@@ -1,3 +1,29 @@
+:root {
+	--dark-a: #102226;
+	--dark-b: #1d2f33;
+	--dark-c: #2a3c40;
+	--dark-d: #374a4f;
+
+	--light-a: white;
+	--light-b: #cbe1e5;
+	--light-c: #bfd1d5;
+	--light-d: #7bbdcd;
+
+	--palette-a: var(--dark-a);
+	--palette-b: var(--dark-b);
+	--palette-c: var(--dark-c);
+	--palette-d: var(--dark-d);
+	--palette-x: var(--light-a);
+}
+
+.light-mode {
+	--palette-a: var(--light-a);
+	--palette-b: var(--light-b);
+	--palette-c: var(--light-c);
+	--palette-d: var(--light-d);
+	--palette-x: var(--dark-a);
+}
+
 html, body {
 	position: relative;
 	width: 100%;
@@ -7,7 +33,6 @@ html, body {
 body {
 	color: #333;
 	margin: 0;
-	padding: 8px;
 	box-sizing: border-box;
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 }
