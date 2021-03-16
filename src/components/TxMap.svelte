@@ -1,22 +1,7 @@
 <script>
   import { onMount } from 'svelte'
-  import WorldMap from './WorldMap.svelte'
-  import TxSprite from './TxSprite.svelte'
   import TxRender from './TxRender.svelte'
   import { txPool, txList, darkMode } from '../stores.js'
-  import { bounceIn } from 'svelte/easing'
-  import { tweened } from 'svelte/motion'
-
-  function plip(node, params) {
-		/*const existingTransform = getComputedStyle(node).transform.replace('none', '');*/
-
-		return {
-			delay: params.delay || 0,
-			duration: params.duration || 1000,
-			easing: params.easing || bounceIn,
-			css: (t, u) => `transform: scale(${t})`
-		};
-	}
 
   let idCounter = 0
   let running = false
@@ -46,121 +31,47 @@
     }
   }
 
-  const cleanInterval = setInterval(cleanTxs, 500)
+  const cleanInterval = setInterval(rotateTxs, 200)
 
   onMount(() => {
     //fakeTxStream()
     txPool.add({
       id: 'test',
-      coords: {
-        lat: 10.033766870069249,
-        lng: -84.04541015625
-      },
-      status: 'mempool'
+      amount: 0.01
     })
     txPool.add({
       id: 'test2',
-      coords: {
-        lat: 76.56284986632164,
-        lng: 16.6552734375
-      },
-      status: 'mempool'
+      amount: 0.1
     })
     txPool.add({
       id: 'center',
-      coords: {
-        lat: 0,
-        lng: 0
-      },
-      status: 'mempool'
+      amount: 1.0
     })
-    /*txPool.add({
-      id: 'north',
-      coords: {
-        lat: 90,
-        lng: 0
-      },
-      status: 'mempool'
-    })
-    txPool.add({
-      id: 'east',
-      coords: {
-        lat: 0,
-        lng: 180
-      },
-      status: 'mempool'
-    })
-    txPool.add({
-      id: 'south',
-      coords: {
-        lat: -90,
-        lng: 0
-      },
-      status: 'mempool'
-    })
-    txPool.add({
-      id: 'west',
-      coords: {
-        lat: 0,
-        lng: -180
-      },
-      status: 'mempool'
-    })*/
-    txPool.add({
-      id: 'madagascar',
-      coords: {
-        lat: -12.082295837363578,
-        lng: 49.273681640625
-      },
-      status: 'mempool'
-    })
-
-    running = true
   })
 
   function addTx () {
     txPool.add({
       id: idCounter++,
-      coords: {
-        lat: (Math.random()*180) - 90,
-        lng: (Math.random()*360) - 180
-      },
-      status: 'mempool'
+      amount: Math.pow((Math.random()*2), 2)
     })
   }
 
-  function cleanTxs () {
-    const newPool = $txPool
-    const oldList = $txList
-    const cutoff = Date.now() - 1000
-    for (var i = 0; i < oldList.length; i++) {
-      if (newPool[oldList[i].id].status === 'mined' && newPool[oldList[i].id].last < cutoff) {
-        delete newPool[oldList[i].id]
-      }
-    }
-    txPool.set(newPool)
+  function rotateTxs () {
+    txPool.rotateTxs()
   }
 
   function newBlock () {
-    const newPool = $txPool
-    const oldList = $txList
-    const now = Date.now()
-    let blockSize = 1250 + (Math.random() * 1250)
-    for (let i = 0, m = 0; i < oldList.length && m < blockSize; i++) {
-      if (newPool[oldList[i].id].status !== 'mined') {
-        newPool[oldList[i].id].status = 'mined'
-        newPool[oldList[i].id].last = now
-        m++
-      }
-    }
-    txPool.set(newPool)
+    let blockSize = 1800 + (Math.random() * 2400)
+    const txIds = Object.keys($txPool).filter(key => {
+      return $txPool[key].status === 'mempool' || $txPool[key].status === 'entry'
+    }).slice(0, blockSize)
+    txPool.mineTxs(txIds)
   }
 
-  function mapClick (e) {
+  function txOnClick (e) {
     txPool.add({
       id: idCounter++,
-      p: e.detail,
-      status: 'mempool'
+      coords: e.detail
     })
   }
 
@@ -170,7 +81,7 @@
 </script>
 
 <style type="text/scss">
-  .tx-map {
+  .tx-area {
     position: relative;
     width: 100vw;
     height: 100vh;
@@ -183,9 +94,10 @@
     transition: background 500ms;
   }
 
-  .map-wrapper {
+  .canvas-wrapper {
     position: relative;
     width: 100%;
+    height: 100%;
   }
 
   .mempool-size-label {
@@ -207,17 +119,9 @@
   }
 </style>
 
-<div class="tx-map" class:light-mode={!$darkMode}>
-  <div class="map-wrapper">
-    <WorldMap on:mapclick={mapClick} />
-    <TxRender txs={$txList} />
-    <!-- <svg viewBox="0 6 960 480" class="tx-layer">
-      <g>
-        {#each $txList as tx (tx.id)}
-          <TxSprite {tx} />
-        {/each}
-      </g>
-    </svg> -->
+<div class="tx-area" class:light-mode={!$darkMode}>
+  <div class="canvas-wrapper">
+    <TxRender txs={$txList} on:makeTx={txOnClick} />
   </div>
   <p class="mempool-size-label">Mempool size: {mempoolSize}</p>
   <div class="sim-controls">

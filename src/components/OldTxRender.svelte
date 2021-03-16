@@ -6,19 +6,20 @@
   import { color } from 'd3-color'
   import { darkMode } from '../stores.js'
 
+  export let txs = []
   let canvas
   let gl
   let shaderProgram
   let aspectRatio
   let sceneScale = [1.0, 1.0]
   let lastTime = 0.0
-  let pointArray
 
   const baseTime = Date.now()
 
-  // Props
-  export let controller
-  export let running = false
+  // Vertex information
+  let pointArray
+
+  // Shader uniforms
 
   // Shader attributes
   const attribs = {
@@ -27,10 +28,11 @@
     speed: { type: 'FLOAT', count: 1, pointer: null },
     positions: { type: 'FLOAT', count: 4, pointer: null },
     sizes: { type: 'FLOAT', count: 2, pointer: null },
-    palettes: { type: 'FLOAT', count: 2, pointer: null },
     colors: { type: 'FLOAT', count: 2, pointer: null },
+    palettes: { type: 'FLOAT', count: 2, pointer: null },
     alphas: { type: 'FLOAT', count: 2, pointer: null }
   }
+
   // Auto-calculate the number of bytes per vertex based on specified attributes
   const stride = Object.values(attribs).reduce((total, attrib) => {
     return total + (attrib.count * 4)
@@ -45,23 +47,38 @@
   // Color map texture
   let colorTexture
 
-  // Computed
+  export let running = false
+
   $: {
     if (running) run()
+  }
+
+  function getTxPointArray () {
+    return new Float32Array(txs.flatMap(tx => {
+      return [
+        tx.last - baseTime,
+        tx.status === 'mempool' ? 0.0 : 1.0,
+        tx.v,
+        tx.from.x,
+        tx.from.y,
+        tx.to.x,
+        tx.to.y,
+        tx.from.r,
+        tx.to.r,
+        tx.from.c,
+        tx.to.c,
+        tx.from.p,
+        tx.to.p,
+        tx.from.a,
+        tx.to.a,
+      ]
+    }))
   }
 
   function resizeCanvas () {
     var rect = canvas.parentNode.getBoundingClientRect()
     canvas.width = rect.width
     canvas.height = rect.height
-  }
-
-  function getTxPointArray () {
-    if (controller) {
-      return new Float32Array(
-        controller.getScenes().flatMap(scene => scene.getVertexData())
-      )
-    } else return []
   }
 
   function compileShader(src, type) {
@@ -215,10 +232,17 @@
 
     running = true
   })
+
+  function canvasClick (e) {
+    let rect = canvas.getBoundingClientRect()
+    let x = e.clientX - rect.left
+    let y = e.clientY - rect.top
+    dispatch('makeTx', { x, y })
+  }
 </script>
 
 <style>
-.tx-scene {
+.tx-layer {
   position: absolute;
   left: 0;
   right: 0;
@@ -232,6 +256,7 @@
 <svelte:window on:resize={resizeCanvas} />
 
 <canvas
-  class="tx-scene"
+  class="tx-layer"
   bind:this={canvas}
+  on:click={canvasClick}
 ></canvas>

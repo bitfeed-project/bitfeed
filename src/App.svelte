@@ -1,15 +1,14 @@
 <script>
-	import TxMap from './components/TxMap.svelte'
+	import TxViz from './components/TxViz.svelte'
 </script>
 
 <main>
-	<TxMap />
+	<TxViz />
 </main>
 
 <style>
 	main {
 		text-align: center;
-		max-width: 240px;
 		margin: 0 auto;
 	}
 
