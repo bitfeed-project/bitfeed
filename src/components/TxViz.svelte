@@ -3,13 +3,12 @@
   import TxController from '../controllers/TxController.js'
   import TxRender from './TxRender.svelte'
   import getTxStream from '../controllers/TxStream.js'
-  import { darkMode, serverConnected, serverDelay, txQueueLength } from '../stores.js'
+  import { darkMode, serverConnected, serverDelay, txQueueLength, txCount } from '../stores.js'
   import BitcoinBlock from '../models/BitcoinBlock.js'
 
   let width = window.innerWidth
   let height = window.innerHeight
   let txController
-  let txCount = 0
   let blockCount = 0
   let running = false
   let txStream = getTxStream()
@@ -51,6 +50,10 @@
     //     }
     //   })
     // }))
+  }
+
+  function fakeTx () {
+    txController.simulateDumpTx(1)
   }
 
   function fakeTxs () {
@@ -107,6 +110,10 @@
     position: absolute;
     top: 20px;
     right: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: flex-end;
 
     .status-light {
       display: block;
@@ -124,6 +131,20 @@
         background: greenyellow;
       }
     }
+
+    .stat-counter {
+      margin-top: 5px;
+
+      &.red {
+        color: red;
+      }
+      &.amber {
+        color: yellow;
+      }
+      &.green {
+        color: greenyellow;
+      }
+    }
   }
 </style>
 
@@ -134,12 +155,14 @@
     <TxRender controller={txController} />
   </div>
   <div class="sim-controls">
+    <button on:click={fakeTx}>TXN</button>
     <button on:click={fakeTxs}>TXNS</button>
     <button on:click={fakeBlock}>BLOCK</button>
     <button on:click={toggleDark}>{$darkMode ? 'LIGHT' : 'DARK' }</button>
   </div>
   <div class="status-bar">
-    <span class="queue-length">{ $txQueueLength }</span>
     <div class="status-light {connectionColor}" title={connectionTitle}></div>
+    <span class="stat-counter {connectionColor}">{ $txQueueLength }</span>
+    <span class="stat-counter {connectionColor}">{ $txCount }</span>
   </div>
 </div>

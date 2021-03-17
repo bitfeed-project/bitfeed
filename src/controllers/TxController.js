@@ -2,13 +2,15 @@ import TxPoolScene from '../models/TxPoolScene.js'
 import TxBlockScene from '../models/TxBlockScene.js'
 import BitcoinTx from '../models/BitcoinTx.js'
 import BitcoinBlock from '../models/BitcoinBlock.js'
+import { FastVertexArray } from '../utils/memory.js'
 import { txQueueLength } from '../stores.js'
 
 export default class TxController {
   constructor ({ width, height }) {
+    this.vertexArray = new FastVertexArray(2048, 24)
     this.txs = {}
     this.expiredTxs = {}
-    this.pool = new TxPoolScene({ width, height, layer: 0.0 })
+    this.pool = new TxPoolScene({ width, height, layer: 0.0, controller: this })
     this.blocks = {}
     this.clearBlockTimeout = null
 
@@ -17,6 +19,10 @@ export default class TxController {
     this.queueLength = 0
 
     this.scheduleQueue(1000)
+  }
+
+  getVertexData () {
+    return this.vertexArray.getVertexData()
   }
 
   getScenes () {
@@ -30,7 +36,8 @@ export default class TxController {
     })
   }
 
-  addTx (tx) {
+  addTx (txData) {
+    const tx = new BitcoinTx(txData, this.vertexArray)
     if (!this.txs[tx.id] && !this.expiredTxs[tx.id]) {
       this.pendingTxs.push([tx, Date.now()])
       txQueueLength.increment()
@@ -77,7 +84,8 @@ export default class TxController {
     }, delay)
   }
 
-  addBlock (block) {
+  addBlock (blockData) {
+    const block = new BitcoinBlock(blockData)
     if (this.clearBlockTimeout) clearTimeout(this.clearBlockTimeout)
 
     this.expiredTxs = {}
@@ -86,7 +94,7 @@ export default class TxController {
       if (!this.blocks[blockId].expired) this.clearBlock(blockId)
     })
 
-    this.blocks[block.id] = new TxBlockScene({ width: 500, height: 500, layer: 1.0 })
+    this.blocks[block.id] = new TxBlockScene({ width: 500, height: 500, layer: 1.0, blockId: block.id, controller: this })
     let knownCount = 0
     let unknownCount = 0
     for (let i = 0; i < block.txns.length; i++) {
@@ -99,14 +107,14 @@ export default class TxController {
         const tx = new BitcoinTx({
           ...block.txns[i],
           block: block.id
-        })
+        }, this.vertexArray)
         this.txs[tx.id] = tx
         this.blocks[block.id].insert(this.txs[tx.id], false)
       }
       this.expiredTxs[block.txns[i].id] = true
     }
     console.log(`New block with ${knownCount} known transactions and ${unknownCount} unknown transactions`)
-    this.blocks[block.id].layoutAll()
+    this.blocks[block.id].initialLayout()
     setTimeout(() => { this.pool.layoutAll() }, 2000)
 
     this.clearBlockTimeout = setTimeout(() => { this.clearBlock(block.id) }, 10000)
@@ -129,7 +137,7 @@ export default class TxController {
     //   }
     // })
     const simulatedTxns = []
-    Object.values(this.txs).forEach(tx => {
+    Object.values(this.pool.txs).forEach(tx => {
       if (Math.random() < 0.5) {
         simulatedTxns.push({
           version: tx.version,
@@ -150,7 +158,7 @@ export default class TxController {
         txn_count: 20,
         txns: simulatedTxns
       }))
-    }, 2500)
+    }, 0)
   }
 
   simulateDumpTx (n) {
@@ -160,22 +168,25 @@ export default class TxController {
         time: Date.now(),
         id: `simulated_${i}_${Math.random()}`,
         value: Math.floor(Math.random() * 100000)
-      }))
+      }, this.vertexArray))
     }
   }
 
   clearBlock (id) {
     if (this.blocks[id]) {
       this.blocks[id].expire()
-      setTimeout(() => {
-        const txs = this.blocks[id].getTxList()
-        for (let i = 0; i < txs.length; i++) {
-          if (this.blocks[id].remove(txs[i])) {
-            delete this.txs[txs[i]]
-          }
-        }
-        delete this.blocks[id]
-      }, 3000)
     }
+  }
+
+  destroyTx (id) {
+    this.getScenes().forEach(scene => {
+      scene.remove(id)
+    })
+    if (this.txs[id]) this.txs[id].destroy()
+    delete this.txs[id]
+  }
+
+  destroyBlock (id) {
+    if (this.blocks) delete this.blocks[id]
   }
 }

@@ -1,9 +1,10 @@
 import TxView from './TxView.js'
 
 export default class BitcoinTx {
-  constructor ({ version, id, value, inputs, outputs, witnesses, time, block }) {
+  constructor ({ version, id, value, inputs, outputs, witnesses, time, block }, vertexArray) {
     this.version = version
     this.id = id
+    this.vertexArray = vertexArray
 
     if (inputs && outputs) {
       this.inputs = inputs
@@ -18,6 +19,10 @@ export default class BitcoinTx {
 
     this.setBlock(block)
     this.view = new TxView(this)
+  }
+
+  destroy () {
+    if (this.view) this.view.destroy()
   }
 
   calcValue () {
@@ -37,7 +42,11 @@ export default class BitcoinTx {
     if (this.view) this.view.update(update)
   }
 
+  setPosition (position) {
+    this.position = position
+  }
+
   getPosition () {
-    if (this.view) return this.view.getPosition()
+    if (this.position) return this.position
   }
 }

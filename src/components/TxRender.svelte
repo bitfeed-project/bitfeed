@@ -21,15 +21,15 @@
   export let running = false
 
   // Shader attributes
+  // each attribute contains [x: startValue, y: endValue, z: startTime, w: rate]
+  // shader interpolates between start and end values at the given rate, from the given time
   const attribs = {
-    startTime: { type: 'FLOAT', count: 1, pointer: null },
-    zIndex: { type: 'FLOAT', count: 1, pointer: null },
-    speed: { type: 'FLOAT', count: 1, pointer: null },
-    positions: { type: 'FLOAT', count: 4, pointer: null },
-    sizes: { type: 'FLOAT', count: 2, pointer: null },
-    palettes: { type: 'FLOAT', count: 2, pointer: null },
-    colors: { type: 'FLOAT', count: 2, pointer: null },
-    alphas: { type: 'FLOAT', count: 2, pointer: null }
+    posX: { type: 'FLOAT', count: 4, pointer: null },
+    posY: { type: 'FLOAT', count: 4, pointer: null },
+    sizes: { type: 'FLOAT', count: 4, pointer: null },
+    palettes: { type: 'FLOAT', count: 4, pointer: null },
+    colors: { type: 'FLOAT', count: 4, pointer: null },
+    alphas: { type: 'FLOAT', count: 4, pointer: null }
   }
   // Auto-calculate the number of bytes per vertex based on specified attributes
   const stride = Object.values(attribs).reduce((total, attrib) => {
@@ -58,9 +58,10 @@
 
   function getTxPointArray () {
     if (controller) {
-      return new Float32Array(
-        controller.getScenes().flatMap(scene => scene.getVertexData())
-      )
+      return controller.getVertexData()
+      // return new Float32Array(
+      //   controller.getScenes().flatMap(scene => scene.getVertexData())
+      // )
     } else return []
   }
 
@@ -136,7 +137,9 @@
     })
 
     /* DRAW */
-    gl.drawArrays(gl.POINTS, 0, pointArray.length / 3)
+    if (pointArray.length) {
+      gl.drawArrays(gl.POINTS, 0, pointArray.length / 3)
+    }
 
     /* LOOP */
     window.requestAnimationFrame(currentTime => {
@@ -214,6 +217,8 @@
     colorTexture = loadColorTexture(gl, '#f7941d', 'rgb(0%,100%,80%)', 500);
 
     running = true
+
+    console.log(this)
   })
 </script>
 
@@ -222,9 +227,9 @@
   position: absolute;
   left: 0;
   right: 0;
-  top: -5px;
+  top: 0;
   bottom: 0;
-  pointer-events: none;
+  /* pointer-events: none; */
   overflow: hidden;
 }
 </style>

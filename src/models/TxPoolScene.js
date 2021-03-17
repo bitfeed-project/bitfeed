@@ -1,14 +1,20 @@
 export default class TxPoolScene {
-  constructor ({ width, height, unit, padding, layer }) {
-    this.init({ width, height, unit, padding, layer })
+  constructor ({ width, height, unit, padding, layer, controller }) {
+    this.init({ width, height, unit, padding, layer, controller })
   }
 
-  init ({ width, height, unit = 8, padding = 1, layer }) {
+  init ({ width, height, unit = 8, padding = 1, layer, controller }) {
+    this.controller = controller
     this.layer = layer
     this.resize({ width, height, unit, padding })
     this.txs = {}
     this.hiddenTxs = {}
-    this.heightLimit = this.height - 50
+
+    this.heightLimit =  Math.max(150, height / 4)
+    this.heightBound = this.height - this.heightLimit
+    this.poolTop = this.height
+    this.poolBottom = this.height
+
     this.scene = {
       width: width,
       height: height,
@@ -21,6 +27,8 @@ export default class TxPoolScene {
     }
     this.scrollRateLimitTimer = null
     this.initialised = true
+
+    console.log('pool', this)
   }
 
   resize ({ width, height, unit, padding }) {
@@ -37,14 +45,8 @@ export default class TxPoolScene {
     if (tx) tx.updateView(update)
   }
 
-  scroll (offset) {
-    if (!this.scrollRateLimitTimer || Date.now() < (this.scrollRateLimitTimer + 10000)) {
-      console.log(`scrolling pool by ${offset}`)
-      this.scrollRateLimitTimer = Date.now()
-      this.doScroll(offset)
-    } else {
-      console.log('scroll recharging')
-    }
+  getPoolHeight () {
+    return this.poolBottom - this.poolTop
   }
 
   insert (tx, autoLayout=true) {
@@ -56,36 +58,81 @@ export default class TxPoolScene {
     }
   }
 
+  clearOffscreenTx (tx) {
+    const currentTargetPosition = tx.getPosition()
+    if (currentTargetPosition && (currentTargetPosition.y + this.scene.scroll) > this.height + 150) {
+      this.controller.destroyTx(tx.id)
+    }
+  }
+
+  clearOffscreenTxs () {
+    if (this.poolBottom + this.scene.scroll > (this.height + 150)) {
+      const ids = this.getTxList()
+      for (let i = 0; i < ids.length; i++) {
+        this.clearOffscreenTx(this.txs[ids[i]])
+      }
+    }
+  }
+
   scrollTx (tx, scrollDistance) {
     if (tx.view.initialised) {
-      let currentPosition = tx.getPosition()
-      this.updateTx(tx, {
-        display: {
-          position: {
-            y: currentPosition.y + scrollDistance
-          }
-        }
-      })
+      let currentTargetPosition = tx.getPosition()
+      if (currentTargetPosition) {
+        this.updateTx(tx, {
+          display: {
+            position: {
+              y: currentTargetPosition.y + scrollDistance
+            }
+          },
+          duration: 500,
+          minDuration: 250,
+          adjust: true
+        })
+      }
     }
   }
 
   doScroll (offset) {
-    const ids = this.getActiveTxList()
-    for (let i = 0; i < ids.length; i++) {
-      this.scrollTx(this.txs[ids[i]], offset)
-    }
+    const ids = this.getTxList()
     this.scene.scroll -= offset
+    for (let i = 0; i < ids.length; i++) {
+      this.scrollTx(this.txs[ids[i]], this.scene.scroll)
+    }
+    this.clearOffscreenTxs()
+  }
+
+  scroll (offset, force) {
+    if (!this.scrollRateLimitTimer || force || Date.now() > (this.scrollRateLimitTimer + 1000)) {
+      this.scrollRateLimitTimer = Date.now()
+      this.doScroll(offset)
+    }
+  }
+
+  txSize (value) {
+    // let scale = Math.log10(value)
+    // let size = (scale*scale) / 5
+    // let rounded = Math.pow(2, Math.ceil(Math.log2(size)))
+    // return Math.max(4, rounded)
+    return this.unitWidth
   }
 
   layoutTx (tx, sequence) {
-    const position = this.place(tx.id, sequence)
-    // if (this.heightLimit && position.y < this.heightLimit) this.scroll(position.y - this.heightLimit)
+    const rawPosition = this.place(tx.id, sequence)
+    const scrolledPosition = {
+      x: rawPosition.x,
+      y: rawPosition.y + this.scene.scroll
+    }
+    tx.setPosition(rawPosition)
+    if (this.heightLimit && scrolledPosition.y < this.heightBound) {
+      this.scroll(scrolledPosition.y - this.heightBound)
+      scrolledPosition.y = rawPosition.y + this.scene.scroll
+    }
     if (!tx.view.initialised) {
       this.updateTx(tx, {
         display: {
           layer: this.layer,
           position: {
-            x: position.x,
+            x: scrolledPosition.x,
             y: 0
           },
           size: this.unitWidth,
@@ -102,8 +149,9 @@ export default class TxPoolScene {
       this.updateTx(tx, {
         display: {
           layer: this.layer,
-          position,
-          size: this.unitWidth,
+          position: scrolledPosition,
+          // size: this.unitWidth,
+          size: this.txSize(tx.value),
           color: {
             palette: 0,
             index: 0,
@@ -112,60 +160,35 @@ export default class TxPoolScene {
         },
         duration: 1500,
         delay: 0,
-        state: 'entering',
-        next: {
-          display: {
-            color: {
-              palette: 0,
-              index: 1
-            }
-          },
-          duration: 30000,
-          delay: 100,
-          state: 'colorfade',
-          next: {
-            display: {},
-            state: 'pool'
+        state: 'pool'
+      })
+      this.updateTx(tx, {
+        display: {
+          color: {
+            palette: 0,
+            index: 1
           }
-        }
+        },
+        duration: 30000,
+        delay: 0
       })
     } else {
-      const shuffleUpdate = {
+      this.updateTx(tx, {
         display: {
-          position
+          position: scrolledPosition
         },
         duration: 1000,
+        minDuration: 1000,
         delay: 0,
-        state: 'shuffling',
-        next: {
-          display: {
-            color: {
-              index: 1
-            }
-          },
-          state: 'colorfade',
-          duration: 15000,
-          delay: 100
-        }
-      }
-      // if (tx.view.state === 'pool' || tx.view.state === 'colorfade') {
-      //   this.updateTx(tx, {
-      //     display: {
-      //       layer: this.layer
-      //     },
-      //     duration: 2000,
-      //     delay: 0,
-      //     state: 'pause',
-      //     next: shuffleUpdate
-      //   })
-      // } else {
-        this.updateTx(tx, shuffleUpdate)
-      // }
+        adjust: true
+      })
     }
   }
 
   layoutAll () {
     this.scene.count = 0
+    this.poolTop = Infinity
+    this.poolBottom = -Infinity
     let ids = this.getHiddenTxList()
     for (let i = 0; i < ids.length; i++) {
       this.txs[ids[i]] = this.hiddenTxs[ids[i]]
@@ -174,6 +197,14 @@ export default class TxPoolScene {
     ids = this.getActiveTxList()
     for (let i = 0; i < ids.length; i++) {
       this.layoutTx(this.txs[ids[i]], this.scene.count++)
+    }
+
+    if (this.heightLimit && ((this.poolTop + this.scene.scroll) < this.heightBound)) {
+      let scrollAmount = (this.poolTop + this.scene.scroll) - this.heightBound
+      this.scroll(scrollAmount, true)
+    } else if (this.heightLimit && ((this.poolTop + this.scene.scroll) > this.heightBound)) {
+      let scrollAmount = Math.min(this.scene.scroll, (this.poolTop + this.scene.scroll) - this.heightBound)
+      this.scroll(scrollAmount, true)
     }
   }
 
@@ -201,10 +232,16 @@ export default class TxPoolScene {
   }
 
   place (id, position) {
-    return {
+    const placement = {
       x: this.scene.offset.x + (this.paddedUnitWidth * (1 + Math.floor(position % this.blockWidth))),
-      y: this.scene.offset.y + this.height - (this.paddedUnitWidth * (0.5 + (Math.floor(position / this.blockWidth)))) + this.scene.scroll
+      y: this.scene.offset.y + this.height - (this.paddedUnitWidth * (1 + (Math.floor(position / this.blockWidth))))
     }
+    if (placement.y < this.poolTop) {
+      this.poolTop = placement.y
+    } else if (placement.y > this.poolBottom) {
+      this.poolBottom = placement.y
+    }
+    return placement
   }
 
   getVertexData () {

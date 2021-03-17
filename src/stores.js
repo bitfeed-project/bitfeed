@@ -296,3 +296,4 @@ function createCounter () {
 }
 
 export const txQueueLength = createCounter()
+export const txCount = createCounter()

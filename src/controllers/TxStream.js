@@ -1,5 +1,3 @@
-import BitcoinTx from '../models/BitcoinTx.js'
-import BitcoinBlock from '../models/BitcoinBlock.js'
 import { serverConnected, serverDelay } from '../stores.js'
 
 class TxStream {
@@ -88,12 +86,10 @@ class TxStream {
     } else {
       const msg = JSON.parse(event.data)
       if (msg && msg.type === 'txn') {
-        const tx = new BitcoinTx(msg.txn)
-        window.dispatchEvent(new CustomEvent('bitcoin_tx', { detail: tx }))
+        window.dispatchEvent(new CustomEvent('bitcoin_tx', { detail: msg.txn }))
       } else if (msg && msg.type === 'block') {
-        const block = new BitcoinBlock(msg.block)
-        console.log('Block recieved: ', block)
-        window.dispatchEvent(new CustomEvent('bitcoin_block', { detail: block }))
+        console.log('Block recieved: ', msg.block)
+        window.dispatchEvent(new CustomEvent('bitcoin_block', { detail: msg.block }))
       } else {
         console.log('unknown message from websocket: ', msg)
       }

@@ -1,10 +1,12 @@
 import TxPoolScene from './TxPoolScene.js'
 
 export default class TxBlockScene extends TxPoolScene {
-  constructor ({ width, height, unit = 4, padding = 1, layer }) {
-    super({ width, height, unit, padding, layer })
+  constructor ({ width, height, unit = 4, padding = 1, layer, blockId, controller }) {
+    super({ width, height, unit, padding, layer, controller })
     this.heightLimit = null
     this.expired = false
+    this.layedOut = false
+    this.blockId = blockId
   }
 
   resize ({ width, height, unit, padding }) {
@@ -48,7 +50,8 @@ export default class TxBlockScene extends TxPoolScene {
         state: 'ready'
       })
     }
-    const flyToBlock = {
+
+    this.updateTx(tx, {
       display: {
         position,
         size: 4,
@@ -60,33 +63,44 @@ export default class TxBlockScene extends TxPoolScene {
       },
       duration: 1500,
       delay: 0,
-      state: 'flytoblock',
-      next: {
-        display: {},
-        state: 'block'
-      }
-    }
-    if (tx.view.state === 'pool' || tx.view.state === 'colorfade') {
+      state: 'block'
+    })
+  }
+
+  prepareTx (tx, sequence) {
+    const position = this.place(tx.id, sequence)
+    if (!tx.view.initialised) {
       this.updateTx(tx, {
         display: {
           layer: this.layer,
+          position: {
+            x: window.innerWidth * ((position.x - this.scene.offset.x) / this.width),
+            y: window.innerHeight * (1 + ((position.y - this.scene.offset.y) / this.height))
+          },
+          size: 8,
           color: {
             palette: 0,
             index: 0,
             alpha: 1
           }
         },
-        duration: 1000,
+        duration: 1500,
         delay: 0,
-        state: 'colorfade',
-        next: flyToBlock
-      })
-    } else {
-      this.updateTx(tx, {
-        ...flyToBlock,
-        duration: 2500
+        state: 'ready'
       })
     }
+    this.updateTx(tx, {
+      display: {
+        layer: this.layer,
+        color: {
+          palette: 0,
+          index: 0,
+          alpha: 1
+        }
+      },
+      duration: 2000,
+      delay: 0
+    })
   }
 
   expireTx (tx) {
@@ -103,9 +117,30 @@ export default class TxBlockScene extends TxPoolScene {
     })
   }
 
+  prepareAll () {
+    this.resize({})
+    this.scene.count = 0
+    let ids = this.getHiddenTxList()
+    for (let i = 0; i < ids.length; i++) {
+      this.txs[ids[i]] = this.hiddenTxs[ids[i]]
+      delete this.hiddenTxs[ids[i]]
+    }
+    ids = this.getActiveTxList()
+    for (let i = 0; i < ids.length; i++) {
+      this.prepareTx(this.txs[ids[i]], this.scene.count++)
+    }
+  }
+
   layoutAll () {
     this.resize({})
-    super.layoutAll(4)
+    super.layoutAll()
+  }
+
+  initialLayout () {
+    this.prepareAll()
+    setTimeout(() => {
+      this.layoutAll()
+    }, 2000)
   }
 
   expire () {
@@ -114,5 +149,12 @@ export default class TxBlockScene extends TxPoolScene {
     for (let i = 0; i < ids.length; i++) {
       this.expireTx(this.txs[ids[i]])
     }
+    setTimeout(() => {
+      const txIds = this.getTxList()
+      for (let i = 0; i < txIds.length; i++) {
+        if (this.txs[txIds[i]]) this.controller.destroyTx(txIds[i])
+      }
+      this.controller.destroyBlock(this.blockId)
+    }, 3000)
   }
 }

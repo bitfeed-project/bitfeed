@@ -1,105 +1,132 @@
-function interpolateAnimationState (from, to, progress) {
-  const clampedProgress = Math.max(0,Math.min(1,progress))
-  return Object.keys(from).reduce((result, key) => {
-    if (to[key] != null) {
-      result[key] = from[key] + ((to[key] - from[key]) * clampedProgress)
-    }
-    return result
-  }, from)
+function interpolateAttributeStart(attribute, now, label) {
+  if (attribute.v == 0 || (attribute.t + attribute.d) <= now) {
+    // transition finished, next transition starts from current end state
+    // (clamp to 1)
+    attribute.a = attribute.b
+    attribute.v = 0
+    attribute.d = 0
+  } else if (attribute.t > now) {
+    // transition not started
+    // (clamp to 0)
+  } else {
+    // transition in progress
+    // (interpolate)
+    let progress =  (now - attribute.t)
+    attribute.a = attribute.a + ((progress / attribute.d) * (attribute.b - attribute.a))
+    attribute.d = attribute.d - progress
+    attribute.v = 1 / attribute.d
+  }
 }
 
 export default class TxSprite {
-  constructor({ now, id, value, layer, position, size, palette, color, alpha }) {
+  constructor({ now = Date.now(), id, value, layer, position, size, palette, color, alpha }, vertexArray) {
     this.id = id
     this.value = value
     this.layer = layer
+    this.vertexArray = vertexArray
 
-    this.duration = 0
-    this.v = 0
-    this.start = now
+    this.attributes = {
+      x: { a: position.x, b: position.x, t: now, v: 0, d: 0 },
+      y: { a: position.y, b: position.y, t: now, v: 0, d: 0 },
+      r: { a: size, b: size, t: now, v: 0, d: 0 },
+      p: { a: palette, b: palette, t: now, v: 0, d: 0 },
+      c: { a: color, b: color, t: now, v: 0, d: 0 },
+      a: { a: alpha, b: alpha, t: now, v: 0, d: 0 },
+    }
 
-    this.from = {
-      x: position.x,
-      y: position.y,
+    this.vertexPointer = this.vertexArray.insert(this)
+
+    this.compile()
+  }
+
+  update({ now, layer, position, size, palette, color, alpha, duration, minDuration, adjust }) {
+    const v = duration > 0 ? (1 / duration) : 0
+
+    let update = {
+      x: position ? position.x : null,
+      y: position ? position.y: null,
       r: size,
       p: palette,
       c: color,
       a: alpha
     }
-    this.to = {
-      ...this.from
-    }
 
-    this.compile()
-  }
-
-  update({ now, duration, layer, position, size, palette, color, alpha }) {
-    // Save a copy of the current target display
-    const currentTarget = this.to
-
-    // Check if we're mid-transition
-    const progress = (this.duration && this.start) ? ((now - this.start) / this.duration) : 0
-    if (progress >= 1 || progress <= 0) {
-      // Transition finished or hasn't started:
-      // so next transition starts from the current display state
-      this.from = {
-        ...currentTarget
+    for (const key of Object.keys(update)) {
+      // for each non-null attribute:
+      if (update[key] != null) {
+        // calculate current interpolated value, and set as 'from'
+        interpolateAttributeStart(this.attributes[key], now, key)
+        // set 'start' to now
+        this.attributes[key].t = now
+        // if 'adjust' flag set
+        // set 'duration' to Max(remaining time, 'duration')
+        if (!adjust || (duration && this.attributes[key].d == 0)) {
+          this.attributes[key].v = v
+          this.attributes[key].d = duration
+        } else if (minDuration > this.attributes[key].d) {
+          this.attributes[key].v = 1 / minDuration
+          this.attributes[key].d = minDuration
+        }
+        // set 'to' to target value
+        this.attributes[key].b = update[key]
       }
-    } else {
-      // Mid-transition:
-      // we want to start the next transition from our current intermediate state
-      // so find that by interpolating between the last transitions start and end states
-      this.from = interpolateAnimationState(this.from, currentTarget, progress)
     }
-
-    // Build new target display, inheriting from the current target where necessary
-    this.to = {
-      x: (position && position.x != null) ? position.x : this.from.x,
-      y: (position && position.y != null) ? position.y : this.from.y,
-      r: (size != null) ? size : this.from.r,
-      p: (palette != null) ? palette : this.from.p,
-      c: (color != null) ? color : this.from.c,
-      a: (alpha != null) ? alpha : this.from.a
-    }
-
-    if (layer != null) this.layer = layer
-    if (duration != null) {
-      this.duration = duration
-      this.v = duration ? (1 / duration) : 0
-    }
-    this.start = now
 
     this.compile()
   }
 
   compile () {
     this.vertexData = [
-      this.start,
-      this.layer,
-      this.v,
-      this.from.x,
-      this.from.y,
-      this.to.x,
-      this.to.y,
-      this.from.r,
-      this.to.r,
-      this.from.p,
-      this.to.p,
-      this.from.c,
-      this.to.c,
-      this.from.a,
-      this.to.a,
+      this.attributes.x.a,
+      this.attributes.x.b,
+      this.attributes.x.t,
+      this.attributes.x.v,
+
+      this.attributes.y.a,
+      this.attributes.y.b,
+      this.attributes.y.t,
+      this.attributes.y.v,
+
+      this.attributes.r.a,
+      this.attributes.r.b,
+      this.attributes.r.t,
+      this.attributes.r.v,
+
+      this.attributes.p.a,
+      this.attributes.p.b,
+      this.attributes.p.t,
+      this.attributes.p.v,
+
+      this.attributes.c.a,
+      this.attributes.c.b,
+      this.attributes.c.t,
+      this.attributes.c.v,
+
+      this.attributes.a.a,
+      this.attributes.a.b,
+      this.attributes.a.t,
+      this.attributes.a.v,
     ]
+    this.vertexArray.setData(this.vertexPointer, this.vertexData)
+  }
+
+  moveVertexPointer (index) {
+    this.vertexPointer = index
   }
 
   getPosition () {
     return {
-      x: this.to.x,
-      y: this.to.y
+      x: this.attributes.x.b,
+      y: this.attributes.y.b
     }
   }
 
   getVertexData () {
     return this.vertexData
+  }
+
+  destroy () {
+    this.vertexArray.remove(this.vertexPointer)
+    this.vertexPointer = null
   }
 }
