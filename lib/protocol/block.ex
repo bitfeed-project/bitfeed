@@ -2,7 +2,7 @@ defmodule BitcoinStream.Protocol.Block do
 @moduledoc """
   Summarised bitcoin block.
 
-  Extends Bitcoinex.Block by computing total block value
+  Extends Bitcoinex.Block by computing total block value & size
   and condensing transactions into only id, value and version
 """
 
@@ -17,6 +17,7 @@ defstruct [
   :merkle_root,
   :timestamp,
   :bits,
+  :bytes,
   :nonce,
   :txn_count,
   :txns,
@@ -25,6 +26,7 @@ defstruct [
 ]
 
 def decode(block_binary) do
+  bytes = byte_size(block_binary)
   hex = Base.encode16(block_binary, case: :lower);
   {:ok, raw_block} = Bitcoinex.Block.decode(hex)
   id = Bitcoinex.Block.block_id(block_binary)
@@ -37,6 +39,7 @@ def decode(block_binary) do
     merkle_root: raw_block.merkle_root,
     timestamp: raw_block.timestamp,
     bits: raw_block.bits,
+    bytes: bytes,
     txn_count: raw_block.txn_count,
     txns: summarised_txns,
     value: total_value,

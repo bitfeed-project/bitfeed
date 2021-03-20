@@ -94,8 +94,8 @@ defmodule BitcoinStream.Bridge do
     {:ok, message} = :chumak.recv_multipart(socket);
     [_topic, payload, _size] = message;
 
-    # keep last block on disk for debugging
-    :ok = File.write("block.dat", payload, [:append, :binary])
+    # # keep last block on disk for debugging
+    # :ok = File.write("block.dat", payload, [:append, :binary])
 
     case BitcoinBlock.decode(payload) do
       {:ok, block} ->
