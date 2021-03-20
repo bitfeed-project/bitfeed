@@ -119,13 +119,12 @@ export default class TxSprite {
   compile () {
     const size = this.attributes.r
     this.vertexData = [
-      // duplicate vertex creates degenerate triangles & terminates the shape
+      ...this.compileVertex({ x: { a: -size.a, b: -size.b }, y: { a: -size.a, b: -size.b }}),
       ...this.compileVertex({ x: { a: size.a, b: size.b }, y: { a: size.a, b: size.b }}),
-      ...this.compileVertex({ x: { a: size.a, b: size.b }, y: { a: size.a, b: size.b }}),
-      ...this.compileVertex({ x: { a: -size.a, b: -size.b }, y: { a: size.a, b: size.b }}),
       ...this.compileVertex({ x: { a: size.a, b: size.b }, y: { a: -size.a, b: -size.b }}),
       ...this.compileVertex({ x: { a: -size.a, b: -size.b }, y: { a: -size.a, b: -size.b }}),
-      ...this.compileVertex({ x: { a: -size.a, b: -size.b }, y: { a: -size.a, b: -size.b }})
+      ...this.compileVertex({ x: { a: size.a, b: size.b }, y: { a: size.a, b: size.b }}),
+      ...this.compileVertex({ x: { a: -size.a, b: -size.b }, y: { a: size.a, b: size.b }})
     ]
     this.vertexArray.setData(this.vertexPointer, this.vertexData)
   }
@@ -151,4 +150,6 @@ export default class TxSprite {
   }
 }
 
-TxSprite.dataSize = 120
+TxSprite.vertexSize = 20
+TxSprite.vertexCount = 6
+TxSprite.dataSize = TxSprite.vertexSize * TxSprite.vertexCount

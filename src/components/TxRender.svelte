@@ -2,6 +2,7 @@
   import { onMount } from 'svelte'
   import vertShaderSrc from '../shaders/tx.vert'
   import fragShaderSrc from '../shaders/tx.frag'
+  import TxSprite from '../models/TxSprite.js'
   import { interpolateHcl } from 'd3-interpolate'
   import { color } from 'd3-color'
   import { darkMode } from '../stores.js'
@@ -63,7 +64,7 @@
       // return new Float32Array(
       //   controller.getScenes().flatMap(scene => scene.getVertexData())
       // )
-    } else return []
+    } else return new Float32Array()
   }
 
   function getDebugTxPointArray () {
@@ -72,7 +73,7 @@
       // return new Float32Array(
       //   controller.getScenes().flatMap(scene => scene.getVertexData())
       // )
-    } else return []
+    } else return new Float32Array()
   }
 
   function compileShader(src, type) {
@@ -155,7 +156,7 @@
 
     /* DRAW */
     if (pointArray.length) {
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, pointArray.length)
+      gl.drawArrays(gl.TRIANGLES, 0, pointArray.length / TxSprite.vertexSize)
     }
 
     /* LOOP */
