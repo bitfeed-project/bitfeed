@@ -6,6 +6,10 @@ import { terser } from 'rollup-plugin-terser';
 import glslify from 'rollup-plugin-glslify';
 import css from 'rollup-plugin-css-only';
 import sveltePreprocess from 'svelte-preprocess';
+import { config as configDotenv } from 'dotenv';
+import replace from '@rollup/plugin-replace';
+
+configDotenv();
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -39,6 +43,9 @@ export default {
 		file: 'public/build/bundle.js'
 	},
 	plugins: [
+		replace({
+			'ENVIRONMENT': JSON.stringify(process.env.ENV)
+		}),
 		svelte({
 			compilerOptions: {
 				// enable run-time checks when not in production

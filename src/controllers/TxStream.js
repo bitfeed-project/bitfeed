@@ -1,8 +1,9 @@
 import { serverConnected, serverDelay } from '../stores.js'
+import config from '../config.js'
 
 class TxStream {
   constructor () {
-    this.websocketUri = 'ws://localhost:4000/ws/txs'
+    this.websocketUri = config.dev ? 'ws://localhost:4000/ws/txs' : (config.websocket_uri || `ws://${window.location.host}/ws/txs`)
     this.reconnectBackoff = 128
     this.websocket = null
     this.setConnected(false)
@@ -12,7 +13,6 @@ class TxStream {
     this.reconnectTimeout = null
     this.heartbeatTimeout = null
 
-    console.log(this)
     this.init()
   }
 
@@ -27,7 +27,6 @@ class TxStream {
   }
 
   init () {
-    console.log('initialising websocket')
     try {
       this.websocket = new WebSocket(this.websocketUri)
       this.websocket.onopen = (evt) => { this.onopen(evt) }
@@ -35,42 +34,35 @@ class TxStream {
       this.websocket.onmessage = (evt) => { this.onmessage(evt) }
       this.websocket.onerror = (evt) => { this.onerror(evt) }
     } catch (error) {
-      console.log('failed to open websocket: ', error)
+      // console.log('failed to open websocket: ', error)
     }
   }
 
   reconnect () {
-    console.log('reconnect')
     if (this.reconnectBackoff) clearTimeout(this.reconnectBackoff)
     if (!this.connected) {
       if (this.reconnectBackoff < 4000) this.reconnectBackoff *= 2
-      console.log(`reconnecting after ${this.reconnectBackoff / 1000} seconds`)
       this.reconnectTimeout = setTimeout(() => { this.init() }, this.reconnectBackoff)
     }
   }
 
   onHeartbeat () {
-    // console.log('heartbeat recieved')
     if (this.heartbeatTimeout) clearTimeout(this.heartbeatTimeout)
     if (this.reconnectTimeout) clearTimeout(this.reconnectTimeout)
     this.setDelay(Date.now() - this.lastBeat)
-    // console.log(`heartbeat delay of ${this.delay}ms`)
     this.setConnected(true)
     this.heartbeatTimeout = setTimeout(() => { this.sendHeartbeat() }, 5000)
   }
 
   sendHeartbeat () {
-    // console.log('sending heartbeat')
     this.lastBeat = Date.now()
     this.websocket.send('hb')
     this.heartbeatTimeout = setTimeout(() => {
-      console.log('heartbeat timed out')
       this.onclose()
     }, 2000)
   }
 
   onopen (event) {
-    console.log('tx websocket connected')
     if (this.heartbeatTimeout) clearTimeout(this.heartbeatTimeout)
     this.setConnected(true)
     this.setDelay(500)
@@ -91,24 +83,22 @@ class TxStream {
         console.log('Block recieved: ', msg.block)
         window.dispatchEvent(new CustomEvent('bitcoin_block', { detail: msg.block }))
       } else {
-        console.log('unknown message from websocket: ', msg)
+        // console.log('unknown message from websocket: ', msg)
       }
 
     }
   }
 
   onerror (event) {
-    console.log('websocket error: ', event)
+    // console.log('websocket error: ', event)
   }
 
   onclose (event) {
-    console.log('websocket closed')
     this.setConnected(false)
     this.reconnect()
   }
 
   dosend (message) {
-    console.log('sending to websocket: ', message)
     this.websocket.send(message)
   }
 
