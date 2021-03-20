@@ -20,7 +20,7 @@ defmodule BitcoinStream.Bridge do
   def start_link(port) do
     IO.puts("Starting Bitcoin bridge on port #{port}")
     connect_to_server(port);
-    # txsub(port);
+    txsub(port);
     blocksub(port);
     GenServer.start_link(__MODULE__, %{})
   end
@@ -51,7 +51,7 @@ defmodule BitcoinStream.Bridge do
   end
 
   def sendTxn(txn) do
-    IO.puts("Forwarding transaction to websocket clients")
+    # IO.puts("Forwarding transaction to websocket clients")
     Registry.dispatch(Registry.BitcoinStream, "txs", fn(entries) ->
       for {pid, _} <- entries do
         IO.puts("Forwarding to pid #{inspect pid}")
@@ -83,7 +83,7 @@ defmodule BitcoinStream.Bridge do
     case BitcoinTx.decode(payload) do
       {:ok, txn} ->
         sendTxn(txn);
-        IO.puts("new tx dispatched")
+        IO.puts("new tx")
       {:error, reason} -> IO.puts("Tx decoding failed: #{reason}");
     end
 
@@ -100,7 +100,7 @@ defmodule BitcoinStream.Bridge do
     case BitcoinBlock.decode(payload) do
       {:ok, block} ->
         sendBlock(block);
-        IO.puts("new block dispatched")
+        IO.puts("new block")
       {:error, reason} -> IO.puts("Block decoding failed: #{reason}");
     end
 

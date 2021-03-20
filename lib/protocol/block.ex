@@ -21,13 +21,13 @@ defstruct [
   :txn_count,
   :txns,
   :value,
-  :block_id
+  :id
 ]
 
 def decode(block_binary) do
   hex = Base.encode16(block_binary, case: :lower);
   {:ok, raw_block} = Bitcoinex.Block.decode(hex)
-  block_id = Bitcoinex.Block.block_id(block_binary)
+  id = Bitcoinex.Block.block_id(block_binary)
 
   {summarised_txns, total_value} = summarise_txns(raw_block.txns)
 
@@ -40,7 +40,7 @@ def decode(block_binary) do
     txn_count: raw_block.txn_count,
     txns: summarised_txns,
     value: total_value,
-    block_id: block_id
+    id: id
   }}
 end
 
@@ -64,7 +64,7 @@ defp summarise_txn(txn) do
 
   %TxSummary{
     version: txn.version,
-    txid: txn.txid,
+    id: txn.id,
     value: total_value
   }
 end

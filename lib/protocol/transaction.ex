@@ -18,14 +18,14 @@ defstruct [
   :outputs,
   :witnesses,
   :lock_time,
-  :txid,
+  :id,
   :time
 ]
 
 def decode(tx_binary) do
   hex = Base.encode16(tx_binary, case: :lower);
   {:ok, raw_tx} = Bitcoinex.Transaction.decode(hex)
-  txid = Bitcoinex.Transaction.transaction_id(raw_tx)
+  id = Bitcoinex.Transaction.transaction_id(raw_tx)
   now = System.os_time(:millisecond)
 
   {:ok, %__MODULE__{
@@ -34,7 +34,7 @@ def decode(tx_binary) do
     outputs: raw_tx.outputs,
     witnesses: raw_tx.witnesses,
     lock_time: raw_tx.lock_time,
-    txid: txid,
+    id: id,
     time: now
   }}
 end
@@ -43,7 +43,7 @@ end
     Converts a Bitcoinex.Transaction to an extended BitcoinTx
   """
 def extend(txn) do
-  txid = Bitcoinex.Transaction.transaction_id(txn)
+  id = Bitcoinex.Transaction.transaction_id(txn)
   now = System.os_time(:millisecond)
 
   %__MODULE__{
@@ -52,7 +52,7 @@ def extend(txn) do
     outputs: txn.outputs,
     witnesses: txn.witnesses,
     lock_time: txn.lock_time,
-    txid: txid,
+    id: id,
     time: now
   }
 end
@@ -63,7 +63,7 @@ defmodule BitcoinStream.Protocol.Transaction.Summary do
   @derive Jason.Encoder
   defstruct [
     :version,
-    :txid,
+    :id,
     :value
   ]
 end
