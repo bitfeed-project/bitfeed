@@ -5,9 +5,10 @@
   import getTxStream from '../controllers/TxStream.js'
   import { darkMode, serverConnected, serverDelay, txQueueLength, txCount } from '../stores.js'
   import BitcoinBlock from '../models/BitcoinBlock.js'
+  import config from '../config.js'
 
-  let width = window.innerWidth
-  let height = window.innerHeight
+  let width = window.innerWidth - 20
+  let height = window.innerHeight - 20
   let txController
   let blockCount = 0
   let running = false
@@ -25,9 +26,11 @@
   })
 
   function resize () {
+    width = window.innerWidth - 20
+    height = window.innerHeight - 20
     txController.resize({
-      width: window.innerWidth,
-      height: window.innerHeight
+      width,
+      height
     })
   }
 
@@ -52,8 +55,8 @@
     // }))
   }
 
-  function fakeTx () {
-    txController.simulateDumpTx(1)
+  function fakeTx (value) {
+    txController.simulateDumpTx(1, value)
   }
 
   function fakeTxs () {
@@ -65,7 +68,7 @@
   }
 
   $: connectionColor = $serverConnected ? ($serverDelay < 500 ? 'green' : 'amber') : 'red'
-  $: connectionTitle = $serverConnected ? ($serverDelay < 500 ? 'Connected' : 'Unstable') : 'No connection'
+  $: connectionTitle = $serverConnected ? ($serverDelay < 500 ? 'Receiving live transactions' : 'Unstable connection') : 'No connection'
 </script>
 
 <style type="text/scss">
@@ -101,7 +104,7 @@
 
   .sim-controls {
     position: absolute;
-    bottom: 20px;
+    top: 50px;
     left: 0;
     right: 0;
   }
@@ -154,15 +157,27 @@
   <div class="canvas-wrapper">
     <TxRender controller={txController} />
   </div>
-  <div class="sim-controls">
-    <button on:click={fakeTx}>TXN</button>
-    <button on:click={fakeTxs}>TXNS</button>
-    <button on:click={fakeBlock}>BLOCK</button>
-    <button on:click={toggleDark}>{$darkMode ? 'LIGHT' : 'DARK' }</button>
-  </div>
+  {#if config.debug}
+    <div class="sim-controls">
+      <button on:click={() => fakeTx()}>TXN</button>
+      <!-- <button on:click={() => fakeTx(10)}>10</button>
+      <button on:click={() => fakeTx(100)}>100</button>
+      <button on:click={() => fakeTx(1000)}>1000</button>
+      <button on:click={() => fakeTx(10000)}>10000</button>
+      <button on:click={() => fakeTx(100000)}>100000</button>
+      <button on:click={() => fakeTx(1000000)}>1000000</button>
+      <button on:click={() => fakeTx(10000000)}>10000000</button>
+      <button on:click={() => fakeTx(100000000)}>1BTC</button> -->
+      <button on:click={fakeTxs}>TXNS</button>
+      <button on:click={fakeBlock}>BLOCK</button>
+      <!-- <button on:click={toggleDark}>{$darkMode ? 'LIGHT' : 'DARK' }</button> -->
+    </div>
+  {/if}
   <div class="status-bar">
     <div class="status-light {connectionColor}" title={connectionTitle}></div>
-    <span class="stat-counter {connectionColor}">{ $txQueueLength }</span>
-    <span class="stat-counter {connectionColor}">{ $txCount }</span>
+    {#if config.debug}
+      <span class="stat-counter {connectionColor}">{ $txQueueLength }</span>
+      <span class="stat-counter {connectionColor}">{ $txCount }</span>
+      {/if}
   </div>
 </div>

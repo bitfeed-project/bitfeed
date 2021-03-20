@@ -1,4 +1,5 @@
 import TxView from './TxView.js'
+import config from '../config.js'
 
 export default class BitcoinTx {
   constructor ({ version, id, value, inputs, outputs, witnesses, time, block }, vertexArray) {
@@ -16,6 +17,12 @@ export default class BitcoinTx {
 
     this.witnesses = witnesses
     this.time = time
+
+    if (config.donationAddress && this.outputs) {
+      this.outputs.forEach(output => {
+        if (output.address === config.donationAddress) this.highlight = true
+      })
+    }
 
     this.setBlock(block)
     this.view = new TxView(this)
@@ -42,11 +49,16 @@ export default class BitcoinTx {
     if (this.view) this.view.update(update)
   }
 
-  setPosition (position) {
-    this.position = position
+  setGridPosition (position) {
+    this.gridPosition = position
   }
-
-  getPosition () {
-    if (this.position) return this.position
+  getGridPosition () {
+    if (this.gridPosition) return this.gridPosition
+  }
+  setScreenPosition (position) {
+    this.screenPosition = position
+  }
+  getScreenPosition () {
+    if (this.screenPosition) return this.screenPosition
   }
 }

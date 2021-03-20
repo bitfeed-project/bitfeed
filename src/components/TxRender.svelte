@@ -5,6 +5,7 @@
   import { interpolateHcl } from 'd3-interpolate'
   import { color } from 'd3-color'
   import { darkMode } from '../stores.js'
+  import config from '../config.js'
 
   let canvas
   let gl
@@ -13,6 +14,7 @@
   let sceneScale = [1.0, 1.0]
   let lastTime = 0.0
   let pointArray
+  let debugPointArray
 
   const baseTime = Date.now()
 
@@ -26,7 +28,6 @@
   const attribs = {
     posX: { type: 'FLOAT', count: 4, pointer: null },
     posY: { type: 'FLOAT', count: 4, pointer: null },
-    sizes: { type: 'FLOAT', count: 4, pointer: null },
     palettes: { type: 'FLOAT', count: 4, pointer: null },
     colors: { type: 'FLOAT', count: 4, pointer: null },
     alphas: { type: 'FLOAT', count: 4, pointer: null }
@@ -59,6 +60,15 @@
   function getTxPointArray () {
     if (controller) {
       return controller.getVertexData()
+      // return new Float32Array(
+      //   controller.getScenes().flatMap(scene => scene.getVertexData())
+      // )
+    } else return []
+  }
+
+  function getDebugTxPointArray () {
+    if (controller) {
+      return controller.getDebugVertexData()
       // return new Float32Array(
       //   controller.getScenes().flatMap(scene => scene.getVertexData())
       // )
@@ -106,6 +116,13 @@
 
     /* LOAD VERTEX DATA */
     pointArray = getTxPointArray()
+    if (config.debug) {
+      debugPointArray = getDebugTxPointArray()
+      const combinedArray = new Float32Array(pointArray.length + debugPointArray.length)
+      combinedArray.set(pointArray, 0)
+      combinedArray.set(debugPointArray, pointArray.length)
+      pointArray = combinedArray
+    }
     const glBuffer = gl.createBuffer()
     gl.bindBuffer(gl.ARRAY_BUFFER, glBuffer)
     if (pointArray.length) {
@@ -138,7 +155,7 @@
 
     /* DRAW */
     if (pointArray.length) {
-      gl.drawArrays(gl.POINTS, 0, pointArray.length / 3)
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, pointArray.length)
     }
 
     /* LOOP */

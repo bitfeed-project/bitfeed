@@ -1,5 +1,3 @@
-import { txCount } from '../stores.js'
-
 /*
   Utility class for access and management of low-level sprite data
 
@@ -10,9 +8,10 @@ import { txCount } from '../stores.js'
   or compacting into a smaller Float32Array when there's space to do so.
 */
 export class FastVertexArray {
-  constructor (length, stride) {
+  constructor (length, stride, counter) {
     // console.log(`Creating Fast Vertex Array with length ${length} and stride ${stride} `)
     this.length = length
+    this.counter = counter
     this.count = 0
     this.stride = stride
     this.sprites = []
@@ -32,7 +31,7 @@ export class FastVertexArray {
   insert (sprite) {
     // console.log('inserting into FVA')
     this.count++
-    txCount.increment()
+    if (this.counter) this.counter.increment()
 
     let position
     if (this.freeSlots.length) {
@@ -51,7 +50,7 @@ export class FastVertexArray {
 
   remove (index) {
     this.count--
-    txCount.decrement()
+    if (this.counter) this.counter.decrement()
     this.setData(index, this.nullSprite)
     this.freeSlots.push(index)
     this.sprites[index] = null

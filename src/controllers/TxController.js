@@ -1,20 +1,27 @@
 import TxPoolScene from '../models/TxPoolScene.js'
+import TxMondrianPoolScene from '../models/TxMondrianPoolScene.js'
 import TxBlockScene from '../models/TxBlockScene.js'
 import BitcoinTx from '../models/BitcoinTx.js'
 import BitcoinBlock from '../models/BitcoinBlock.js'
+import TxSprite from '../models/TxSprite.js'
 import { FastVertexArray } from '../utils/memory.js'
-import { txQueueLength } from '../stores.js'
+import { txQueueLength, txCount } from '../stores.js'
+import config from "../config.js"
 
 export default class TxController {
   constructor ({ width, height }) {
-    this.vertexArray = new FastVertexArray(2048, 24)
+    this.vertexArray = new FastVertexArray(2048, TxSprite.dataSize, txCount)
+    this.debugVertexArray = new FastVertexArray(1024, TxSprite.dataSize)
     this.txs = {}
     this.expiredTxs = {}
-    this.pool = new TxPoolScene({ width, height, layer: 0.0, controller: this })
+    this.pool = new TxMondrianPoolScene({ width, height, layer: 0.0, controller: this })
     this.blocks = {}
     this.clearBlockTimeout = null
+    this.txDelay = 0 //config.txDelay
+    this.maxTxDelay = config.txDelay
 
     this.pendingTxs = []
+    this.pendingMap = {}
     this.queueTimeout = null
     this.queueLength = 0
 
@@ -25,14 +32,17 @@ export default class TxController {
     return this.vertexArray.getVertexData()
   }
 
+  getDebugVertexData () {
+    return this.debugVertexArray.getVertexData()
+  }
+
   getScenes () {
     return [this.pool, ...Object.values(this.blocks)]
   }
 
   resize ({ width, height }) {
     this.getScenes().forEach(scene => {
-      scene.resize({ width, height })
-      scene.layoutAll()
+      scene.layoutAll({ width, height })
     })
   }
 
@@ -40,6 +50,7 @@ export default class TxController {
     const tx = new BitcoinTx(txData, this.vertexArray)
     if (!this.txs[tx.id] && !this.expiredTxs[tx.id]) {
       this.pendingTxs.push([tx, Date.now()])
+      this.pendingTxs[tx.id] = tx
       txQueueLength.increment()
     }
   }
@@ -56,11 +67,14 @@ export default class TxController {
         if (this.txs[this.pendingTxs[0][0].id] || this.expiredTxs[this.pendingTxs[0][0].id]) {
           // duplicate transaction, skip without delay
           const tx = this.pendingTxs.shift()[0]
+          delete this.pendingMap[tx.id]
           txQueueLength.decrement()
         } else {
           const timeSince = Date.now() - this.pendingTxs[0][1]
-          if (timeSince > 2000) {
+          if (timeSince > this.txDelay) {
+            if (this.txDelay < this.maxTxDelay) this.txDelay += 10
             const tx = this.pendingTxs.shift()[0]
+            delete this.pendingMap[tx.id]
             txQueueLength.decrement()
             this.txs[tx.id] = tx
             this.pool.insert(this.txs[tx.id])
@@ -94,7 +108,8 @@ export default class TxController {
       if (!this.blocks[blockId].expired) this.clearBlock(blockId)
     })
 
-    this.blocks[block.id] = new TxBlockScene({ width: 500, height: 500, layer: 1.0, blockId: block.id, controller: this })
+    const blockSize = Math.min(window.innerWidth / 2, window.innerHeight / 2)
+    this.blocks[block.id] = new TxBlockScene({ width: blockSize, height: blockSize, layer: 1.0, blockId: block.id, controller: this })
     let knownCount = 0
     let unknownCount = 0
     for (let i = 0; i < block.txns.length; i++) {
@@ -102,6 +117,15 @@ export default class TxController {
         knownCount++
         this.txs[block.txns[i].id].setBlock(block.id)
         this.blocks[block.id].insert(this.txs[block.txns[i].id], false)
+      } else if (this.pendingMap[block.txns[i].id]) {
+        knownCount++
+        const tx = this.pendingMap[tx.id]
+        const pendingIndex = this.pendingTxs.indexOf(tx)
+        if (pendingIndex >= 0) this.pendingTxs.splice(pendingIndex, 1)
+        delete this.pendingMap[tx.id]
+        tx.setBlock(block.id)
+        this.txs[tx.id] = tx
+        this.blocks[block.id].insert(tx, false)
       } else {
         unknownCount++
         const tx = new BitcoinTx({
@@ -109,40 +133,42 @@ export default class TxController {
           block: block.id
         }, this.vertexArray)
         this.txs[tx.id] = tx
-        this.blocks[block.id].insert(this.txs[tx.id], false)
+        this.blocks[block.id].insert(tx, false)
       }
       this.expiredTxs[block.txns[i].id] = true
     }
     console.log(`New block with ${knownCount} known transactions and ${unknownCount} unknown transactions`)
     this.blocks[block.id].initialLayout()
-    setTimeout(() => { this.pool.layoutAll() }, 2000)
+    setTimeout(() => { this.pool.layoutAll() }, 4000)
 
     this.clearBlockTimeout = setTimeout(() => { this.clearBlock(block.id) }, 10000)
   }
 
   simulateBlock () {
-    // for (var i = 0; i < 1000; i++) {
-    //   this.addTx(new BitcoinTx({
-    //     version: 'simulated',
-    //     time: Date.now(),
-    //     id: `simulated_${i}_${Math.random()}`,
-    //     value: Math.floor(Math.random() * 100000)
-    //   }))
-    // }
-    // const simulatedTxns = this.pendingTxs.map(pending => {
-    //   return {
-    //     version: pending[0].version,
-    //     id: pending[0].id,
-    //     time: pending[0].time
-    //   }
-    // })
-    const simulatedTxns = []
+    for (var i = 0; i < 1000; i++) {
+      this.addTx(new BitcoinTx({
+        version: 'simulated',
+        time: Date.now(),
+        id: `simulated_${i}_${Math.random()}`,
+        value: Math.floor(Math.pow(2,(0.1-(Math.log(1 - Math.random()))) * 8))
+      }))
+    }
+    const simulatedTxns = this.pendingTxs.map(pending => {
+      return {
+        version: pending[0].version,
+        id: pending[0].id,
+        time: pending[0].time,
+        value: pending[0].value
+      }
+    })
+    // const simulatedTxns = []
     Object.values(this.pool.txs).forEach(tx => {
       if (Math.random() < 0.5) {
         simulatedTxns.push({
           version: tx.version,
           id: tx.id,
-          time: tx.time
+          time: tx.time,
+          value: tx.value
         })
       }
     })
@@ -158,16 +184,17 @@ export default class TxController {
         txn_count: 20,
         txns: simulatedTxns
       }))
-    }, 0)
+    }, 2500)
   }
 
-  simulateDumpTx (n) {
+  simulateDumpTx (n, value) {
     for (var i = 0; i < n; i++) {
       this.addTx(new BitcoinTx({
         version: 'simulated',
         time: Date.now(),
         id: `simulated_${i}_${Math.random()}`,
-        value: Math.floor(Math.random() * 100000)
+        value: value || Math.floor(Math.pow(2,(0.1-(Math.log(1 - Math.random()))) * 8)) // horrible but plausible distribution of tx values
+        // value: value || Math.pow(10,Math.floor(Math.random() * 5))
       }, this.vertexArray))
     }
   }

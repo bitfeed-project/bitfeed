@@ -1,14 +1,13 @@
 import TxSprite from './TxSprite.js'
-import { timeOffset } from '../utils/time.js'
 
 // converts from this class's update format to TxSprite's update format
 // now, id, value, layer, position, size, palette, color, alpha, duration, adjust
 function toSpriteUpdate(display, duration, start, adjust) {
   return {
-    now: start ? start - timeOffset : Date.now() - timeOffset,
+    now: start || Date.now(),
     duration: duration,
     ...display,
-    ...(display.color ? { palette: display.color.palette, color: display.color.index, alpha: display.color.alpha } : { color: null }),
+    ...(display.color != null ? { palette: display.color.palette, color: display.color.index, alpha: display.color.alpha } : { color: null }),
     adjust
   }
 }

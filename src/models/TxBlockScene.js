@@ -1,45 +1,63 @@
-import TxPoolScene from './TxPoolScene.js'
+import TxMondrianPoolScene from './TxMondrianPoolScene.js'
 
-export default class TxBlockScene extends TxPoolScene {
+export default class TxBlockScene extends TxMondrianPoolScene {
   constructor ({ width, height, unit = 4, padding = 1, layer, blockId, controller }) {
     super({ width, height, unit, padding, layer, controller })
     this.heightLimit = null
     this.expired = false
     this.layedOut = false
     this.blockId = blockId
+    this.initialised = true
   }
 
-  resize ({ width, height, unit, padding }) {
+  resize ({ width = this.width, height = this.height }) {
     if (this.initialised) {
-      this.unitWidth = unit || this.unitWidth || 4
-      this.unitPadding = padding || this.unitPadding || 1
-      this.paddedUnitWidth = this.unitWidth + (this.unitPadding * 2)
-      console.log(`Resizing block: ${this.unitWidth}, ${this.unitPadding}, ${this.paddedUnitWidth}`)
-      let txCount = this.getTxList().length
-      this.blockWidth = Math.ceil(Math.sqrt(txCount))
+      let blockWeight = 0
+      const ids = this.getTxList()
+      for (let i = 0; i < ids.length; i++) {
+        let squareSize = 0
+        if (this.txs[ids[i]]) squareSize = this.txSize(this.txs[ids[i]].value || 1)
+        else if (this.hiddenTxs[ids[i]]) squareSize = this.txSize(this.hiddenTxs[ids[i]].value || 1)
+        blockWeight += (squareSize * squareSize)
+      }
+
+      console.log(`Resizing block: ${ids.length} txs, total weight: ${blockWeight}`)
+
+      this.width = width
+      this.height = height
+      this.blockWidth = Math.ceil(Math.sqrt(blockWeight))
       this.blockHeight = this.blockWidth
-      this.width = (this.blockWidth + 1) * this.paddedUnitWidth
-      this.height = (this.blockHeight + 1) * this.paddedUnitWidth
+
+      this.paddedUnit
+      this.gridSize = width / this.blockWidth
+      this.unitPadding = this.gridSize / 4
+      this.unitWidth = this.gridSize - (this.unitPadding * 2)
+
+      console.log(`Resized block: ${this.unitWidth}, ${this.unitPadding}, ${this.gridSize}`)
+
       this.scene.offset = {
         x: (window.innerWidth - this.width) / 2,
         y: (window.innerHeight - this.height) / 2
       }
       this.scene.scroll = 0
+    } else {
+      this.width = width
+      this.height = height
     }
+
+    this.resetLayout()
   }
 
-  layoutTx (tx, sequence) {
-    const position = this.place(tx.id, sequence)
+  setTxOnScreen (tx, screenPosition) {
     if (!tx.view.initialised) {
       this.updateTx(tx, {
         display: {
           layer: this.layer,
           position: {
-            x: window.innerWidth * ((position.x - this.scene.offset.x) / this.width),
-            y: window.innerHeight * (1 + ((position.y - this.scene.offset.y) / this.height))
+            x: ((screenPosition.x - this.scene.offset.x) / this.width) * window.innerWidth,
+            y: screenPosition.y - this.height - 20
           },
-          size: 8,
-          color: {
+          color: tx.highlight ? this.highlightColor : {
             palette: 0,
             index: 0,
             alpha: 1
@@ -53,9 +71,8 @@ export default class TxBlockScene extends TxPoolScene {
 
     this.updateTx(tx, {
       display: {
-        position,
-        size: 4,
-        color: {
+        position: screenPosition,
+        color: tx.highlight ? this.highlightColor : {
           palette: 0,
           index: 0,
           alpha: 1
@@ -67,18 +84,17 @@ export default class TxBlockScene extends TxPoolScene {
     })
   }
 
-  prepareTx (tx, sequence) {
-    const position = this.place(tx.id, sequence)
+  prepareTxOnScreen (tx, screenPosition) {
     if (!tx.view.initialised) {
       this.updateTx(tx, {
         display: {
           layer: this.layer,
           position: {
-            x: window.innerWidth * ((position.x - this.scene.offset.x) / this.width),
-            y: window.innerHeight * (1 + ((position.y - this.scene.offset.y) / this.height))
+            x: ((screenPosition.x - this.scene.offset.x) / this.width) * window.innerWidth,
+            y: screenPosition.y - (window.innerHeight + 20),
+            r: screenPosition.r
           },
-          size: 8,
-          color: {
+          color: tx.highlight ? this.highlightColor : {
             palette: 0,
             index: 0,
             alpha: 1
@@ -92,7 +108,7 @@ export default class TxBlockScene extends TxPoolScene {
     this.updateTx(tx, {
       display: {
         layer: this.layer,
-        color: {
+        color: tx.highlight ? this.highlightColor : {
           palette: 0,
           index: 0,
           alpha: 1
@@ -103,10 +119,18 @@ export default class TxBlockScene extends TxPoolScene {
     })
   }
 
+  prepareTx (tx, sequence) {
+    const screenPosition = this.layoutTx(tx, sequence, false)
+    this.prepareTxOnScreen(tx, screenPosition)
+  }
+
   expireTx (tx) {
+    const screenPosition = tx.getScreenPosition()
     this.updateTx(tx, {
       display: {
-        size: 30,
+        position: {
+          y: screenPosition.y + 50
+        },
         color: {
           alpha: 0
         }
@@ -131,16 +155,11 @@ export default class TxBlockScene extends TxPoolScene {
     }
   }
 
-  layoutAll () {
-    this.resize({})
-    super.layoutAll()
-  }
-
   initialLayout () {
     this.prepareAll()
     setTimeout(() => {
       this.layoutAll()
-    }, 2000)
+    }, 3000)
   }
 
   expire () {
@@ -154,6 +173,7 @@ export default class TxBlockScene extends TxPoolScene {
       for (let i = 0; i < txIds.length; i++) {
         if (this.txs[txIds[i]]) this.controller.destroyTx(txIds[i])
       }
+      this.layout.destroy()
       this.controller.destroyBlock(this.blockId)
     }, 3000)
   }

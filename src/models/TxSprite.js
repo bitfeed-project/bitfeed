@@ -1,3 +1,5 @@
+import { timeOffset } from '../utils/time.js'
+
 function interpolateAttributeStart(attribute, now, label) {
   if (attribute.v == 0 || (attribute.t + attribute.d) <= now) {
     // transition finished, next transition starts from current end state
@@ -19,19 +21,21 @@ function interpolateAttributeStart(attribute, now, label) {
 }
 
 export default class TxSprite {
-  constructor({ now = Date.now(), id, value, layer, position, size, palette, color, alpha }, vertexArray) {
+
+  constructor({ now = Date.now(), id, value, layer, position, palette, color, alpha }, vertexArray) {
+    const offsetTime = now - timeOffset
     this.id = id
     this.value = value
     this.layer = layer
     this.vertexArray = vertexArray
 
     this.attributes = {
-      x: { a: position.x, b: position.x, t: now, v: 0, d: 0 },
-      y: { a: position.y, b: position.y, t: now, v: 0, d: 0 },
-      r: { a: size, b: size, t: now, v: 0, d: 0 },
-      p: { a: palette, b: palette, t: now, v: 0, d: 0 },
-      c: { a: color, b: color, t: now, v: 0, d: 0 },
-      a: { a: alpha, b: alpha, t: now, v: 0, d: 0 },
+      x: { a: position.x, b: position.x, t: offsetTime, v: 0, d: 0 },
+      y: { a: position.y, b: position.y, t: offsetTime, v: 0, d: 0 },
+      r: { a: position.r, b: position.r, t: offsetTime, v: 0, d: 0 },
+      p: { a: palette, b: palette, t: offsetTime, v: 0, d: 0 },
+      c: { a: color, b: color, t: offsetTime, v: 0, d: 0 },
+      a: { a: alpha, b: alpha, t: offsetTime, v: 0, d: 0 },
     }
 
     this.vertexPointer = this.vertexArray.insert(this)
@@ -39,25 +43,32 @@ export default class TxSprite {
     this.compile()
   }
 
-  update({ now, layer, position, size, palette, color, alpha, duration, minDuration, adjust }) {
+  update({ now = Date.now(), layer, position, palette, color, alpha, duration, minDuration, adjust }) {
+    const offsetTime = now - timeOffset
     const v = duration > 0 ? (1 / duration) : 0
 
     let update = {
       x: position ? position.x : null,
-      y: position ? position.y: null,
-      r: size,
+      y: position ? position.y : null,
+      r: position ? position.r : null,
       p: palette,
       c: color,
       a: alpha
+    }
+
+    if (update.x || update.y || update.r) {
+      if (update.x == null) update.x = this.attributes.x.b
+      if (update.y == null) update.y = this.attributes.y.b
+      if (update.r == null) update.r = this.attributes.r.b
     }
 
     for (const key of Object.keys(update)) {
       // for each non-null attribute:
       if (update[key] != null) {
         // calculate current interpolated value, and set as 'from'
-        interpolateAttributeStart(this.attributes[key], now, key)
+        interpolateAttributeStart(this.attributes[key], offsetTime, key)
         // set 'start' to now
-        this.attributes[key].t = now
+        this.attributes[key].t = offsetTime
         // if 'adjust' flag set
         // set 'duration' to Max(remaining time, 'duration')
         if (!adjust || (duration && this.attributes[key].d == 0)) {
@@ -75,22 +86,18 @@ export default class TxSprite {
     this.compile()
   }
 
-  compile () {
-    this.vertexData = [
-      this.attributes.x.a,
-      this.attributes.x.b,
+  // vertex offset = { x: { a, b }, y: { a, b} }
+  compileVertex (offset) {
+    return [
+      this.attributes.x.a + offset.x.a,
+      this.attributes.x.b + offset.x.b,
       this.attributes.x.t,
       this.attributes.x.v,
 
-      this.attributes.y.a,
-      this.attributes.y.b,
+      this.attributes.y.a + offset.y.a,
+      this.attributes.y.b + offset.y.b,
       this.attributes.y.t,
       this.attributes.y.v,
-
-      this.attributes.r.a,
-      this.attributes.r.b,
-      this.attributes.r.t,
-      this.attributes.r.v,
 
       this.attributes.p.a,
       this.attributes.p.b,
@@ -107,6 +114,19 @@ export default class TxSprite {
       this.attributes.a.t,
       this.attributes.a.v,
     ]
+  }
+
+  compile () {
+    const size = this.attributes.r
+    this.vertexData = [
+      // duplicate vertex creates degenerate triangles & terminates the shape
+      ...this.compileVertex({ x: { a: size.a, b: size.b }, y: { a: size.a, b: size.b }}),
+      ...this.compileVertex({ x: { a: size.a, b: size.b }, y: { a: size.a, b: size.b }}),
+      ...this.compileVertex({ x: { a: -size.a, b: -size.b }, y: { a: size.a, b: size.b }}),
+      ...this.compileVertex({ x: { a: size.a, b: size.b }, y: { a: -size.a, b: -size.b }}),
+      ...this.compileVertex({ x: { a: -size.a, b: -size.b }, y: { a: -size.a, b: -size.b }}),
+      ...this.compileVertex({ x: { a: -size.a, b: -size.b }, y: { a: -size.a, b: -size.b }})
+    ]
     this.vertexArray.setData(this.vertexPointer, this.vertexData)
   }
 
@@ -114,19 +134,21 @@ export default class TxSprite {
     this.vertexPointer = index
   }
 
-  getPosition () {
-    return {
-      x: this.attributes.x.b,
-      y: this.attributes.y.b
-    }
-  }
-
-  getVertexData () {
-    return this.vertexData
-  }
+  // getPosition () {
+  //   return {
+  //     x: this.attributes.x.b,
+  //     y: this.attributes.y.b
+  //   }
+  // }
+  //
+  // getVertexData () {
+  //   return this.vertexData
+  // }
 
   destroy () {
     this.vertexArray.remove(this.vertexPointer)
     this.vertexPointer = null
   }
 }
+
+TxSprite.dataSize = 120
