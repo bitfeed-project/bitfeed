@@ -99,7 +99,7 @@ export default class TxController {
   }
 
   addBlock (blockData) {
-    const block = new BitcoinBlock(blockData)
+    const block = (blockData && blockData.isBlock) ? blockData : new BitcoinBlock(blockData)
     if (this.clearBlockTimeout) clearTimeout(this.clearBlockTimeout)
 
     this.expiredTxs = {}
@@ -108,7 +108,7 @@ export default class TxController {
       if (!this.blocks[blockId].expired) this.clearBlock(blockId)
     })
 
-    const blockSize = Math.min(window.innerWidth / 2, window.innerHeight / 2)
+    const blockSize = Math.min(window.innerWidth * 0.75, window.innerHeight / 2)
     this.blocks[block.id] = new TxBlockScene({ width: blockSize, height: blockSize, layer: 1.0, blockId: block.id, controller: this })
     let knownCount = 0
     let unknownCount = 0
@@ -141,7 +141,9 @@ export default class TxController {
     this.blocks[block.id].initialLayout()
     setTimeout(() => { this.pool.layoutAll() }, 4000)
 
-    this.clearBlockTimeout = setTimeout(() => { this.clearBlock(block.id) }, 10000)
+    this.clearBlockTimeout = setTimeout(() => { this.clearBlock(block.id) }, config.blockTimeout)
+
+    return block
   }
 
   simulateBlock () {
@@ -172,19 +174,22 @@ export default class TxController {
         })
       }
     })
+    const block = new BitcoinBlock({
+      version: 'fake',
+      id: 'fake_block' + Math.random(),
+      value: 12345678900,
+      prev_block: 'also_fake',
+      merkle_root: 'merkle',
+      timestamp: Date.now() / 1000,
+      bits: 'none',
+      bytes: 1379334,
+      txn_count: simulatedTxns.length,
+      txns: simulatedTxns
+    })
     setTimeout(() => {
-      this.addBlock(new BitcoinBlock({
-        version: 'fake',
-        id: Math.random(),
-        value: 10000,
-        prev_block: 'also_fake',
-        merkle_root: 'merkle',
-        timestamp: Date.now(),
-        bits: 'none',
-        txn_count: 20,
-        txns: simulatedTxns
-      }))
+      this.addBlock(block)
     }, 2500)
+    return block
   }
 
   simulateDumpTx (n, value) {

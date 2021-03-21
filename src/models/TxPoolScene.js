@@ -12,6 +12,8 @@ export default class TxPoolScene {
     this.controller = controller
     this.layer = layer
 
+    this.inverted = false
+
     this.scene = {
       width: width,
       height: height,
@@ -62,8 +64,8 @@ export default class TxPoolScene {
   }
 
   clearOffscreenTx (tx) {
-    const screenPosition = tx.getScreenPosition()
-    if (screenPosition && (screenPosition.y + screenPosition.r) < -(this.scene.offset.y + 20)) {
+    const pixelPosition = tx.getPixelPosition()
+    if (pixelPosition && (pixelPosition.y + pixelPosition.r) < -(this.scene.offset.y + 20)) {
       this.controller.destroyTx(tx.id)
     }
   }
@@ -77,11 +79,11 @@ export default class TxPoolScene {
 
   redrawTx (tx) {
     if (tx.view.initialised) {
-      const screenPosition = this.gridToScreen(tx.getGridPosition())
-      tx.setScreenPosition(screenPosition)
+      const pixelPosition = this.gridToPixels(tx.getGridPosition())
+      tx.setPixelPosition(pixelPosition)
       this.updateTx(tx, {
         display: {
-          position: screenPosition
+          position: this.pixelsToScreen(pixelPosition)
         },
         duration: 500,
         minDuration: 250,
@@ -120,27 +122,27 @@ export default class TxPoolScene {
   layoutTx (tx, sequence, setOnScreen = true) {
     const units = this.txSize(tx.value)
     const gridPosition = this.place(tx.id, sequence, units)
-    let screenPosition = this.gridToScreen(gridPosition)
+    let pixelPosition = this.gridToPixels(gridPosition)
     tx.setGridPosition(gridPosition)
-    if (this.heightLimit && (screenPosition.y - screenPosition.r) > this.heightLimit) {
-      this.scroll(this.heightLimit - (screenPosition.y - screenPosition.r))
-      screenPosition = this.gridToScreen(gridPosition)
+    if (this.heightLimit && (pixelPosition.y - pixelPosition.r) > this.heightLimit) {
+      this.scroll(this.heightLimit - (pixelPosition.y - pixelPosition.r))
+      pixelPosition = this.gridToPixels(gridPosition)
     }
-    tx.setScreenPosition(screenPosition)
-    if (setOnScreen) this.setTxOnScreen(tx, screenPosition)
-    return screenPosition
+    tx.setPixelPosition(pixelPosition)
+    if (setOnScreen) this.setTxOnScreen(tx, pixelPosition)
+    return pixelPosition
   }
 
-  setTxOnScreen (tx, screenPosition) {
+  setTxOnScreen (tx, pixelPosition) {
     if (!tx.view.initialised) {
       this.updateTx(tx, {
         display: {
           layer: this.layer,
-          position: {
-            x: screenPosition.x,
+          position: this.pixelsToScreen({
+            x: pixelPosition.x,
             y: window.innerHeight + 10,
             r: this.unitWidth / 2
-          },
+          }),
           color: tx.highlight ? this.highlightColor : {
             palette: 0,
             index: 0,
@@ -154,7 +156,7 @@ export default class TxPoolScene {
       this.updateTx(tx, {
         display: {
           layer: this.layer,
-          position: screenPosition,
+          position: this.pixelsToScreen(pixelPosition),
           color: tx.highlight ? this.highlightColor : {
             palette: 0,
             index: 0,
@@ -178,7 +180,7 @@ export default class TxPoolScene {
     } else {
       this.updateTx(tx, {
         display: {
-          position: screenPosition
+          position: this.pixelsToScreen(pixelPosition)
         },
         duration: 1000,
         minDuration: 1000,
@@ -205,7 +207,7 @@ export default class TxPoolScene {
     let poolBottom = Infinity
     ids = this.getActiveTxList()
     for (let i = 0; i < ids.length; i++) {
-      const position = this.gridToScreen(this.txs[ids[i]].getGridPosition())
+      const position = this.gridToPixels(this.txs[ids[i]].getGridPosition())
       poolTop = Math.max(poolTop, position.y - position.r)
       poolBottom = Math.min(poolBottom, position.y - position.r)
     }
@@ -243,13 +245,24 @@ export default class TxPoolScene {
     else return []
   }
 
-  gridToScreen (position) {
+  gridToPixels (position) {
     const pixelRadius = (position.r * this.gridSize / 2) - this.unitPadding
     return {
-      x: (this.gridSize * (position.x) + pixelRadius) + this.scene.offset.x,
-      y: (this.gridSize * (position.y) + pixelRadius) + this.scene.offset.y + this.scene.scroll,
+      x: (this.gridSize * (position.x) + pixelRadius),
+      y: (this.gridSize * (position.y) + pixelRadius) + this.scene.scroll,
       r: pixelRadius
     }
+  }
+
+  pixelsToScreen (position) {
+    // if (this.inverted) {
+    const screenPosition = {
+      ...position
+    }
+    if (this.inverted) screenPosition.y = this.height - screenPosition.y
+    screenPosition.x += this.scene.offset.x
+    screenPosition.y += this.scene.offset.y
+    return screenPosition
   }
 
   place (id, position, size) {

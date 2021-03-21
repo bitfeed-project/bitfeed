@@ -117,7 +117,7 @@
 
     /* LOAD VERTEX DATA */
     pointArray = getTxPointArray()
-    if (config.debug) {
+    if (config.layoutHints) {
       debugPointArray = getDebugTxPointArray()
       const combinedArray = new Float32Array(pointArray.length + debugPointArray.length)
       combinedArray.set(pointArray, 0)

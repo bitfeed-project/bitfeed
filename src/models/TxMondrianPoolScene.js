@@ -72,7 +72,7 @@ class MondrianLayout {
     let done = false
     const cutoff = -this.context.scene.scroll / this.context.gridSize
     // console.log(`clearing layout rows. cut off at grid ${cutoff}`)
-    while (!done) {
+    while (!done && this.rows.length) {
       const head = this.rows[0]
       let max = 0
       head.slots.forEach(x => {
@@ -130,7 +130,7 @@ class MondrianLayout {
       row.map[slot.x] = slot
 
       // Set up a sprite for debugging graphics
-      if (config.debug) {
+      if (config.layoutHints) {
         slot.sprite = new TxSprite(this.slotToSprite(slot), this.context.controller.debugVertexArray)
       }
 
@@ -281,7 +281,7 @@ class MondrianLayout {
 
   slotToSprite (slot) {
     return {
-      position: this.context.gridToScreen(slot),
+      position: this.context.pixelsToScreen(this.context.gridToPixels(slot)),
       palette: 3,
       color: 0,
       alpha: 0.1
@@ -289,7 +289,7 @@ class MondrianLayout {
   }
 
   updateSlotSprite (slot) {
-    if (config.debug) {
+    if (config.layoutHints) {
       slot.sprite.update({
         ...this.slotToSprite(slot),
         duration: 500,
@@ -300,7 +300,7 @@ class MondrianLayout {
   }
 
   redraw () {
-    if (config.debug) {
+    if (config.layoutHints) {
       this.rows.forEach(row => {
         row.slots.forEach(slot => {
           this.updateSlotSprite(slot)
@@ -310,7 +310,7 @@ class MondrianLayout {
   }
 
   destroyRow (row) {
-    if (config.debug) {
+    if (config.layoutHints) {
       row.slots.forEach(slot => {
         slot.sprite.destroy()
       })
@@ -318,7 +318,7 @@ class MondrianLayout {
   }
 
   destroy () {
-    if (config.debug) {
+    if (config.layoutHints) {
       this.rows.forEach(row => {
         row.slots.forEach(slot => {
           slot.sprite.destroy()

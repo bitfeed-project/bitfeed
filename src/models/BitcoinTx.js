@@ -55,10 +55,10 @@ export default class BitcoinTx {
   getGridPosition () {
     if (this.gridPosition) return this.gridPosition
   }
-  setScreenPosition (position) {
-    this.screenPosition = position
+  setPixelPosition (position) {
+    this.pixelPosition = position
   }
-  getScreenPosition () {
-    if (this.screenPosition) return this.screenPosition
+  getPixelPosition () {
+    if (this.pixelPosition) return this.pixelPosition
   }
 }

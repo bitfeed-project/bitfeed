@@ -8,6 +8,7 @@ export default class TxBlockScene extends TxMondrianPoolScene {
     this.layedOut = false
     this.blockId = blockId
     this.initialised = true
+    this.inverted = true
   }
 
   resize ({ width = this.width, height = this.height }) {
@@ -21,8 +22,6 @@ export default class TxBlockScene extends TxMondrianPoolScene {
         blockWeight += (squareSize * squareSize)
       }
 
-      console.log(`Resizing block: ${ids.length} txs, total weight: ${blockWeight}`)
-
       this.width = width
       this.height = height
       this.blockWidth = Math.ceil(Math.sqrt(blockWeight))
@@ -32,8 +31,6 @@ export default class TxBlockScene extends TxMondrianPoolScene {
       this.gridSize = width / this.blockWidth
       this.unitPadding = this.gridSize / 4
       this.unitWidth = this.gridSize - (this.unitPadding * 2)
-
-      console.log(`Resized block: ${this.unitWidth}, ${this.unitPadding}, ${this.gridSize}`)
 
       this.scene.offset = {
         x: (window.innerWidth - this.width) / 2,
@@ -48,15 +45,15 @@ export default class TxBlockScene extends TxMondrianPoolScene {
     this.resetLayout()
   }
 
-  setTxOnScreen (tx, screenPosition) {
+  setTxOnScreen (tx, pixelPosition) {
     if (!tx.view.initialised) {
       this.updateTx(tx, {
         display: {
           layer: this.layer,
-          position: {
-            x: ((screenPosition.x - this.scene.offset.x) / this.width) * window.innerWidth,
-            y: screenPosition.y - this.height - 20
-          },
+          position: this.pixelsToScreen({
+            x: ((pixelPosition.x - this.scene.offset.x) / this.width) * window.innerWidth,
+            y: pixelPosition.y - this.height - 20
+          }),
           color: tx.highlight ? this.highlightColor : {
             palette: 0,
             index: 0,
@@ -71,7 +68,7 @@ export default class TxBlockScene extends TxMondrianPoolScene {
 
     this.updateTx(tx, {
       display: {
-        position: screenPosition,
+        position: this.pixelsToScreen(pixelPosition),
         color: tx.highlight ? this.highlightColor : {
           palette: 0,
           index: 0,
@@ -84,16 +81,16 @@ export default class TxBlockScene extends TxMondrianPoolScene {
     })
   }
 
-  prepareTxOnScreen (tx, screenPosition) {
+  prepareTxOnScreen (tx, pixelPosition) {
     if (!tx.view.initialised) {
       this.updateTx(tx, {
         display: {
           layer: this.layer,
-          position: {
-            x: ((screenPosition.x - this.scene.offset.x) / this.width) * window.innerWidth,
-            y: screenPosition.y - (window.innerHeight + 20),
-            r: screenPosition.r
-          },
+          position: this.pixelsToScreen({
+            x: ((pixelPosition.x - this.scene.offset.x) / this.width) * window.innerWidth,
+            y: pixelPosition.y - (window.innerHeight + 20),
+            r: pixelPosition.r
+          }),
           color: tx.highlight ? this.highlightColor : {
             palette: 0,
             index: 0,
@@ -120,16 +117,16 @@ export default class TxBlockScene extends TxMondrianPoolScene {
   }
 
   prepareTx (tx, sequence) {
-    const screenPosition = this.layoutTx(tx, sequence, false)
-    this.prepareTxOnScreen(tx, screenPosition)
+    const pixelPosition = this.layoutTx(tx, sequence, false)
+    this.prepareTxOnScreen(tx, pixelPosition)
   }
 
   expireTx (tx) {
-    const screenPosition = tx.getScreenPosition()
+    const pixelPosition = this.pixelsToScreen(tx.getPixelPosition())
     this.updateTx(tx, {
       display: {
         position: {
-          y: screenPosition.y + 50
+          y: pixelPosition.y + 50
         },
         color: {
           alpha: 0

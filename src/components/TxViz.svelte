@@ -5,6 +5,7 @@
   import getTxStream from '../controllers/TxStream.js'
   import { darkMode, serverConnected, serverDelay, txQueueLength, txCount } from '../stores.js'
   import BitcoinBlock from '../models/BitcoinBlock.js'
+  import BlockInfo from '../components/BlockInfo.svelte'
   import config from '../config.js'
 
   let width = window.innerWidth - 20
@@ -12,17 +13,30 @@
   let txController
   let blockCount = 0
   let running = false
-  let txStream = getTxStream()
+
+  let currentBlock = null
+
+  $: {
+    console.log('block: ', currentBlock)
+  }
+
+  let txStream
+  if (!config.nofeed) txStream = getTxStream()
 
   onMount(() => {
     txController = new TxController({ width, height })
 
-    txStream.subscribe('tx', tx => {
-      txController.addTx(tx)
-    })
-    txStream.subscribe('block', block => {
-      txController.addBlock(block)
-    })
+    if (!config.nofeed) {
+      txStream.subscribe('tx', tx => {
+        txController.addTx(tx)
+      })
+      txStream.subscribe('block', block => {
+        currentBlock = txController.addBlock(block)
+        setTimeout(() => {
+          if (block.id === currentBlock.id) currentBlock = null
+        }, config.blockTimeout)
+      })
+    }
   })
 
   function resize () {
@@ -35,7 +49,11 @@
   }
 
   function fakeBlock () {
-    txController.simulateBlock()
+    const block = txController.simulateBlock()
+    currentBlock = block
+    setTimeout(() => {
+      if (block.id === currentBlock.id) currentBlock = null
+    }, config.blockTimeout + 2500)
     // txController.addBlock(new BitcoinBlock({
     //   version: 'fake',
     //   id: Math.random(),
@@ -93,6 +111,9 @@
     position: relative;
     width: 100%;
     height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
   .mempool-size-label {
@@ -153,6 +174,16 @@
       }
     }
   }
+
+  .block-area-wrapper {
+    position: relative;
+    width: 75vw;
+    max-width: 50vh;
+
+    .block-area {
+      padding-top: 100%;
+    }
+  }
 </style>
 
 <svelte:window on:resize={resize} />
@@ -160,6 +191,12 @@
 <div class="tx-area" class:light-mode={!$darkMode}>
   <div class="canvas-wrapper">
     <TxRender controller={txController} />
+
+    <div class="block-area-wrapper">
+      <div class="block-area">
+        <BlockInfo block={currentBlock} />
+      </div>
+    </div>
   </div>
   {#if config.debug}
     <div class="sim-controls">

@@ -28,7 +28,7 @@ float interpolateAttribute(vec4 attr) {
 
 void main() {
   vec4 screenTransform = vec4(2.0 / screenSize.x, 2.0 / screenSize.y, -1.0, -1.0);
-  // vec4 screenTransform = vec4(1.0 / screenSize.x, 1.0 / screenSize.y, -0.5, -0.0);
+  // vec4 screenTransform = vec4(1.0 / screenSize.x, 1.0 / screenSize.y, -0.5, -0.5);
 
   vec2 position = vec2(interpolateAttribute(posX), interpolateAttribute(posY));
   gl_Position = vec4(position * screenTransform.xy + screenTransform.zw, 1.0, 1.0);
