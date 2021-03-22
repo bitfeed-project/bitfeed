@@ -151,7 +151,7 @@
     }
 
     const frameTime = now - lastTime
-    rawFrameRate = (rawFrameRate * 0.8) + (0.2 * (1 / (frameTime / 1000)))
+    rawFrameRate = Math.max(1, (rawFrameRate * 0.8) + (0.2 * (1 / (frameTime / 1000))))
     frameRate.set(rawFrameRate)
     lastTime = now
 
