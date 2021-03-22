@@ -3,7 +3,7 @@ export default {
   debug: false,
   layoutHints: false,
   fps: true,
-  websocket_uri: 'wss://bits.monospace.live/ws/txs',
+  websocket_path: '/ws/txs',
   nofeed: false,
   txDelay: 5000,
   blockTimeout: 10000,
