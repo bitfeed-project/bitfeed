@@ -29,7 +29,7 @@ export default class TxPoolScene {
     this.txs = {}
     this.hiddenTxs = {}
 
-    this.heightLimit =  Math.max(150, height / 4)
+    this.heightLimit =  height / 4
 
     this.scrollRateLimitTimer = null
     this.initialised = true

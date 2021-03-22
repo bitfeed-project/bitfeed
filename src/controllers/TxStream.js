@@ -7,11 +7,17 @@ class TxStream {
     this.reconnectBackoff = 128
     this.websocket = null
     this.setConnected(false)
-    this.setDelay(1000)
+    this.setDelay(0)
     this.lastBeat = Date.now()
 
     this.reconnectTimeout = null
     this.heartbeatTimeout = null
+
+    this.delayInterval = setInterval(() => {
+      if (this.lastBeat && this.connected) {
+        this.setDelay(Date.now() - this.lastBeat)
+      }
+    }, 789)
 
     this.init()
   }
@@ -27,15 +33,17 @@ class TxStream {
   }
 
   init () {
-    try {
-      this.websocket = new WebSocket(this.websocketUri)
-      this.websocket.onopen = (evt) => { this.onopen(evt) }
-      this.websocket.onclose = (evt) => { this.onclose(evt) }
-      this.websocket.onmessage = (evt) => { this.onmessage(evt) }
-      this.websocket.onerror = (evt) => { this.onerror(evt) }
-    } catch (error) {
-      // console.log('failed to open websocket: ', error)
-    }
+    if (!this.connected && (!this.websocket || this.websocket.readyState === WebSocket.CLOSED)) {
+      try {
+        if (!this.websocket) this.websocket = new WebSocket(this.websocketUri)
+        this.websocket.onopen = (evt) => { this.onopen(evt) }
+        this.websocket.onclose = (evt) => { this.onclose(evt) }
+        this.websocket.onmessage = (evt) => { this.onmessage(evt) }
+        this.websocket.onerror = (evt) => { this.onerror(evt) }
+      } catch (error) {
+        this.reconnect()
+      }
+    } else this.reconnect()
   }
 
   reconnect () {
@@ -50,22 +58,43 @@ class TxStream {
     if (this.heartbeatTimeout) clearTimeout(this.heartbeatTimeout)
     if (this.reconnectTimeout) clearTimeout(this.reconnectTimeout)
     this.setDelay(Date.now() - this.lastBeat)
+    this.lastBeat = null
     this.setConnected(true)
-    this.heartbeatTimeout = setTimeout(() => { this.sendHeartbeat() }, 5000)
-  }
-
-  sendHeartbeat () {
-    this.lastBeat = Date.now()
-    this.websocket.send('hb')
     this.heartbeatTimeout = setTimeout(() => {
-      this.onclose()
+      this.sendHeartbeat()
     }, 2000)
   }
 
-  onopen (event) {
+  sendHeartbeat () {
     if (this.heartbeatTimeout) clearTimeout(this.heartbeatTimeout)
+    this.lastBeat = Date.now()
+    if (this.websocket && this.websocket.readyState === WebSocket.OPEN) {
+      this.lastBeat = Date.now()
+      this.websocket.send('hb')
+      this.heartbeatTimeout = setTimeout(() => {
+        this.setDelay(Date.now() - this.lastBeat)
+        this.disconnect()
+      }, 5000)
+    }
+  }
+
+  disconnect () {
+    if (this.websocket) {
+      this.websocket.onopen = null
+      this.websocket.onclose = null
+      this.websocket.onmessage = null
+      this.websocket.onerror = null
+      this.websocket.close()
+      this.websocket = null
+    }
+    this.setConnected(false)
+    this.setDelay(0)
+    this.reconnect()
+  }
+
+  onopen (event) {
     this.setConnected(true)
-    this.setDelay(500)
+    this.setDelay(0)
     this.reconnectBackoff = 128
     this.sendHeartbeat()
   }

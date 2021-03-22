@@ -19,10 +19,6 @@
 
   let currentBlock = null
 
-  $: {
-    console.log('block: ', currentBlock)
-  }
-
   let txStream
   if (!config.nofeed) txStream = getTxStream()
 
@@ -88,8 +84,8 @@
     $darkMode = !$darkMode
   }
 
-  $: connectionColor = $serverConnected ? ($serverDelay < 500 ? 'green' : 'amber') : 'red'
-  $: connectionTitle = $serverConnected ? ($serverDelay < 500 ? 'Receiving live transactions' : 'Unstable connection') : 'No connection'
+  $: connectionColor = ($serverConnected && $serverDelay < 5000) ? ($serverDelay < 500 ? 'green' : 'amber') : 'red'
+  $: connectionTitle = ($serverConnected && $serverDelay < 5000) ? ($serverDelay < 500 ? 'Streaming live transactions' : 'Unstable connection') : 'Disconnected'
   $: {
     if (lastFrameUpdate + 250 < Date.now()) {
       frameRateLabel = Number($frameRate).toFixed(1) + ' FPS'
@@ -241,6 +237,7 @@
   <div class="status-bar right">
     <div class="status-light {connectionColor}" title={connectionTitle}></div>
     {#if config.debug}
+      <span class="stat-counter {connectionColor}">{ $serverDelay } ms</span>
       <span class="stat-counter {connectionColor}">{ $txQueueLength }</span>
       <span class="stat-counter {connectionColor}">{ $txCount }</span>
       {/if}

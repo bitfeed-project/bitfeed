@@ -11,7 +11,5 @@ export default class BitcoinBlock {
     this.bytes = bytes // OTW size of this block in bytes
     this.txnCount = txn_count
     this.txns = txns
-
-    console.log('new block: ', this)
   }
 }
