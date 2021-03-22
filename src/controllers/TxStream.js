@@ -3,7 +3,7 @@ import config from '../config.js'
 
 class TxStream {
   constructor () {
-    this.websocketUri = (config.dev ? `ws://localhost:5000${config.websocket_path}` : `wss://${window.location.host}${config.websocket_path}`)
+    this.websocketUri = config.localSocket ? `ws://localhost:4000${config.websocket_path}` : (config.dev ? `wss://bits.monospace.live${config.websocket_path}` : `wss://${window.location.host}${config.websocket_path}`)
     this.reconnectBackoff = 128
     this.websocket = null
     this.setConnected(false)
