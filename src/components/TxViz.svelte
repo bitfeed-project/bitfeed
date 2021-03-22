@@ -3,9 +3,10 @@
   import TxController from '../controllers/TxController.js'
   import TxRender from './TxRender.svelte'
   import getTxStream from '../controllers/TxStream.js'
-  import { darkMode, serverConnected, serverDelay, txQueueLength, txCount, frameRate, blockVisible, currentBlock } from '../stores.js'
+  import { settings, serverConnected, serverDelay, txQueueLength, txCount, frameRate, blockVisible, currentBlock } from '../stores.js'
   import BitcoinBlock from '../models/BitcoinBlock.js'
   import BlockInfo from '../components/BlockInfo.svelte'
+  import Settings from '../components/Settings.svelte'
   import config from '../config.js'
 
   let width = window.innerWidth - 20
@@ -77,11 +78,7 @@
     txController.simulateDumpTx(200)
   }
 
-  function toggleDark () {
-    $darkMode = !$darkMode
-  }
-
-  $: connectionColor = ($serverConnected && $serverDelay < 5000) ? ($serverDelay < 500 ? 'green' : 'amber') : 'red'
+  $: connectionColor = ($serverConnected && $serverDelay < 5000) ? ($serverDelay < 500 ? 'good' : 'ok') : 'bad'
   $: connectionTitle = ($serverConnected && $serverDelay < 5000) ? ($serverDelay < 500 ? 'Streaming live transactions' : 'Unstable connection') : 'Disconnected'
   $: {
     if (lastFrameUpdate + 250 < Date.now()) {
@@ -89,7 +86,7 @@
       lastFrameUpdate = Date.now()
     }
   }
-  $: frameRateColor = $frameRate > 40 ? 'green' : ($frameRate > 20 ? 'amber' : 'red')
+  $: frameRateColor = $frameRate > 40 ? 'good' : ($frameRate > 20 ? 'ok' : 'bad')
 
 	const debounce = v => {
 		clearTimeout(timer);
@@ -166,28 +163,28 @@
       height: 10px;
       border-radius: 5px;
 
-      &.red {
-        background: red;
+      &.bad {
+        background: var(--palette-bad);
       }
-      &.amber {
-        background: yellow;
+      &.ok {
+        background: var(--palette-ok);
       }
-      &.green {
-        background: greenyellow;
+      &.good {
+        background: var(--palette-good);
       }
     }
 
     .stat-counter {
       margin-top: 5px;
 
-      &.red {
-        color: red;
+      &.bad {
+        color: var(--palette-bad);
       }
-      &.amber {
-        color: yellow;
+      &.ok {
+        color: var(--palette-ok);
       }
-      &.green {
-        color: greenyellow;
+      &.good {
+        color: var(--palette-good);
       }
     }
   }
@@ -205,7 +202,7 @@
 
 <svelte:window on:resize={resize} />
 
-<div class="tx-area" class:light-mode={!$darkMode}>
+<div class="tx-area" class:light-mode={!$settings.darkMode}>
   <div class="canvas-wrapper">
     <TxRender controller={txController} />
 
@@ -228,7 +225,6 @@
       <button on:click={() => fakeTx(100000000)}>1BTC</button> -->
       <button on:click={fakeTxs}>TXNS</button>
       <button on:click={fakeBlock}>BLOCK</button>
-      <!-- <button on:click={toggleDark}>{$darkMode ? 'LIGHT' : 'DARK' }</button> -->
     </div>
   {/if}
   <div class="status-bar right">
@@ -239,9 +235,11 @@
       <span class="stat-counter {connectionColor}">{ $txCount }</span>
       {/if}
   </div>
-  {#if config.fps }
+  {#if $settings.showFPS }
     <div class="status-bar left">
       <span class="stat-counter {frameRateColor}">{ frameRateLabel }</span>
     </div>
   {/if}
+
+  <Settings />
 </div>

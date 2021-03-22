@@ -300,3 +300,9 @@ export const txCount = createCounter()
 export const frameRate = writable(null)
 export const blockVisible = writable(false)
 export const currentBlock = writable(null)
+
+export const settingsOpen = writable(false)
+export const settings = writable({
+	showFPS: false,
+	darkMode: true
+})
