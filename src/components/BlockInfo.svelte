@@ -27,17 +27,18 @@
     right: 0;
 
     color: var(--palette-x);
-    font-size: 12px;
+    font-size: 14pt;
 
     .data-row {
       display: flex;
       flex-direction: row;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       justify-content: space-between;
     }
 
     .data-field {
-      margin: 1px;
+      margin: 1px 5px;
+      white-space: nowrap;
     }
   }
 </style>

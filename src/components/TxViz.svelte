@@ -3,7 +3,7 @@
   import TxController from '../controllers/TxController.js'
   import TxRender from './TxRender.svelte'
   import getTxStream from '../controllers/TxStream.js'
-  import { darkMode, serverConnected, serverDelay, txQueueLength, txCount } from '../stores.js'
+  import { darkMode, serverConnected, serverDelay, txQueueLength, txCount, frameRate } from '../stores.js'
   import BitcoinBlock from '../models/BitcoinBlock.js'
   import BlockInfo from '../components/BlockInfo.svelte'
   import config from '../config.js'
@@ -13,6 +13,9 @@
   let txController
   let blockCount = 0
   let running = false
+
+  let lastFrameUpdate = 0
+  let frameRateLabel = ''
 
   let currentBlock = null
 
@@ -87,6 +90,20 @@
 
   $: connectionColor = $serverConnected ? ($serverDelay < 500 ? 'green' : 'amber') : 'red'
   $: connectionTitle = $serverConnected ? ($serverDelay < 500 ? 'Receiving live transactions' : 'Unstable connection') : 'No connection'
+  $: {
+    if (lastFrameUpdate + 250 < Date.now()) {
+      frameRateLabel = Number($frameRate).toFixed(1) + ' FPS'
+      lastFrameUpdate = Date.now()
+    }
+  }
+  $: frameRateColor = $frameRate > 40 ? 'green' : ($frameRate > 20 ? 'amber' : 'red')
+
+	const debounce = v => {
+		clearTimeout(timer);
+		timer = setTimeout(() => {
+			val = v;
+		}, 750);
+	}
 </script>
 
 <style type="text/scss">
@@ -137,11 +154,18 @@
   .status-bar {
     position: absolute;
     top: 20px;
-    right: 20px;
     display: flex;
     flex-direction: column;
     align-items: flex-end;
     justify-content: flex-end;
+
+    &.right {
+      right: 20px;
+    }
+
+    &.left {
+      left: 20px
+    }
 
     .status-light {
       display: block;
@@ -214,11 +238,16 @@
       <!-- <button on:click={toggleDark}>{$darkMode ? 'LIGHT' : 'DARK' }</button> -->
     </div>
   {/if}
-  <div class="status-bar">
+  <div class="status-bar right">
     <div class="status-light {connectionColor}" title={connectionTitle}></div>
     {#if config.debug}
       <span class="stat-counter {connectionColor}">{ $txQueueLength }</span>
       <span class="stat-counter {connectionColor}">{ $txCount }</span>
       {/if}
   </div>
+  {#if config.fps }
+    <div class="status-bar left">
+      <span class="stat-counter {frameRateColor}">{ frameRateLabel }</span>
+    </div>
+  {/if}
 </div>

@@ -5,7 +5,7 @@
   import TxSprite from '../models/TxSprite.js'
   import { interpolateHcl } from 'd3-interpolate'
   import { color } from 'd3-color'
-  import { darkMode } from '../stores.js'
+  import { darkMode, frameRate } from '../stores.js'
   import config from '../config.js'
 
   let canvas
@@ -13,11 +13,17 @@
   let shaderProgram
   let aspectRatio
   let sceneScale = [1.0, 1.0]
-  let lastTime = 0.0
   let pointArray
   let debugPointArray
 
+  let lastTime = Date.now()
+  let rawFrameRate = 0
+
   const baseTime = Date.now()
+
+  const nullPointArray = new Float32Array()
+  // const staticPointArray = new Float32Array(JSON.parse("[19.500000000000114,19.500000000000114,1664,0.0006666666666666666,591.8000000000001,28.000000000000018,1664,0.0006666666666666666,0,0,1664,0.000033333333333333335,0,1,1664,0.000033333333333333335,1,1,1664,0.0006666666666666666,27.100000000000115,27.100000000000115,1664,0.0006666666666666666,599.4,35.600000000000016,1664,0.0006666666666666666,0,0,1664,0.000033333333333333335,0,1,1664,0.000033333333333333335,1,1,1664,0.0006666666666666666,27.100000000000115,27.100000000000115,1664,0.0006666666666666666,591.8000000000001,28.000000000000018,1664,0.0006666666666666666,0,0,1664,0.000033333333333333335,0,1,1664,0.000033333333333333335,1,1,1664,0.0006666666666666666,19.500000000000114,19.500000000000114,1664,0.0006666666666666666,591.8000000000001,28.000000000000018,1664,0.0006666666666666666,0,0,1664,0.000033333333333333335,0,1,1664,0.000033333333333333335,1,1,1664,0.0006666666666666666,27.100000000000115,27.100000000000115,1664,0.0006666666666666666,599.4,35.600000000000016,1664,0.0006666666666666666,0,0,1664,0.000033333333333333335,0,1,1664,0.000033333333333333335,1,1,1664,0.0006666666666666666,19.500000000000114,19.500000000000114,1664,0.0006666666666666666,599.4,35.600000000000016,1664,0.0006666666666666666,0,0,1664,0.000033333333333333335,0,1,1664,0.000033333333333333335,1,1,1664,0.0006666666666666666]"
+  // ))
 
   // Props
   export let controller
@@ -56,6 +62,7 @@
     var rect = canvas.parentNode.getBoundingClientRect()
     canvas.width = rect.width
     canvas.height = rect.height
+    if (gl) gl.viewport(0, 0, canvas.width, canvas.height)
   }
 
   function getTxPointArray () {
@@ -110,12 +117,11 @@
   }
 
   function run () {
-    /* RESET DRAWING AREA */
-    gl.viewport(0, 0, canvas.width, canvas.height)
-    gl.clearColor(0.0, 0.0, 0.0, 0.0)
-    gl.clear(gl.COLOR_BUFFER_BIT)
+    // /* RESET DRAWING AREA */
 
     /* LOAD VERTEX DATA */
+    // pointArray = nullPointArray //getTxPointArray()
+    // pointArray = staticPointArray //getTxPointArray()
     pointArray = getTxPointArray()
     if (config.layoutHints) {
       debugPointArray = getDebugTxPointArray()
@@ -124,11 +130,6 @@
       combinedArray.set(debugPointArray, pointArray.length)
       pointArray = combinedArray
     }
-    const glBuffer = gl.createBuffer()
-    gl.bindBuffer(gl.ARRAY_BUFFER, glBuffer)
-    if (pointArray.length) {
-      gl.bufferData(gl.ARRAY_BUFFER, pointArray, gl.DYNAMIC_DRAW)
-    }
 
     /* SET UP SHADER UNIFORMS */
     // screen dimensions
@@ -136,16 +137,10 @@
     // frame timestamp
     const now = Date.now() - baseTime
     gl.uniform1f(gl.getUniformLocation(shaderProgram, 'now'), now)
-    // gl.uniform1f(gl.getUniformLocation(shaderProgram, 'opacityTarget'), $darkMode ? 0.1 : 0.4)
-    // Color mapping textures
-    gl.activeTexture(gl.TEXTURE0)
-    gl.bindTexture(gl.TEXTURE_2D, colorTexture)
     gl.uniform1i(gl.getUniformLocation(shaderProgram, 'colorTexture'), 0);
 
     /* SET UP SHADER ATTRIBUTES */
     Object.keys(attribs).forEach((key, i) => {
-      attribs[key].pointer = gl.getAttribLocation(shaderProgram, key)
-      gl.enableVertexAttribArray(attribs[key].pointer);
       gl.vertexAttribPointer(attribs[key].pointer,
           attribs[key].count,  // number of primitives in this attribute
           gl[attribs[key].type],  // type of primitive in this attribute (e.g. gl.FLOAT)
@@ -154,16 +149,20 @@
           attribs[key].offset);  // offset of the first value
     })
 
-    /* DRAW */
     if (pointArray.length) {
+      gl.bufferData(gl.ARRAY_BUFFER, pointArray, gl.DYNAMIC_DRAW)
       gl.drawArrays(gl.TRIANGLES, 0, pointArray.length / TxSprite.vertexSize)
     }
 
+    const frameTime = now - lastTime
+    rawFrameRate = (rawFrameRate * 0.8) + (0.2 * (1 / (frameTime / 1000)))
+    frameRate.set(rawFrameRate)
+    lastTime = now
+
     /* LOOP */
-    window.requestAnimationFrame(currentTime => {
-      lastTime = currentTime
-      if (running) run()
-    })
+    if (running) {
+      window.requestAnimationFrame(run)
+    }
   }
 
   // Creates a width x 1 pixel texture representing a colour gradient
@@ -210,6 +209,7 @@
     resizeCanvas()
     gl = canvas.getContext('webgl')
 
+    gl.viewport(0, 0, canvas.width, canvas.height)
     gl.clearColor(0.0, 0.0, 0.0, 0.0)
     gl.clear(gl.COLOR_BUFFER_BIT)
 
@@ -233,6 +233,20 @@
     gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
     colorTexture = loadColorTexture(gl, '#f7941d', 'rgb(0%,100%,80%)', 500);
+
+    const glBuffer = gl.createBuffer()
+    gl.bindBuffer(gl.ARRAY_BUFFER, glBuffer)
+
+    /* SET UP SHADER UNIFORMS */
+    // Color mapping textures
+    gl.activeTexture(gl.TEXTURE0)
+    gl.bindTexture(gl.TEXTURE_2D, colorTexture)
+
+    /* SET UP SHADER ATTRIBUTES */
+    Object.keys(attribs).forEach((key, i) => {
+      attribs[key].pointer = gl.getAttribLocation(shaderProgram, key)
+      gl.enableVertexAttribArray(attribs[key].pointer);
+    })
 
     running = true
 
