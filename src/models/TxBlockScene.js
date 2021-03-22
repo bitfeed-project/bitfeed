@@ -5,10 +5,11 @@ export default class TxBlockScene extends TxMondrianPoolScene {
     super({ width, height, unit, padding, layer, controller })
     this.heightLimit = null
     this.expired = false
-    this.layedOut = false
+    this.laidOut = false
     this.blockId = blockId
     this.initialised = true
     this.inverted = true
+    this.hidden = false
   }
 
   resize ({ width = this.width, height = this.height }) {
@@ -75,7 +76,7 @@ export default class TxBlockScene extends TxMondrianPoolScene {
           alpha: 1
         }
       },
-      duration: 1500,
+      duration: this.laidOut ? 1000 : 1500,
       delay: 0,
       state: 'block'
     })
@@ -121,7 +122,7 @@ export default class TxBlockScene extends TxMondrianPoolScene {
     this.prepareTxOnScreen(tx, pixelPosition)
   }
 
-  expireTx (tx) {
+  hideTx (tx) {
     const pixelPosition = this.pixelsToScreen(tx.getPixelPosition())
     this.updateTx(tx, {
       display: {
@@ -152,6 +153,13 @@ export default class TxBlockScene extends TxMondrianPoolScene {
     }
   }
 
+  layoutAll (args) {
+    if (!this.hidden) {
+      super.layoutAll(args)
+      this.laidOut = true
+    }
+  }
+
   initialLayout () {
     this.prepareAll()
     setTimeout(() => {
@@ -159,19 +167,23 @@ export default class TxBlockScene extends TxMondrianPoolScene {
     }, 3000)
   }
 
-  expire () {
-    this.expired = true
+  hide () {
+    this.hidden = true
     const ids = this.getActiveTxList()
     for (let i = 0; i < ids.length; i++) {
-      this.expireTx(this.txs[ids[i]])
+      this.hideTx(this.txs[ids[i]])
     }
+  }
+
+  expire () {
+    this.expired = true
+    this.hide()
     setTimeout(() => {
       const txIds = this.getTxList()
       for (let i = 0; i < txIds.length; i++) {
         if (this.txs[txIds[i]]) this.controller.destroyTx(txIds[i])
       }
       this.layout.destroy()
-      this.controller.destroyBlock(this.blockId)
     }, 3000)
   }
 }

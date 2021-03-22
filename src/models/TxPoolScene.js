@@ -15,8 +15,6 @@ export default class TxPoolScene {
     this.inverted = false
 
     this.scene = {
-      width: width,
-      height: height,
       count: 0,
       scroll: 0,
       offset: {
@@ -29,8 +27,6 @@ export default class TxPoolScene {
     this.txs = {}
     this.hiddenTxs = {}
 
-    this.heightLimit =  height / 4
-
     this.scrollRateLimitTimer = null
     this.initialised = true
 
@@ -40,6 +36,7 @@ export default class TxPoolScene {
   resize ({ width = this.width, height = this.height }) {
     this.width = width
     this.height = height
+    this.heightLimit =  height / 4
     this.unitWidth = Math.floor(Math.max(4, width / 250))
     this.unitPadding = Math.floor(Math.max(1, width / 1000))
     this.gridSize = this.unitWidth + (this.unitPadding * 2)

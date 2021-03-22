@@ -5,7 +5,7 @@ import BitcoinTx from '../models/BitcoinTx.js'
 import BitcoinBlock from '../models/BitcoinBlock.js'
 import TxSprite from '../models/TxSprite.js'
 import { FastVertexArray } from '../utils/memory.js'
-import { txQueueLength, txCount } from '../stores.js'
+import { txQueueLength, txCount, blockVisible, currentBlock } from '../stores.js'
 import config from "../config.js"
 
 export default class TxController {
@@ -14,8 +14,8 @@ export default class TxController {
     this.debugVertexArray = new FastVertexArray(1024, TxSprite.dataSize)
     this.txs = {}
     this.expiredTxs = {}
-    this.pool = new TxMondrianPoolScene({ width, height, layer: 0.0, controller: this })
-    this.blocks = {}
+    this.poolScene = new TxMondrianPoolScene({ width, height, layer: 0.0, controller: this })
+    this.blockScene = null
     this.clearBlockTimeout = null
     this.txDelay = 0 //config.txDelay
     this.maxTxDelay = config.txDelay
@@ -37,13 +37,16 @@ export default class TxController {
   }
 
   getScenes () {
-    return [this.pool, ...Object.values(this.blocks)]
+    if (this.blockScene) return [this.poolScene, this.blockScene]
+    else return [this.poolScene]
   }
 
   resize ({ width, height }) {
-    this.getScenes().forEach(scene => {
-      scene.layoutAll({ width, height })
-    })
+    this.poolScene.layoutAll({ width, height })
+    if (this.blockScene) {
+      const blockSize = Math.min(window.innerWidth * 0.75, window.innerHeight / 2)
+      this.blockScene.layoutAll({ width: blockSize, height: blockSize })
+    }
   }
 
   addTx (txData) {
@@ -77,7 +80,7 @@ export default class TxController {
             delete this.pendingMap[tx.id]
             txQueueLength.decrement()
             this.txs[tx.id] = tx
-            this.pool.insert(this.txs[tx.id])
+            this.poolScene.insert(this.txs[tx.id])
           } else {
             done = true
             delay = 2001 - timeSince
@@ -104,19 +107,17 @@ export default class TxController {
 
     this.expiredTxs = {}
 
-    Object.keys(this.blocks).forEach(blockId => {
-      if (!this.blocks[blockId].expired) this.clearBlock(blockId)
-    })
+    this.clearBlock()
 
     const blockSize = Math.min(window.innerWidth * 0.75, window.innerHeight / 2)
-    this.blocks[block.id] = new TxBlockScene({ width: blockSize, height: blockSize, layer: 1.0, blockId: block.id, controller: this })
+    this.blockScene = new TxBlockScene({ width: blockSize, height: blockSize, layer: 1.0, blockId: block.id, controller: this })
     let knownCount = 0
     let unknownCount = 0
     for (let i = 0; i < block.txns.length; i++) {
-      if (this.pool.remove(block.txns[i].id)) {
+      if (this.poolScene.remove(block.txns[i].id)) {
         knownCount++
         this.txs[block.txns[i].id].setBlock(block.id)
-        this.blocks[block.id].insert(this.txs[block.txns[i].id], false)
+        this.blockScene.insert(this.txs[block.txns[i].id], false)
       } else if (this.pendingMap[block.txns[i].id]) {
         knownCount++
         const tx = this.pendingMap[tx.id]
@@ -125,7 +126,7 @@ export default class TxController {
         delete this.pendingMap[tx.id]
         tx.setBlock(block.id)
         this.txs[tx.id] = tx
-        this.blocks[block.id].insert(tx, false)
+        this.blockScene.insert(tx, false)
       } else {
         unknownCount++
         const tx = new BitcoinTx({
@@ -133,15 +134,16 @@ export default class TxController {
           block: block.id
         }, this.vertexArray)
         this.txs[tx.id] = tx
-        this.blocks[block.id].insert(tx, false)
+        this.blockScene.insert(tx, false)
       }
       this.expiredTxs[block.txns[i].id] = true
     }
     console.log(`New block with ${knownCount} known transactions and ${unknownCount} unknown transactions`)
-    this.blocks[block.id].initialLayout()
-    setTimeout(() => { this.pool.layoutAll() }, 4000)
+    this.blockScene.initialLayout()
+    setTimeout(() => { this.poolScene.layoutAll() }, 4000)
 
-    this.clearBlockTimeout = setTimeout(() => { this.clearBlock(block.id) }, config.blockTimeout)
+    blockVisible.set(true)
+    currentBlock.set(block)
 
     return block
   }
@@ -164,7 +166,7 @@ export default class TxController {
       }
     })
     // const simulatedTxns = []
-    Object.values(this.pool.txs).forEach(tx => {
+    Object.values(this.poolScene.txs).forEach(tx => {
       if (Math.random() < 0.5) {
         simulatedTxns.push({
           version: tx.version,
@@ -204,10 +206,18 @@ export default class TxController {
     }
   }
 
-  clearBlock (id) {
-    if (this.blocks[id]) {
-      this.blocks[id].expire()
+  hideBlock () {
+    if (this.blockScene) {
+      this.blockScene.hide()
+      blockVisible.set(false)
     }
+  }
+
+  clearBlock () {
+    if (this.blockScene) {
+      this.blockScene.expire()
+    }
+    currentBlock.set(null)
   }
 
   destroyTx (id) {
@@ -216,9 +226,5 @@ export default class TxController {
     })
     if (this.txs[id]) this.txs[id].destroy()
     delete this.txs[id]
-  }
-
-  destroyBlock (id) {
-    if (this.blocks) delete this.blocks[id]
   }
 }

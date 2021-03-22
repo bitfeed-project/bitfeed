@@ -3,7 +3,7 @@
   import TxController from '../controllers/TxController.js'
   import TxRender from './TxRender.svelte'
   import getTxStream from '../controllers/TxStream.js'
-  import { darkMode, serverConnected, serverDelay, txQueueLength, txCount, frameRate } from '../stores.js'
+  import { darkMode, serverConnected, serverDelay, txQueueLength, txCount, frameRate, blockVisible, currentBlock } from '../stores.js'
   import BitcoinBlock from '../models/BitcoinBlock.js'
   import BlockInfo from '../components/BlockInfo.svelte'
   import config from '../config.js'
@@ -17,8 +17,6 @@
   let lastFrameUpdate = 0
   let frameRateLabel = ''
 
-  let currentBlock = null
-
   let txStream
   if (!config.nofeed) txStream = getTxStream()
 
@@ -30,10 +28,7 @@
         txController.addTx(tx)
       })
       txStream.subscribe('block', block => {
-        currentBlock = txController.addBlock(block)
-        setTimeout(() => {
-          if (block.id === currentBlock.id) currentBlock = null
-        }, config.blockTimeout)
+        txController.addBlock(block)
       })
     }
   })
@@ -47,12 +42,14 @@
     })
   }
 
+  function hideBlock () {
+    if (txController) {
+      txController.hideBlock()
+    }
+  }
+
   function fakeBlock () {
     const block = txController.simulateBlock()
-    currentBlock = block
-    setTimeout(() => {
-      if (block.id === currentBlock.id) currentBlock = null
-    }, config.blockTimeout + 2500)
     // txController.addBlock(new BitcoinBlock({
     //   version: 'fake',
     //   id: Math.random(),
@@ -214,7 +211,7 @@
 
     <div class="block-area-wrapper">
       <div class="block-area">
-        <BlockInfo block={currentBlock} />
+        <BlockInfo block={$currentBlock} visible={$blockVisible} on:hideBlock={hideBlock} />
       </div>
     </div>
   </div>
