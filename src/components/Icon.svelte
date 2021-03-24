@@ -6,10 +6,6 @@ export let color = "white"
 
 <style type="text/scss">
 .svg-icon {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
   :global(svg) {
     height: 0.9em;
   }

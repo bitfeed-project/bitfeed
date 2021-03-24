@@ -18,9 +18,12 @@ export default class BitcoinTx {
     this.witnesses = witnesses
     this.time = time
 
-    if (config.donationAddress && this.outputs) {
+    if (config.donationHash && this.outputs) {
       this.outputs.forEach(output => {
-        if (output.address === config.donationAddress) this.highlight = true
+        if (output.script_pub_key.includes(config.donationHash)) {
+          console.log('highlight!', this)
+          this.highlight = true
+        }
       })
     }
 
