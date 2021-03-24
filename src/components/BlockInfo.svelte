@@ -32,11 +32,13 @@
   .block-info {
     position: absolute;
     bottom: 100%;
-    left: 0;
-    right: 0;
+    left: 50%;
+    transform: translateX(-50%);
 
     color: var(--palette-x);
     font-size: 14pt;
+
+    pointer-events: all;
 
     .data-row {
       display: flex;

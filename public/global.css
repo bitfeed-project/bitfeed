@@ -1,109 +1,110 @@
 :root {
-	--dark-a: #102226;
-	--dark-b: #1d2f33;
-	--dark-c: #2a3c40;
-	--dark-d: #374a4f;
+  --dark-a: #102226;
+  --dark-b: #1d2f33;
+  --dark-c: #2a3c40;
+  --dark-d: #374a4f;
 
-	--dark-good: greenyellow;
-	--dark-ok: yellow;
-	--dark-bad: red;
+  --dark-good: greenyellow;
+  --dark-ok: yellow;
+  --dark-bad: red;
 
-	/* --light-a: white;
-	--light-b: #cbe1e5;
-	--light-c: #bfd1d5;
-	--light-d: #7bbdcd; */
-	--light-a: white;
-	--light-b: #e7fffa;
-	--light-c: #cffff5;
-	--light-d: #b7fff1;
-	--light-e: #9fffec;
+  /* --light-a: white;
+  --light-b: #cbe1e5;
+  --light-c: #bfd1d5;
+  --light-d: #7bbdcd; */
+  --light-a: white;
+  --light-b: #e7fffa;
+  --light-c: #cffff5;
+  --light-d: #b7fff1;
+  --light-e: #9fffec;
 
-	--light-good: limegreen;
-	--light-ok: orange;
-	--light-bad: red;
+  --light-good: limegreen;
+  --light-ok: orange;
+  --light-bad: red;
 
-	--bold: #00ffcc;
+  --bold-a: #f7941d;
+  --bold-b: #00ffcc;
 
-	--palette-a: var(--dark-a);
-	--palette-b: var(--dark-b);
-	--palette-c: var(--dark-c);
-	--palette-d: var(--dark-d);
-	--palette-x: var(--light-a);
-	--palette-good: var(--dark-good);
-	--palette-ok: var(--dark-ok);
-	--palette-bad: var(--dark-bad);
+  --palette-a: var(--dark-a);
+  --palette-b: var(--dark-b);
+  --palette-c: var(--dark-c);
+  --palette-d: var(--dark-d);
+  --palette-x: var(--light-a);
+  --palette-good: var(--dark-good);
+  --palette-ok: var(--dark-ok);
+  --palette-bad: var(--dark-bad);
 }
 
 .light-mode {
-	--palette-a: var(--light-b);
-	--palette-b: var(--light-c);
-	--palette-c: var(--light-d);
-	--palette-d: var(--light-d);
-	--palette-x: var(--dark-a);
-	--palette-good: var(--light-good);
-	--palette-ok: var(--light-ok);
-	--palette-bad: var(--light-bad);
+  --palette-a: var(--light-b);
+  --palette-b: var(--light-c);
+  --palette-c: var(--light-d);
+  --palette-d: var(--light-d);
+  --palette-x: var(--dark-a);
+  --palette-good: var(--light-good);
+  --palette-ok: var(--light-ok);
+  --palette-bad: var(--light-bad);
 }
 
 html, body {
-	position: relative;
-	width: 100%;
-	height: 100%;
+  position: relative;
+  width: 100%;
+  height: 100%;
 }
 
 body {
-	color: #333;
-	margin: 0;
-	box-sizing: border-box;
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  color: #333;
+  margin: 0;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 }
 
 a {
-	color: rgb(0,100,200);
-	text-decoration: none;
+  color: rgb(0,100,200);
+  text-decoration: none;
 }
 
 a:hover {
-	text-decoration: underline;
+  text-decoration: underline;
 }
 
 a:visited {
-	color: rgb(0,80,160);
+  color: rgb(0,80,160);
 }
 
 label {
-	display: block;
+  display: block;
 }
 
 input, button, select, textarea {
-	font-family: inherit;
-	font-size: inherit;
-	-webkit-padding: 0.4em 0;
-	padding: 0.4em;
-	margin: 0 0 0.5em 0;
-	box-sizing: border-box;
-	border: 1px solid #ccc;
-	border-radius: 2px;
+  font-family: inherit;
+  font-size: inherit;
+  -webkit-padding: 0.4em 0;
+  padding: 0.4em;
+  margin: 0 0 0.5em 0;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 2px;
 }
 
 input:disabled {
-	color: #ccc;
+  color: #ccc;
 }
 
 button {
-	color: #333;
-	background-color: #f4f4f4;
-	outline: none;
+  color: #333;
+  background-color: #f4f4f4;
+  outline: none;
 }
 
 button:disabled {
-	color: #999;
+  color: #999;
 }
 
 button:not(:disabled):active {
-	background-color: #ddd;
+  background-color: #ddd;
 }
 
 button:focus {
-	border-color: #666;
+  border-color: #666;
 }

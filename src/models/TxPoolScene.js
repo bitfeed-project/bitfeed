@@ -171,7 +171,7 @@ export default class TxPoolScene {
             index: 1
           }
         },
-        duration: 30000,
+        duration: 60000,
         delay: 0
       })
     } else {

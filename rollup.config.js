@@ -8,6 +8,7 @@ import css from 'rollup-plugin-css-only';
 import sveltePreprocess from 'svelte-preprocess';
 import { config as configDotenv } from 'dotenv';
 import replace from '@rollup/plugin-replace';
+import inlineSvg from 'rollup-plugin-inline-svg';
 
 configDotenv();
 
@@ -45,6 +46,11 @@ export default {
 	plugins: [
 		replace({
 			'ENVIRONMENT': JSON.stringify(process.env.ENV)
+		}),
+		inlineSvg({
+			removeTags: false,
+			removingTags: ['title', 'desc', 'defs', 'style'],
+			removeSVGTagAttrs: true
 		}),
 		svelte({
 			compilerOptions: {

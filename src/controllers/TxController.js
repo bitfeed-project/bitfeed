@@ -44,7 +44,7 @@ export default class TxController {
   resize ({ width, height }) {
     this.poolScene.layoutAll({ width, height })
     if (this.blockScene) {
-      const blockSize = Math.min(window.innerWidth * 0.75, window.innerHeight / 2)
+      const blockSize = Math.min(window.innerWidth * 0.75, window.innerHeight / 2.5)
       this.blockScene.layoutAll({ width: blockSize, height: blockSize })
     }
   }
@@ -109,7 +109,7 @@ export default class TxController {
 
     this.clearBlock()
 
-    const blockSize = Math.min(window.innerWidth * 0.75, window.innerHeight / 2)
+    const blockSize = Math.min(window.innerWidth * 0.75, window.innerHeight / 2.5)
     this.blockScene = new TxBlockScene({ width: blockSize, height: blockSize, layer: 1.0, blockId: block.id, controller: this })
     let knownCount = 0
     let unknownCount = 0

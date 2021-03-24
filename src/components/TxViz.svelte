@@ -7,6 +7,7 @@
   import BitcoinBlock from '../models/BitcoinBlock.js'
   import BlockInfo from '../components/BlockInfo.svelte'
   import Settings from '../components/Settings.svelte'
+  import DonationBar from '../components/DonationBar.svelte'
   import config from '../config.js'
 
   let width = window.innerWidth - 20
@@ -118,9 +119,6 @@
     position: relative;
     width: 100%;
     height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
   }
 
   .mempool-size-label {
@@ -139,63 +137,88 @@
     top: 50px;
     left: 0;
     right: 0;
+    pointer-events: none;
+
+    button {
+      pointer-events: all;
+    }
   }
 
-  .status-bar {
+  .top-bar {
     position: absolute;
-    top: 20px;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
     display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    justify-content: flex-end;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
 
-    &.right {
-      right: 20px;
+    .status, .spacer {
+      width: 100px;
     }
 
-    &.left {
-      left: 20px
-    }
+    .status {
+      text-align: left;
+      padding: 5px;
+      flex-shrink: 0;
 
-    .status-light {
-      display: block;
-      width: 10px;
-      height: 10px;
-      border-radius: 5px;
+      .status-light {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 5px;
 
-      &.bad {
-        background: var(--palette-bad);
+        &.bad {
+          background: var(--palette-bad);
+        }
+        &.ok {
+          background: var(--palette-ok);
+        }
+        &.good {
+          background: var(--palette-good);
+        }
       }
-      &.ok {
-        background: var(--palette-ok);
-      }
-      &.good {
-        background: var(--palette-good);
-      }
-    }
 
-    .stat-counter {
-      margin-top: 5px;
+      .stat-counter {
+        margin-top: 5px;
 
-      &.bad {
-        color: var(--palette-bad);
-      }
-      &.ok {
-        color: var(--palette-ok);
-      }
-      &.good {
-        color: var(--palette-good);
+        &.bad {
+          color: var(--palette-bad);
+        }
+        &.ok {
+          color: var(--palette-ok);
+        }
+        &.good {
+          color: var(--palette-good);
+        }
       }
     }
   }
+
+
 
   .block-area-wrapper {
-    position: relative;
-    width: 75vw;
-    max-width: 50vh;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    pointer-events: none;
 
-    .block-area {
-      padding-top: 100%;
+    .spacer {
+      flex: 1;
+    }
+
+    .block-area-outer {
+      position: relative;
+      flex: 0;
+      width: 75vw;
+      max-width: 40vh;
+      margin: auto;
+
+      .block-area {
+        padding-top: 100%;
+      }
     }
   }
 </style>
@@ -207,9 +230,14 @@
     <TxRender controller={txController} />
 
     <div class="block-area-wrapper">
-      <div class="block-area">
-        <BlockInfo block={$currentBlock} visible={$blockVisible} on:hideBlock={hideBlock} />
+      <div class="spacer"></div>
+      <div class="block-area-outer">
+        <div class="block-area">
+          <BlockInfo block={$currentBlock} visible={$blockVisible} on:hideBlock={hideBlock} />
+        </div>
       </div>
+      <div class="spacer"></div>
+      <div class="spacer"></div>
     </div>
   </div>
   {#if config.debug}
@@ -227,19 +255,17 @@
       <button on:click={fakeBlock}>BLOCK</button>
     </div>
   {/if}
-  <div class="status-bar right">
-    <div class="status-light {connectionColor}" title={connectionTitle}></div>
-    {#if config.debug}
-      <span class="stat-counter {connectionColor}">{ $serverDelay } ms</span>
-      <span class="stat-counter {connectionColor}">{ $txQueueLength }</span>
-      <span class="stat-counter {connectionColor}">{ $txCount }</span>
+
+  <div class="top-bar">
+    <div class="status">
+      <div class="status-light {connectionColor}" title={connectionTitle}></div>
+      {#if $settings.showFPS }
+        <span class="stat-counter {frameRateColor}">{ frameRateLabel }</span>
       {/if}
-  </div>
-  {#if $settings.showFPS }
-    <div class="status-bar left">
-      <span class="stat-counter {frameRateColor}">{ frameRateLabel }</span>
     </div>
-  {/if}
+    <DonationBar />
+    <div class="spacer" />
+  </div>
 
   <Settings />
 </div>

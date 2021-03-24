@@ -77,7 +77,7 @@ function getSettingLabel(setting) {
       }
 
       &.toggled-on {
-        background: var(--bold);
+        background: var(--bold-b);
         color: var(--dark-a);
       }
 
