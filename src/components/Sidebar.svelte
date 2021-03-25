@@ -28,7 +28,7 @@ function settings (tab) {
 
 <div class="sidebar">
   <SidebarTab open={$sidebarToggle === 'settings'} on:click={() => {settings('settings')}}>
-    <span slot="tab">
+    <span slot="tab" title="Settings">
       <Icon icon={cogIcon} color="var(--bold-a)" />
     </span>
     <div slot="content">

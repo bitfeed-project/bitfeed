@@ -176,7 +176,7 @@ async function copyAddress () {
       <div class="address-and-copy">
         <span class="address" bind:this={addressElement}>{ config.donationAddress }</span>
         {#if showCopyButton}
-          <button class="copy-button" on:click={copyAddress}>
+          <button class="copy-button" on:click={copyAddress} title="Copy address" alt="Copy address">
             <Icon icon={clipboardIcon} color="var(--palette-x)" />
             {#if copied }
               <span class="copy-notif" transition:fly={{ y: -5 }}>Copied to clipboard!</span>

@@ -2,6 +2,8 @@
   import { fly } from 'svelte/transition'
   import { linear } from 'svelte/easing'
   import { createEventDispatcher } from 'svelte'
+  import Icon from '../components/Icon.svelte'
+  import closeIcon from '../assets/icon/cil-x-circle.svg'
 
 	const dispatch = createEventDispatcher()
 
@@ -54,19 +56,14 @@
       &.close-button {
         width: 1em;
         height: 1em;
-        background: var(--palette-x);
+        background: none;
+        border: none;
         display: flex;
         justify-content: center;
         align-items: center;
         margin: 0;
         padding: 0;
         cursor: pointer;
-
-        .close-x {
-          color: var(--palette-a);
-          padding: 0;
-          margin: 0;
-        }
       }
 
        &:first-child {
@@ -85,7 +82,7 @@
         <!-- <span class="data-field">Hash: { block.id }</span> -->
         <div class="data-row">
           <span class="data-field"><b>Block</b></span>
-          <button class="data-field close-button" on:click={hideBlock}><span class="close-x">X</span></button>
+          <button class="data-field close-button" on:click={hideBlock}><Icon icon={closeIcon} color="var(--palette-x)" /></button>
         </div>
         <div class="data-row">
           <span class="data-field">Mined at { formatTime(block.time) }</span>
