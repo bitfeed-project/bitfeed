@@ -290,7 +290,7 @@
         <div class="block-area">
           <BlockInfo block={$currentBlock} visible={$blockVisible} on:hideBlock={hideBlock} />
         </div>
-        {#if $devSettings.guides }
+        {#if config.dev && config.debug && $devSettings.guides }
           <div class="guide-area" />
         {/if}
       </div>
@@ -316,7 +316,7 @@
 
   <Sidebar />
 
-  {#if $devSettings.guides }
+  {#if config.dev && config.debug && $devSettings.guides }
     <div class="guide-overlay">
       <div class="guide v-half" />
       <div class="guide h-half" />
