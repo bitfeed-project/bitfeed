@@ -45,9 +45,9 @@ async function copyAddress () {
     z-index: 100;
     position: absolute;
     top: 0;
-    width: 500px;
+    width: 32rem;
     min-width: 100px;
-    max-width: calc(100vw - 110px);
+    max-width: calc(100vw - 8.25rem);
     margin: auto;
     transition: width 300ms, max-width 300ms;
 

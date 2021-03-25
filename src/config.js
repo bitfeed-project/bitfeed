@@ -1,6 +1,6 @@
 export default {
   dev: ENVIRONMENT === 'development',
-  debug: true,
+  debug: false,
   layoutHints: false,
   fps: true,
   websocket_path: '/ws/txs',

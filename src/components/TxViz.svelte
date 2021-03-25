@@ -160,12 +160,12 @@
     align-items: flex-start;
 
     .status, .spacer {
-      width: 100px;
+      width: 6.25rem;
     }
 
     .status {
       text-align: left;
-      padding: 5px;
+      padding: 1rem;
       flex-shrink: 0;
 
       .status-light {
