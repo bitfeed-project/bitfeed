@@ -6,8 +6,10 @@ export let color = "white"
 
 <style type="text/scss">
 .svg-icon {
+  line-height: 1em;
   :global(svg) {
-    height: 0.9em;
+    height: 1em;
+    margin-bottom: -16%
   }
 
   &.inline {
@@ -19,6 +21,12 @@ export let color = "white"
 }
 </style>
 
-<span class="svg-icon" class:inline style="fill: {color}; stroke: {color}; color: {color}">
+{#if inline}
+<span class="svg-icon inline" style="fill: {color}; stroke: {color}; color: {color}">
   {@html icon }
 </span>
+{:else}
+<div class="svg-icon" style="fill: {color}; stroke: {color}; color: {color}">
+  {@html icon }
+</div>
+{/if}

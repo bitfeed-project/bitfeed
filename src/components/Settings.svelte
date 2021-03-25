@@ -1,20 +1,23 @@
 <script>
-import { settings, settingsOpen } from '../stores.js'
+import SidebarMenuItem from '../components/SidebarMenuItem.svelte'
+import { settings } from '../stores.js'
 
 function toggle(setting) {
   $settings[setting] = !$settings[setting]
 }
 
-function toggleSettingsMenu () {
-  $settingsOpen = !$settingsOpen
-}
-
 const settingConfig = {
-  showFPS: {
-    label: 'Show FPS?'
+  showNetworkStatus: {
+    label: 'Show Network Status'
   },
   darkMode: {
-    label: 'Dark mode?'
+    label: 'Dark Mode'
+  },
+  showFPS: {
+    label: 'Show FPS'
+  },
+  showDonation: {
+    label: 'Show Donation Info'
   }
 }
 
@@ -25,75 +28,29 @@ function getSettingLabel(setting) {
 </script>
 
 <style type="text/scss">
-  .settings-menu {
-    display: block;
-    position: fixed;
-    top: 100px;
-    left: 100%;
-
-    background: none;
-    border: solid 1px var(--palette-x);
-    border-right: none;
-    border-bottom-left-radius: 5px;
+  .setting {
+    text-align: right;
+    padding: 5px 10px;
     color: var(--palette-x);
+    font-size: 0.8em;
+    cursor: pointer;
+    min-width: 80px;
 
-    transition: transform 300ms;
-
-    &.open {
-      transform: translateX(-100%);
+    &:hover {
+      font-weight: bold;
     }
 
-    .settings-button {
-      display: block;
-      position: absolute;
-      top: -1px;
-      right: 100%;
-      width: 2em;
-      height: 2em;
-
-      background: none;
-      border: solid 1px var(--palette-x);
-      border-right: none;
-      border-top-left-radius: 5px;
-      border-bottom-left-radius: 5px;
-      color: var(--palette-x);
-
-      overflow: hidden;
-
-      cursor: pointer;
+    &.toggled-on {
+      background: var(--bold-b);
+      color: var(--dark-a);
     }
 
-    .setting {
-      text-align: right;
-      padding: 5px 10px;
-      border-bottom: solid 1px var(--palette-x);
-      color: var(--palette-x);
-      font-size: 0.8em;
-      cursor: pointer;
-      min-width: 80px;
-
-      &:hover {
-        font-weight: bold;
-      }
-
-      &.toggled-on {
-        background: var(--bold-b);
-        color: var(--dark-a);
-      }
-
-      &:last-child {
-        border-bottom: none;
-      }
+    &:last-child {
+      border-bottom: none;
     }
   }
 </style>
 
-<div class="settings-menu" class:open={$settingsOpen}>
-  <button class="settings-button" on:click={toggleSettingsMenu}>!!</button>
-
-  {#each Object.keys($settings) as setting (setting) }
-  <div class="setting setting-toggle" class:toggled-on={$settings[setting]} on:click={() => { toggle(setting) }}>
-    { getSettingLabel(setting) }
-  </div>
-  {/each}
-</div>
+{#each Object.keys($settings) as setting (setting) }
+  <SidebarMenuItem active={$settings[setting]} on:click={() => { toggle(setting) }} label={getSettingLabel(setting)} />
+{/each}

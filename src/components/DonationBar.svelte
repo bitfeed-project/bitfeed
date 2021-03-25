@@ -54,8 +54,8 @@ async function copyAddress () {
     .donation-content {
       padding: 5px 5px;
 
-      background: var(--bold-a);
-      color: var(--light-a);
+      background: var(--palette-c);
+      color: var(--palette-x);
 
       border-bottom-left-radius: 5px;
       border-bottom-right-radius: 5px;
@@ -167,17 +167,17 @@ async function copyAddress () {
   }
 </style>
 
-<div class="donation-bar">
+<div class="donation-bar" transition:fly={{ y: -10 }}>
   <div class="donation-content">
     <div class="main-content">
       <span class="coffee-icon">
-        <Icon icon={coffeeIcon} color="var(--light-a)"/>
+        <Icon icon={coffeeIcon} color="var(--bold-a)" inline />
       </span>
       <div class="address-and-copy">
         <span class="address" bind:this={addressElement}>{ config.donationAddress }</span>
         {#if showCopyButton}
           <button class="copy-button" on:click={copyAddress}>
-            <Icon icon={clipboardIcon} color="var(--light-a)" />
+            <Icon icon={clipboardIcon} color="var(--palette-x)" />
             {#if copied }
               <span class="copy-notif" transition:fly={{ y: -5 }}>Copied to clipboard!</span>
             {/if}
@@ -187,7 +187,7 @@ async function copyAddress () {
     </div>
     <div class="expandable-content">
       <p class="donation-info">
-        Thank you! Donations help to keep this site running. Transactions to the donation address should appear highlighted in green.
+        Thank you! Donations help to keep this site running. Transactions to the donation address appear highlighted in green.
       </p>
       <img src="/img/qr.png" alt="" class="address-qr">
     </div>

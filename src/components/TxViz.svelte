@@ -3,10 +3,10 @@
   import TxController from '../controllers/TxController.js'
   import TxRender from './TxRender.svelte'
   import getTxStream from '../controllers/TxStream.js'
-  import { settings, serverConnected, serverDelay, txQueueLength, txCount, frameRate, blockVisible, currentBlock } from '../stores.js'
+  import { settings, serverConnected, serverDelay, txQueueLength, txCount, frameRate, blockVisible, currentBlock, devEvents } from '../stores.js'
   import BitcoinBlock from '../models/BitcoinBlock.js'
   import BlockInfo from '../components/BlockInfo.svelte'
-  import Settings from '../components/Settings.svelte'
+  import Sidebar from '../components/Sidebar.svelte'
   import DonationBar from '../components/DonationBar.svelte'
   import config from '../config.js'
 
@@ -33,6 +33,10 @@
         txController.addBlock(block)
       })
     }
+
+    $devEvents.addOneCallback = fakeTx
+    $devEvents.addManyCallback = fakeTxs
+    $devEvents.addBlockCallback = fakeBlock
   })
 
   function resize () {
@@ -240,32 +244,21 @@
       <div class="spacer"></div>
     </div>
   </div>
-  {#if config.debug}
-    <div class="sim-controls">
-      <button on:click={() => fakeTx()}>TXN</button>
-      <!-- <button on:click={() => fakeTx(10)}>10</button>
-      <button on:click={() => fakeTx(100)}>100</button>
-      <button on:click={() => fakeTx(1000)}>1000</button>
-      <button on:click={() => fakeTx(10000)}>10000</button>
-      <button on:click={() => fakeTx(100000)}>100000</button>
-      <button on:click={() => fakeTx(1000000)}>1000000</button>
-      <button on:click={() => fakeTx(10000000)}>10000000</button>
-      <button on:click={() => fakeTx(100000000)}>1BTC</button> -->
-      <button on:click={fakeTxs}>TXNS</button>
-      <button on:click={fakeBlock}>BLOCK</button>
-    </div>
-  {/if}
 
   <div class="top-bar">
     <div class="status">
-      <div class="status-light {connectionColor}" title={connectionTitle}></div>
+      {#if $settings.showNetworkStatus }
+        <div class="status-light {connectionColor}" title={connectionTitle}></div>
+      {/if}
       {#if $settings.showFPS }
         <span class="stat-counter {frameRateColor}">{ frameRateLabel }</span>
       {/if}
     </div>
-    <DonationBar />
+    {#if $settings.showDonation }
+      <DonationBar />
+    {/if}
     <div class="spacer" />
   </div>
 
-  <Settings />
+  <Sidebar />
 </div>

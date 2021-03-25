@@ -33,6 +33,7 @@
     position: absolute;
     bottom: 100%;
     left: 50%;
+    min-width: 100%;
     transform: translateX(-50%);
 
     color: var(--palette-x);

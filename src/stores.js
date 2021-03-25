@@ -295,6 +295,12 @@ function createCounter () {
 	}
 }
 
+export const devEvents = writable({
+	addOneCallback: null,
+	addManyCallback: null,
+	addBlockCallback: null
+})
+
 export const txQueueLength = createCounter()
 export const txCount = createCounter()
 export const frameRate = writable(null)
@@ -303,6 +309,9 @@ export const currentBlock = writable(null)
 
 export const settingsOpen = writable(false)
 export const settings = writable({
+	darkMode: true,
+	showNetworkStatus: true,
 	showFPS: false,
-	darkMode: true
+	showDonation: true
 })
+export const sidebarToggle = writable(null)
