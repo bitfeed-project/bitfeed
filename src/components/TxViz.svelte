@@ -3,7 +3,7 @@
   import TxController from '../controllers/TxController.js'
   import TxRender from './TxRender.svelte'
   import getTxStream from '../controllers/TxStream.js'
-  import { settings, serverConnected, serverDelay, txQueueLength, txCount, frameRate, blockVisible, currentBlock, devEvents } from '../stores.js'
+  import { settings, serverConnected, serverDelay, txQueueLength, txCount, frameRate, blockVisible, currentBlock, devEvents, devSettings } from '../stores.js'
   import BitcoinBlock from '../models/BitcoinBlock.js'
   import BlockInfo from '../components/BlockInfo.svelte'
   import Sidebar from '../components/Sidebar.svelte'
@@ -223,6 +223,57 @@
       .block-area {
         padding-top: 100%;
       }
+
+      .guide-area {
+        background: #00FF00;
+        opacity: 25%;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+      }
+    }
+  }
+
+  .guide-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+
+    pointer-events: none;
+
+    .guide {
+      position: absolute;
+      background: #00FF00;
+    }
+
+    .v-half {
+      top: 0;
+      bottom: 0;
+      left: calc(50% - 1px);
+      width: 1px;
+      margin: auto;
+    }
+
+    .h-half {
+      top: calc(50% - 1px);
+      left: 0;
+      right: 0;
+      height: 1px;
+      margin: auto;
+    }
+
+    .mempool-height {
+      bottom: 25%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      margin: auto;
     }
   }
 </style>
@@ -239,6 +290,9 @@
         <div class="block-area">
           <BlockInfo block={$currentBlock} visible={$blockVisible} on:hideBlock={hideBlock} />
         </div>
+        {#if $devSettings.guides }
+          <div class="guide-area" />
+        {/if}
       </div>
       <div class="spacer"></div>
       <div class="spacer"></div>
@@ -261,4 +315,13 @@
   </div>
 
   <Sidebar />
+
+  {#if $devSettings.guides }
+    <div class="guide-overlay">
+      <div class="guide v-half" />
+      <div class="guide h-half" />
+      <div class="guide mempool-height" />
+      <div class="area block-area" />
+    </div>
+  {/if}
 </div>

@@ -125,6 +125,7 @@ async function copyAddress () {
           right: 0;
           margin: auto;
           max-width: 100vw;
+          max-height: calc(100vh - 120px);
         }
       }
     }

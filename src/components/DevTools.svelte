@@ -1,6 +1,6 @@
 <script>
 import SidebarMenuItem from '../components/SidebarMenuItem.svelte'
-import { devEvents } from '../stores.js'
+import { devEvents, devSettings } from '../stores.js'
 // import { devSettings } from '../stores.js'
 //
 // function toggle(setting) {
@@ -25,6 +25,12 @@ function addMany () {
 }
 function addBlock () {
   if ($devEvents.addOneCallback) $devEvents.addBlockCallback()
+}
+
+function toggle (setting) {
+  console.log(setting, $devSettings[setting])
+  $devSettings[setting] = !$devSettings[setting]
+  console.log($devSettings[setting])
 }
 
 </script>
@@ -61,3 +67,4 @@ function addBlock () {
 <SidebarMenuItem on:click={addOne} label="Add One" />
 <SidebarMenuItem on:click={addMany} label="Add Many" />
 <SidebarMenuItem on:click={addBlock} label="Add Block" />
+<SidebarMenuItem on:click={() => { toggle('guides')}} active={$devSettings.guides} label="Guides" />

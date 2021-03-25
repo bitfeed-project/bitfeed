@@ -314,4 +314,7 @@ export const settings = writable({
 	showFPS: false,
 	showDonation: true
 })
+export const devSettings = writable({
+	guides: true
+})
 export const sidebarToggle = writable(null)
