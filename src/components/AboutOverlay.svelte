@@ -50,7 +50,7 @@ function onClose () {
       Bitfeed is an attempt to visualise this flow of information.
     </p>
     <p>
-      As new transactions are recieved over the network, they drop into the mempool to await confirmation.
+      As new transactions are recieved by our nodes, they drop into the mempool to await confirmation.
     </p>
     <p>
       Squares representing transactions in the mempool are sized according to total output value,
