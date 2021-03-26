@@ -37,6 +37,8 @@
     $devEvents.addOneCallback = fakeTx
     $devEvents.addManyCallback = fakeTxs
     $devEvents.addBlockCallback = fakeBlock
+
+    if (!$settings.showDonation) $settings.showDonation = true
   })
 
   function resize () {

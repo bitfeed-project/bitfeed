@@ -1,4 +1,5 @@
 import { writable, derived } from 'svelte/store'
+import config from './config.js'
 
 // const COLOR_MAP_TEX1 = 1
 
@@ -308,13 +309,43 @@ export const blockVisible = writable(false)
 export const currentBlock = writable(null)
 
 export const settingsOpen = writable(false)
-export const settings = writable({
+
+function createCachedDict (namespace, defaultValues) {
+	const initial = {
+		...defaultValues
+	}
+
+	console.log('creating cached dict with default values: ', initial)
+	// load from local storage
+	Object.keys(initial).forEach(field => {
+		const val = localStorage.getItem(`${namespace}-${field}`)
+		if (val != null) initial[field] = JSON.parse(val)
+	})
+
+	console.log('loaded cached values: ', initial)
+
+	const { subscribe, set, update } = writable(initial)
+
+	return {
+		subscribe,
+		set: (val) => {
+			set(val)
+			Object.keys(val).forEach(field => {
+				localStorage.setItem(`${namespace}-${field}`, val[field])
+			})
+		}
+	}
+}
+
+export const settings = createCachedDict('settings', {
 	darkMode: true,
 	showNetworkStatus: true,
 	showFPS: false,
 	showDonation: true
 })
-export const devSettings = writable({
-	guides: true
-})
+
+export const devSettings = (config.dev && config.debug) ? createCachedDict('dev-settings', {
+	guides: false
+}) : writable({})
+
 export const sidebarToggle = writable(null)

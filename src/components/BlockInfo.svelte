@@ -118,6 +118,10 @@
         margin-left: 0;
         margin-right: 5px;
 
+        &.title-field {
+          margin-bottom: .5em;
+        }
+
         &.close-button {
           display: none;
         }
@@ -147,7 +151,7 @@
     <div class="block-info" out:fly="{{ y: -50, duration: 2000, easing: linear }}" in:fly="{{ y: 50, duration: 1000, easing: linear, delay: 2000 }}">
         <!-- <span class="data-field">Hash: { block.id }</span> -->
         <div class="data-row">
-          <span class="data-field"><b>Block</b></span>
+          <span class="data-field title-field"><b>Latest Block</b></span>
           <button class="data-field close-button" on:click={hideBlock}><Icon icon={closeIcon} color="var(--palette-x)" /></button>
         </div>
         <div class="data-row">

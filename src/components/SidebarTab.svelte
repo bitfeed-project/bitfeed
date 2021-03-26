@@ -1,5 +1,21 @@
 <script>
+import { tick } from 'svelte'
 export let open = false
+let contentElement
+let contentSlotElement
+
+async function updateContentHeight (isOpen) {
+  if (contentElement && contentSlotElement) {
+    if (isOpen) {
+      contentElement.style.height = `${contentSlotElement.clientHeight}px`
+    } else if (contentElement) {
+      contentElement.style.height = null
+    }
+  }
+}
+
+$: updateContentHeight(open)
+
 </script>
 
 <style type="text/scss">
@@ -22,6 +38,7 @@ export let open = false
       display: block;
       padding: 5px;
       margin: 0;
+      outline: none;
       background: none;
       border: none;
       border-radius: 0;
@@ -37,20 +54,21 @@ export let open = false
       &:hover {
         background: var(--palette-d);
       }
+
+      &::-moz-focus-inner {
+        border: 0;
+        padding: 0;
+      }
     }
 
     .sidebar-content {
-      max-height: calc(1.5rem + 10px);
+      height: calc(1.5rem + 10px);
       overflow: hidden;
-      transition: max-height 300ms;
+      transition: height 300ms;
     }
 
     &.open {
       transform: translateX(-100%);
-
-      .sidebar-content {
-        max-height: 200px;
-      }
     }
   }
 </style>
@@ -62,7 +80,9 @@ export let open = false
     </slot>
   </button>
 
-  <div class="sidebar-content">
-    <slot name="content" />
+  <div class="sidebar-content" bind:this={contentElement}>
+    <div class="inner-content" bind:this={contentSlotElement}>
+      <slot name="content" />
+    </div>
   </div>
 </div>

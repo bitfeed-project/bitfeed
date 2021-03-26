@@ -51,10 +51,11 @@ export default class TxBlockScene extends TxMondrianPoolScene {
       this.updateTx(tx, {
         display: {
           layer: this.layer,
-          position: this.pixelsToScreen({
-            x: ((pixelPosition.x - this.scene.offset.x) / this.width) * window.innerWidth,
-            y: pixelPosition.y - this.height - 20
-          }),
+          position: {
+            x: Math.random() * window.innerWidth,
+            y: -(Math.random() * window.innerWidth) - (this.scene.offset.y * 2) - pixelPosition.r,
+            r: pixelPosition.r
+          },
           color: tx.highlight ? this.highlightColor : {
             palette: 0,
             index: 0,
@@ -87,11 +88,11 @@ export default class TxBlockScene extends TxMondrianPoolScene {
       this.updateTx(tx, {
         display: {
           layer: this.layer,
-          position: this.pixelsToScreen({
-            x: ((pixelPosition.x - this.scene.offset.x) / this.width) * window.innerWidth,
-            y: pixelPosition.y - (window.innerHeight + 20),
+          position: {
+            x: Math.random() * window.innerWidth,
+            y: -(Math.random() * window.innerWidth) - (this.scene.offset.y * 2) - pixelPosition.r,
             r: pixelPosition.r
-          }),
+          },
           color: tx.highlight ? this.highlightColor : {
             palette: 0,
             index: 0,

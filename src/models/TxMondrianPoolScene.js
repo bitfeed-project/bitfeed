@@ -1,5 +1,6 @@
 import TxPoolScene from './TxPoolScene.js'
 import TxSprite from './TxSprite.js'
+import { logTxSize } from '../utils/misc.js'
 import config from '../config.js'
 
 export default class TxMondrianPoolScene extends TxPoolScene {
@@ -19,10 +20,7 @@ export default class TxMondrianPoolScene extends TxPoolScene {
 
   // calculates and returns the size of the tx in multiples of the grid size
   txSize (value) {
-    // console.log('calculating txSize', value)
-    let scale = Math.ceil(Math.log10(value)) - 5
-    // console.log(scale)
-    return Math.min(this.blockWidth || Infinity,Math.max(1, scale)) // bound between 1 and the max displayable size (just in case!)
+    return logTxSize(value, this.blockWidth)
   }
 
   place (id, index, size) {
