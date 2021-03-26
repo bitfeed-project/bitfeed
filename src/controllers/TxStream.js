@@ -33,22 +33,28 @@ class TxStream {
   }
 
   init () {
+    console.log('initialising websocket')
     if (!this.connected && (!this.websocket || this.websocket.readyState === WebSocket.CLOSED)) {
-      try {
-        if (!this.websocket) this.websocket = new WebSocket(this.websocketUri)
-        this.websocket.onopen = (evt) => { this.onopen(evt) }
-        this.websocket.onclose = (evt) => { this.onclose(evt) }
-        this.websocket.onmessage = (evt) => { this.onmessage(evt) }
-        this.websocket.onerror = (evt) => { this.onerror(evt) }
-      } catch (error) {
-        this.reconnect()
+      if (this.websocket) this.disconnect()
+      else {
+        try {
+          this.websocket = new WebSocket(this.websocketUri)
+          this.websocket.onopen = (evt) => { this.onopen(evt) }
+          this.websocket.onclose = (evt) => { this.onclose(evt) }
+          this.websocket.onmessage = (evt) => { this.onmessage(evt) }
+          this.websocket.onerror = (evt) => { this.onerror(evt) }
+        } catch (error) {
+          this.reconnect()
+        }
       }
     } else this.reconnect()
   }
 
   reconnect () {
+    console.log('reconnecting websocket')
     if (this.reconnectBackoff) clearTimeout(this.reconnectBackoff)
     if (!this.connected) {
+      console.log('actually reconnecting')
       if (this.reconnectBackoff < 4000) this.reconnectBackoff *= 2
       this.reconnectTimeout = setTimeout(() => { this.init() }, this.reconnectBackoff)
     }
@@ -79,6 +85,7 @@ class TxStream {
   }
 
   disconnect () {
+    console.log('disconnecting websocket', this.websocket)
     if (this.websocket) {
       this.websocket.onopen = null
       this.websocket.onclose = null
@@ -93,6 +100,7 @@ class TxStream {
   }
 
   onopen (event) {
+    console.log('websocket opened')
     this.setConnected(true)
     this.setDelay(0)
     this.reconnectBackoff = 128
@@ -119,10 +127,11 @@ class TxStream {
   }
 
   onerror (event) {
-    // console.log('websocket error: ', event)
+    console.log('websocket error: ', event)
   }
 
   onclose (event) {
+    console.log('websocket closed')
     this.setConnected(false)
     this.reconnect()
   }
@@ -132,10 +141,12 @@ class TxStream {
   }
 
   close () {
+    console.log('closing websocket: ', this.websocket)
     if (this.websocket) this.websocket.close()
   }
 
   subscribe (type, callback) {
+    console.log('subscribing to bitcoin events')
     window.addEventListener('bitcoin_'+type, (event) => {
       callback(event.detail)
     })

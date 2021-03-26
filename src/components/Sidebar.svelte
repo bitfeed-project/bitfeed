@@ -12,11 +12,15 @@ import questionIcon from '../assets/icon/help-circle.svg'
 import infoIcon from '../assets/icon/info.svg'
 import MempoolLegend from '../components/MempoolLegend.svelte'
 
-import { sidebarToggle } from '../stores.js'
+import { sidebarToggle, overlay } from '../stores.js'
 
 function settings (tab) {
   if ($sidebarToggle === tab) sidebarToggle.set(null)
   else sidebarToggle.set(tab)
+}
+
+function openAbout () {
+  $overlay = 'about'
 }
 
 </script>
@@ -49,6 +53,11 @@ function settings (tab) {
     <div slot="content">
       <MempoolLegend />
     </div>
+  </SidebarTab>
+  <SidebarTab on:click={openAbout}>
+    <span slot="tab">
+      <Icon icon={questionIcon} color="var(--bold-a)" />
+    </span>
   </SidebarTab>
   {#if config.dev && config.debug}
     <SidebarTab open={$sidebarToggle === 'dev'} on:click={() => {settings('dev')}}>

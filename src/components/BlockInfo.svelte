@@ -31,6 +31,25 @@
 </script>
 
 <style type="text/scss">
+  .close-button {
+    width: 1em;
+    height: 1em;
+    background: none;
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+    pointer-events: all;
+    font-size: 1.2em;
+
+    &.standalone {
+      display: none;
+    }
+  }
+
   .block-info {
     position: absolute;
     bottom: 100%;
@@ -67,6 +86,7 @@
         margin: 0;
         padding: 0;
         cursor: pointer;
+        margin-top: -5px;
       }
 
        &:first-child {
@@ -78,30 +98,13 @@
     }
   }
 
-  .close-button {
-    width: 1em;
-    height: 1em;
-    background: none;
-    border: none;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 0;
-    padding: 0;
-    cursor: pointer;
-    pointer-events: all;
-
-    &.standalone {
-      display: none;
-    }
-  }
-
   @media (min-aspect-ratio: 1/1) {
     .block-info {
       bottom: unset;
       left: unset;
       top: 0;
       right: 100%;
+      padding-right: .5rem;
 
       min-width: 0;
       transform: translateX(0);

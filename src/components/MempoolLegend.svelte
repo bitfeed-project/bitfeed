@@ -33,7 +33,6 @@ onMount(() => {
 function calcSizeValues (gridSize, unitWidth, unitPadding) {
   sizeValues.forEach(sizeVal => {
     sizeVal.size = calcSize(sizeVal.val)
-    console.log(`sample size: ${sizeVal.size} ${sizeVal.val}`)
   })
   sizeValues = sizeValues
 }
@@ -43,7 +42,6 @@ $: {
 }
 
 function calcSize (value) {
-  console.log(`Calculating size for ${value}, 2 * ${(logTxSize(value - 1) * gridSize / 2) - unitPadding} = ${logTxSize(value - 1)} * (${gridSize} / 2) - ${unitPadding}`)
   return 2 * ((logTxSize(value - 1) * gridSize / 2) - unitPadding)
 }
 
@@ -143,6 +141,12 @@ function generateColorScale (colorA, colorB) {
           margin-left: .5em
         }
       }
+
+      .color-scale-img {
+        flex-shrink: 1;
+        min-width: 0;
+        flex-grow: 1;
+      }
     }
   }
 </style>
@@ -162,7 +166,7 @@ function generateColorScale (colorA, colorB) {
   <h3 class="subheading">Age in seconds</h3>
   <div class="color-legend">
     <span class="value left">0</span>
-    <img src={colorScale} alt="">
+    <img src={colorScale} alt="" class="color-scale-img">
     <span class="value right">60+</span>
   </div>
 </div>

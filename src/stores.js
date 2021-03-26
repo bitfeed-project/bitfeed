@@ -349,3 +349,6 @@ export const devSettings = (config.dev && config.debug) ? createCachedDict('dev-
 }) : writable({})
 
 export const sidebarToggle = writable(null)
+
+const newVisitor = !localStorage.getItem('seen-welcome-msg')
+export const overlay = writable(newVisitor ? 'about' : null)
