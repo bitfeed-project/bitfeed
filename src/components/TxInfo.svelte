@@ -3,7 +3,7 @@ export let tx
 export let position
 
 let clampedX
-$: clampedX = Math.min(position.x, window.innerWidth - 200)
+$: clampedX = Math.min(position.x, window.innerWidth - 250)
 
 function formatBTC (sats) {
   return `${(sats/100000000).toFixed(8)} BTC`

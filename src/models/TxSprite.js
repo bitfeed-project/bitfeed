@@ -1,6 +1,6 @@
 import { timeOffset } from '../utils/time.js'
 
-const hoverTransitionTime = 200
+const hoverTransitionTime = 300
 
 function interpolate (startState, endState, startTime, duration, now) {
   const progress = Math.max(0, Math.min(1, (now - startTime) / duration))
