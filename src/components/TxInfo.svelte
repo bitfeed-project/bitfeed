@@ -14,7 +14,7 @@ function formatBTC (sats) {
   .tx-info {
     position: fixed;
     z-index: 50;
-    width: 200px;
+    width: 240px;
     display: block;
     transform: translate(-1rem, -120%);
     pointer-events: none;
