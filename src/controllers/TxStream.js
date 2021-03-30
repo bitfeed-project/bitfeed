@@ -84,6 +84,10 @@ class TxStream {
     }
   }
 
+  sendBlockRequest () {
+    this.websocket.send('block')
+  }
+
   disconnect () {
     console.log('disconnecting websocket', this.websocket)
     if (this.websocket) {
@@ -105,6 +109,7 @@ class TxStream {
     this.setDelay(0)
     this.reconnectBackoff = 128
     this.sendHeartbeat()
+    this.sendBlockRequest()
   }
 
   onmessage (event) {
@@ -112,6 +117,8 @@ class TxStream {
 
     if (event.data === 'hb') {
       this.onHeartbeat()
+    } else if (event.data === 'error') {
+      // ignore
     } else {
       const msg = JSON.parse(event.data)
       if (msg && msg.type === 'txn') {

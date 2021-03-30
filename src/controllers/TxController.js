@@ -19,6 +19,7 @@ export default class TxController {
     this.clearBlockTimeout = null
     this.txDelay = 0 //config.txDelay
     this.maxTxDelay = config.txDelay
+    this.knownBlocks = {}
 
     this.selectedTx = null
 
@@ -104,7 +105,13 @@ export default class TxController {
   }
 
   addBlock (blockData) {
+    // prevent duplicate blocks
+    if (!blockData || !blockData.id || this.knownBlocks[blockData.id]) {
+      return
+    }
+
     const block = (blockData && blockData.isBlock) ? blockData : new BitcoinBlock(blockData)
+    this.knownBlocks[block.id] = true
     if (this.clearBlockTimeout) clearTimeout(this.clearBlockTimeout)
 
     this.expiredTxs = {}
