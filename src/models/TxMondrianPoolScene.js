@@ -76,7 +76,7 @@ class MondrianLayout {
 
   clearOffscreen () {
     let done = false
-    const cutoff = -this.context.scene.scroll / this.context.gridSize
+    const cutoff = -(this.context.scene.scroll + this.context.scene.offset.y) / this.context.gridSize
     // console.log(`clearing layout rows. cut off at grid ${cutoff}`)
     while (!done && this.rows.length) {
       const head = this.rows[0]

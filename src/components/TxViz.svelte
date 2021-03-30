@@ -104,7 +104,7 @@
 		}, 750);
 	}
 
-  let mousePosition = null
+  let mousePosition = { x: 0, y: 0 }
 
   function pointerMove (e) {
     mousePosition = {

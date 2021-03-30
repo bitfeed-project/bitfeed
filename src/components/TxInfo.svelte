@@ -3,7 +3,13 @@ export let tx
 export let position
 
 let clampedX
-$: clampedX = Math.min(position.x, window.innerWidth - 250)
+let clampedY
+let above = false
+$: clampedX = Math.max(20, Math.min(position.x - 30, window.innerWidth - 300))
+$: clampedY = Math.max(50, Math.min(position.y, window.innerHeight - 30))
+$: {
+  above = position.y > (window.innerHeight / 2)
+}
 
 function formatBTC (sats) {
   return `${(sats/100000000).toFixed(8)} BTC`
@@ -14,10 +20,11 @@ function formatBTC (sats) {
   .tx-info {
     position: fixed;
     z-index: 50;
-    width: 240px;
+    width: 280px;
     display: block;
-    transform: translate(-1rem, -120%);
     pointer-events: none;
+    box-sizing: border-box;
+    transform: translateY(20px);
 
     background: var(--palette-c);
     color: var(--palette-x);
@@ -25,6 +32,10 @@ function formatBTC (sats) {
 
     font-size: 0.8rem;
     text-align: left;
+
+    &.above {
+      transform: translateY(calc(-100% - 20px));
+    }
 
     .field {
       margin: 0;
@@ -38,7 +49,7 @@ function formatBTC (sats) {
   }
 </style>
 
-<div class="tx-info" style="left: {clampedX}px; top: {position.y}px">
+<div class="tx-info" class:above style="left: {clampedX}px; top: {clampedY}px">
   <p class="field hash">
     TxID: { tx.id }
   </p>
