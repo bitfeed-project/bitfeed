@@ -26,25 +26,32 @@ defstruct [
 ]
 
 def decode(block_binary) do
-  bytes = byte_size(block_binary)
-  hex = Base.encode16(block_binary, case: :lower);
-  {:ok, raw_block} = Bitcoinex.Block.decode(hex)
-  id = Bitcoinex.Block.block_id(block_binary)
-
-  {summarised_txns, total_value} = summarise_txns(raw_block.txns)
-
-  {:ok, %__MODULE__{
-    version: raw_block.version,
-    prev_block: raw_block.prev_block,
-    merkle_root: raw_block.merkle_root,
-    timestamp: raw_block.timestamp,
-    bits: raw_block.bits,
-    bytes: bytes,
-    txn_count: raw_block.txn_count,
-    txns: summarised_txns,
-    value: total_value,
-    id: id
-  }}
+  with  bytes <- byte_size(block_binary),
+        hex <- Base.encode16(block_binary, case: :lower),
+        {:ok, raw_block} <- Bitcoinex.Block.decode(hex),
+        id <- Bitcoinex.Block.block_id(block_binary),
+        {summarised_txns, total_value} <- summarise_txns(raw_block.txns)
+  do
+    {:ok, %__MODULE__{
+      version: raw_block.version,
+      prev_block: raw_block.prev_block,
+      merkle_root: raw_block.merkle_root,
+      timestamp: raw_block.timestamp,
+      bits: raw_block.bits,
+      bytes: bytes,
+      txn_count: raw_block.txn_count,
+      txns: summarised_txns,
+      value: total_value,
+      id: id
+    }}
+  else
+    {:error, reason} ->
+      IO.puts("Error decoding data for BitcoinBlock: #{reason}")
+      :error
+    _ ->
+      IO.puts("Error decoding data for BitcoinBlock: (unknown reason)")
+      :error
+  end
 end
 
 defp summarise_txns(txns) do

@@ -95,7 +95,7 @@ defmodule BitcoinStream.Bridge do
     [_topic, payload, _size] = message;
 
     # keep last block on disk for preloading
-    :ok = File.write("block.dat", payload, [:append, :binary])
+    :ok = File.write("block.dat", payload, [:binary])
 
     case BitcoinBlock.decode(payload) do
       {:ok, block} ->

@@ -15,36 +15,17 @@ defmodule BitcoinStream.SocketHandler do
   end
 
   def load_block() do
-    case File.read("block.dat") do
-      {:ok, blockData } ->
-        case BitcoinBlock.decode(blockData) do
-          {:ok, block} ->
-            IO.puts('file decoded ok')
-            case Jason.encode(%{type: "block", block: block}) do
-              {:ok, payload} ->
-                IO.puts("block encoded ok");
-                { :ok, payload };
-              {:error, reason} ->
-                IO.puts("Error json encoding block: #{reason}");
-                :error
-              _ ->
-                IO.puts("json encoding failed: (unknown reason)")
-                :error
-            end
-          {:error, reason} ->
-            IO.puts("Block decoding failed: #{reason}");
-            :error
-          _ ->
-            IO.puts("Block decoding failed: (unknown reason)")
-            :error
-        end
-
+    with  {:ok, blockData} <- File.read("block.dat"),
+          {:ok, block} <- BitcoinBlock.decode(blockData),
+          {:ok, payload} <- Jason.encode(%{type: "block", block: block})
+          do
+      {:ok, payload}
+    else
       {:error, reason} ->
-        IO.puts("Reading block file failed: #{reason}");
+        IO.puts("Block decoding failed: #{reason}");
         :error
-
       _ ->
-        IO.puts("Reading block file failed (unknown reason)")
+        IO.puts("Block decoding failed: (unknown reason)");
         :error
     end
   end
