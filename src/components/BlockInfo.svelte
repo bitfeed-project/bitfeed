@@ -7,8 +7,27 @@
 
 	const dispatch = createEventDispatcher()
 
+  let prevBlockId
+  let blockId
   export let block
   export let visible
+  const newBlockDelay = 2000
+  let restoring = false
+
+  $: {
+    if (block && visible) {
+      prevBlockId = blockId
+      blockId = block.id
+    }
+  }
+
+  $: {
+    if (visible && block && block.id === prevBlockId) {
+      restoring = true
+    } else {
+      restoring = false
+    }
+  }
 
   function formatTime (time) {
     return (new Date(time)).toLocaleTimeString()
@@ -52,7 +71,7 @@
 
   .block-info {
     position: absolute;
-    bottom: 100%;
+    bottom: calc(100% + 0.5rem);
     left: 50%;
     min-width: 100%;
     transform: translateX(-50%);
@@ -151,7 +170,7 @@
 
 {#each [block] as block (block)}
   {#if block != null && visible }
-    <div class="block-info" out:fly="{{ y: -50, duration: 2000, easing: linear }}" in:fly="{{ y: 50, duration: 1000, easing: linear, delay: 2000 }}">
+    <div class="block-info" out:fly="{{ y: -50, duration: 2000, easing: linear }}" in:fly="{{ y: (restoring ? -50 : 50), duration: (restoring ? 500 : 1000), easing: linear, delay: (restoring ? 0 : newBlockDelay) }}">
         <!-- <span class="data-field">Hash: { block.id }</span> -->
         <div class="data-row">
           <span class="data-field title-field"><b>Latest Block</b></span>
@@ -166,7 +185,7 @@
           <span class="data-field">{ block.txnCount } transactions</span>
         </div>
     </div>
-    <button class="close-button standalone" on:click={hideBlock} out:fly="{{ y: -50, duration: 2000, easing: linear }}" in:fly="{{ y: 50, duration: 1000, easing: linear, delay: 2000 }}" >
+    <button class="close-button standalone" on:click={hideBlock} out:fly="{{ y: -50, duration: 2000, easing: linear }}" in:fly="{{ y: (restoring ? -50 : 50), duration: (restoring ? 500 : 1000), easing: linear, delay: (restoring ? 0 : newBlockDelay) }}" >
       <Icon icon={closeIcon} color="var(--palette-x)" />
     </button>
   {/if}

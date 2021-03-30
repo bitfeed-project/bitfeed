@@ -24,6 +24,14 @@
   let txStream
   if (!config.nofeed) txStream = getTxStream()
 
+  $: {
+    if ($blockVisible) {
+      if (txController) txController.showBlock()
+    } else {
+      if (txController) txController.hideBlock()
+    }
+  }
+
   onMount(() => {
     txController = new TxController({ width, height })
 
@@ -53,9 +61,7 @@
   }
 
   function hideBlock () {
-    if (txController) {
-      txController.hideBlock()
-    }
+    $blockVisible = false
   }
 
   function fakeBlock () {

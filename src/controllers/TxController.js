@@ -144,8 +144,8 @@ export default class TxController {
     this.blockScene.initialLayout()
     setTimeout(() => { this.poolScene.layoutAll() }, 4000)
 
-    blockVisible.set(true)
     currentBlock.set(block)
+    blockVisible.set(true)
 
     return block
   }
@@ -210,8 +210,15 @@ export default class TxController {
 
   hideBlock () {
     if (this.blockScene) {
+      console.log('hide block')
       this.blockScene.hide()
-      blockVisible.set(false)
+    }
+  }
+
+  showBlock () {
+    if (this.blockScene) {
+      console.log('show block')
+      this.blockScene.show()
     }
   }
 
@@ -220,6 +227,7 @@ export default class TxController {
       this.blockScene.expire()
     }
     currentBlock.set(null)
+    if (this.blockVisibleUnsub) this.blockVisibleUnsub()
   }
 
   destroyTx (id) {

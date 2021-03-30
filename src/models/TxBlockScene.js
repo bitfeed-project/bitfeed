@@ -140,6 +140,23 @@ export default class TxBlockScene extends TxMondrianPoolScene {
     })
   }
 
+  showTx (tx) {
+    const pixelPosition = this.pixelsToScreen(tx.getPixelPosition())
+    this.updateTx(tx, {
+      display: {
+        position: {
+          y: pixelPosition.y
+        },
+        color: {
+          alpha: 1
+        }
+      },
+      duration: 500,
+      delay: 0,
+      state: 'fadeout'
+    })
+  }
+
   prepareAll () {
     this.resize({})
     this.scene.count = 0
@@ -173,6 +190,16 @@ export default class TxBlockScene extends TxMondrianPoolScene {
     const ids = this.getActiveTxList()
     for (let i = 0; i < ids.length; i++) {
       this.hideTx(this.txs[ids[i]])
+    }
+  }
+
+  show () {
+    if (this.hidden) {
+      this.hidden = false
+      const ids = this.getActiveTxList()
+      for (let i = 0; i < ids.length; i++) {
+        this.showTx(this.txs[ids[i]])
+      }
     }
   }
 

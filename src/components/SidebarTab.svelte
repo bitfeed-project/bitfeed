@@ -1,6 +1,10 @@
 <script>
 import { tick } from 'svelte'
+import { fly } from 'svelte/transition'
+
 export let open = false
+export let tooltip = null
+
 let contentElement
 let contentSlotElement
 
@@ -73,8 +77,8 @@ $: updateContentHeight(open)
   }
 </style>
 
-<div class="sidebar-tab" class:open={open}>
-  <button class="tab-button" on:click>
+<div class="sidebar-tab" class:open={open} transition:fly={{ x: 30, duration: 1000 }}>
+  <button class="tab-button" on:click title={tooltip}>
     <slot name="tab">
       ??
     </slot>
