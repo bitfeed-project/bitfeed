@@ -15,9 +15,25 @@ uniform sampler2D colorTexture;
 vec3 selectPalette(float index) {
   if (index < 2.0) {
     return vec3(0.97, 0.58, 0.1);
-  } else {
+  } else if (index < 3.0) {
     // return vec3(0.0, 1.0, 0.8);
     return vec3(0.0, 1.0, 0.0);
+  } else {
+    return vec3(1.0, 0.078, 0.576);
+  }
+}
+
+vec3 getColor(float palette, float index) {
+  if (palette <= 1.0) {
+    vec4 texel = texture2D(colorTexture, vec2(index, 0.0));
+    return texel.rgb;
+  } else if (palette <= 2.0) {
+    return vec3(0.97, 0.58, 0.1);
+  } else if (palette <= 3.0) {
+    // return vec3(0.0, 1.0, 0.8);
+    return vec3(0.0, 1.0, 0.0);
+  } else {
+    return vec3(1.0, 0.078, 0.576);
   }
 }
 
@@ -35,13 +51,17 @@ void main() {
 
   float colorIndex = interpolateAttribute(colors);
   float alpha = interpolateAttribute(alphas);
-  if (palettes.y < 1.0) { // texture color
+
+  if (palettes.y < 1.0 && palettes.x < 1.0) { // start and end in same texture, so interpolate along texture scale
     vec4 texel = texture2D(colorTexture, vec2(colorIndex, 0.0));
     vColor = vec4(texel.rgb, alpha);
-  } else { // preset color
-    vec3 startColor = selectPalette(palettes.x);
-    vec3 endColor = selectPalette(palettes.y);
-    vec3 color = mix(startColor, endColor, colorIndex);
+  } else { // one or more preset colors, so interpolate rgb directly
+    vec3 startColor = getColor(palettes.x, colors.x);
+    vec3 endColor = getColor(palettes.y, colors.y);
+
+    float delta = clamp((now - palettes.z) * palettes.w, 0.0, 1.0);
+    vec3 color = mix(startColor, endColor, delta);
+
     vColor = vec4(color, alpha);
   }
 }

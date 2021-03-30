@@ -61,6 +61,9 @@ function onClose () {
       <MempoolLegend />
     </div>
     <p>
+      Tap, click or mouse-over a square for transaction details.
+    </p>
+    <p>
       Every <i>10 minutes</i>, on average, Bitcoin miners confirm transactions from the mempool by packaging them into newly discovered blocks.
     </p>
     <div class="figure block">

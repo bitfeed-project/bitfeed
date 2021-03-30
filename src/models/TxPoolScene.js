@@ -38,7 +38,7 @@ export default class TxPoolScene {
     this.height = height
     this.heightLimit =  height / 4
     this.unitWidth = Math.floor(Math.max(4, width / 250))
-    this.unitPadding = Math.floor(Math.max(1, width / 1000))
+    this.unitPadding =  Math.floor(Math.max(1, width / 1000))
     this.gridSize = this.unitWidth + (this.unitPadding * 2)
     this.blockWidth = (Math.floor(width / this.gridSize) - 1)
     this.blockHeight = (Math.floor(height / this.gridSize) - 1)
@@ -118,7 +118,7 @@ export default class TxPoolScene {
 
   layoutTx (tx, sequence, setOnScreen = true) {
     const units = this.txSize(tx.value)
-    const gridPosition = this.place(tx.id, sequence, units)
+    const gridPosition = this.place(tx.id, sequence, units, tx)
     let pixelPosition = this.gridToPixels(gridPosition)
     tx.setGridPosition(gridPosition)
     if (this.heightLimit && (pixelPosition.y - pixelPosition.r) > this.heightLimit) {
@@ -245,8 +245,8 @@ export default class TxPoolScene {
   gridToPixels (position) {
     const pixelRadius = (position.r * this.gridSize / 2) - this.unitPadding
     return {
-      x: (this.gridSize * (position.x) + pixelRadius),
-      y: (this.gridSize * (position.y) + pixelRadius) + this.scene.scroll,
+      x: ((this.gridSize * position.x) + pixelRadius),
+      y: ((this.gridSize * position.y) + pixelRadius) + this.scene.scroll,
       r: pixelRadius
     }
   }
@@ -262,6 +262,20 @@ export default class TxPoolScene {
     return screenPosition
   }
 
+  screenToGrid (position) {
+    const pixels = {
+      x: position.x - this.scene.offset.x,
+      y: position.y - this.scene.offset.y + (this.unitPadding)
+    }
+    if (this.inverted) pixels.y = this.height - pixels.y
+    const grid = {
+      x: Math.floor(pixels.x / this.gridSize),
+      y: Math.floor(((pixels.y - this.scene.scroll) / this.gridSize)), // not sure why we need this offset??
+      r: 0
+    }
+    return grid
+  }
+
   place (id, position, size) {
     const placement = {
       x: 1 + Math.floor(position % this.blockWidth),
@@ -274,5 +288,9 @@ export default class TxPoolScene {
   getVertexData () {
     // return Object.values(this.txs).slice(-1000).flatMap(tx => tx.view.sprite.getVertexData())
     return Object.values(this.txs).flatMap(tx => tx.view.sprite.getVertexData())
+  }
+
+  selectAt (position) {
+    return null
   }
 }

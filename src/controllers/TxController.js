@@ -5,7 +5,7 @@ import BitcoinTx from '../models/BitcoinTx.js'
 import BitcoinBlock from '../models/BitcoinBlock.js'
 import TxSprite from '../models/TxSprite.js'
 import { FastVertexArray } from '../utils/memory.js'
-import { txQueueLength, txCount, blockVisible, currentBlock } from '../stores.js'
+import { txQueueLength, txCount, blockVisible, currentBlock, selectedTx } from '../stores.js'
 import config from "../config.js"
 
 export default class TxController {
@@ -19,6 +19,8 @@ export default class TxController {
     this.clearBlockTimeout = null
     this.txDelay = 0 //config.txDelay
     this.maxTxDelay = config.txDelay
+
+    this.selectedTx = null
 
     this.pendingTxs = []
     this.pendingMap = {}
@@ -226,5 +228,19 @@ export default class TxController {
     })
     if (this.txs[id]) this.txs[id].destroy()
     delete this.txs[id]
+  }
+
+  mouseMove (position) {
+    if (this.poolScene) {
+      let selected = this.poolScene.selectAt(position)
+      if (!selected && this.blockScene && !this.blockScene.hidden) selected = this.blockScene.selectAt(position)
+
+      if (selected !== this.selectedTx) {
+        if (this.selectedTx) this.selectedTx.hoverOff()
+        if (selected) selected.hoverOn()
+      }
+      this.selectedTx = selected
+      selectedTx.set(this.selectedTx)
+    }
   }
 }

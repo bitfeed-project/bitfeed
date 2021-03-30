@@ -52,6 +52,10 @@ export default class TxView {
     }
   }
 
+  setHover (hoverOn) {
+    if (this.sprite) this.sprite.setHover(hoverOn)
+  }
+
   getPosition () {
     if (this.initialised && this.sprite) return this.sprite.getPosition()
   }

@@ -3,9 +3,10 @@
   import TxController from '../controllers/TxController.js'
   import TxRender from './TxRender.svelte'
   import getTxStream from '../controllers/TxStream.js'
-  import { settings, overlay, serverConnected, serverDelay, txQueueLength, txCount, frameRate, blockVisible, currentBlock, devEvents, devSettings } from '../stores.js'
+  import { settings, overlay, serverConnected, serverDelay, txQueueLength, txCount, frameRate, blockVisible, currentBlock, selectedTx, devEvents, devSettings } from '../stores.js'
   import BitcoinBlock from '../models/BitcoinBlock.js'
   import BlockInfo from '../components/BlockInfo.svelte'
+  import TxInfo from '../components/TxInfo.svelte'
   import Sidebar from '../components/Sidebar.svelte'
   import AboutOverlay from '../components/AboutOverlay.svelte'
   import DonationBar from '../components/DonationBar.svelte'
@@ -102,6 +103,20 @@
 			val = v;
 		}, 750);
 	}
+
+  let mousePosition = null
+
+  function pointerMove (e) {
+    mousePosition = {
+      x: e.clientX,
+      y: e.clientY
+    }
+    const position = {
+      x: e.clientX,
+      y: window.innerHeight - e.clientY
+    }
+    if (txController) txController.mouseMove(position)
+  }
 </script>
 
 <style type="text/scss">
@@ -281,11 +296,16 @@
   }
 </style>
 
-<svelte:window on:resize={resize} />
+<svelte:window on:resize={resize} on:pointermove={pointerMove} on:click={pointerMove} />
+<!-- <svelte:window on:resize={resize} on:click={pointerMove} /> -->
 
 <div class="tx-area" class:light-mode={!$settings.darkMode}>
   <div class="canvas-wrapper">
     <TxRender controller={txController} />
+
+    {#if $selectedTx }
+      <TxInfo tx={$selectedTx} position={mousePosition} />
+    {/if}
 
     <div class="block-area-wrapper">
       <div class="spacer"></div>

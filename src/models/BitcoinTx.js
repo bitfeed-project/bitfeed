@@ -52,6 +52,14 @@ export default class BitcoinTx {
     if (this.view) this.view.update(update)
   }
 
+  hoverOn () {
+    if (this.view) this.view.setHover(true)
+  }
+
+  hoverOff () {
+    if (this.view) this.view.setHover(false)
+  }
+
   setGridPosition (position) {
     this.gridPosition = position
   }

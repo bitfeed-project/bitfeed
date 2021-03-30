@@ -1,6 +1,13 @@
 import { timeOffset } from '../utils/time.js'
 
-function interpolateAttributeStart(attribute, now, label) {
+const hoverTransitionTime = 200
+
+function interpolate (startState, endState, startTime, duration, now) {
+  const progress = Math.max(0, Math.min(1, (now - startTime) / duration))
+  return startState + ((endState - startState) * progress)
+}
+
+function interpolateAttributeStart(attribute, now, label, binaryAttribute) {
   if (attribute.v == 0 || (attribute.t + attribute.d) <= now) {
     // transition finished, next transition starts from current end state
     // (clamp to 1)
@@ -13,8 +20,10 @@ function interpolateAttributeStart(attribute, now, label) {
   } else {
     // transition in progress
     // (interpolate)
-    let progress =  (now - attribute.t)
-    attribute.a = attribute.a + ((progress / attribute.d) * (attribute.b - attribute.a))
+    let progress = (now - attribute.t)
+    if (!binaryAttribute) {
+      attribute.a = attribute.a + ((progress / attribute.d) * (attribute.b - attribute.a))
+    }
     attribute.d = attribute.d - progress
     attribute.v = 1 / attribute.d
   }
@@ -40,10 +49,14 @@ export default class TxSprite {
 
     this.vertexPointer = this.vertexArray.insert(this)
 
+    this.hover = false
+    this.hoverCache = null
+
     this.compile()
   }
 
-  update({ now = Date.now(), layer, position, palette, color, alpha, duration, minDuration, adjust }) {
+  update({ now = Date.now(), layer, position, palette, color, alpha, duration, minDuration, adjust }, internal) {
+    if (!internal && (palette || color || alpha)) this.clearHover()
     const offsetTime = now - timeOffset
     const v = duration > 0 ? (1 / duration) : 0
 
@@ -65,8 +78,9 @@ export default class TxSprite {
     for (const key of Object.keys(update)) {
       // for each non-null attribute:
       if (update[key] != null) {
-        // calculate current interpolated value, and set as 'from'
-        interpolateAttributeStart(this.attributes[key], offsetTime, key)
+        // calculate current interpolated value, and set as 'from' (except the non-interpolatable palette attribute)
+        interpolateAttributeStart(this.attributes[key], offsetTime, key, key === 'p')
+        // interpolateAttributeStart(this.attributes[key], offsetTime, key)
         // set 'start' to now
         this.attributes[key].t = offsetTime
         // if 'adjust' flag set
@@ -143,6 +157,44 @@ export default class TxSprite {
   // getVertexData () {
   //   return this.vertexData
   // }
+
+  clearHover () {
+    if (this.hoverCache) {
+      this.attributes.p = { ...this.hoverCache.p }
+      this.attributes.c = { ...this.hoverCache.c }
+      this.attributes.a = { ...this.hoverCache.a }
+    }
+    this.hoverCache = null
+  }
+
+  // On hover, we transition to the hover color
+  // If the sprite already has a color transition in progress, we cache it
+  // in order to smoothly transition back
+  setHover (hoverOn) {
+    if (hoverOn !== this.hover) {
+      if (hoverOn) {
+        // cache current color transition
+        this.hoverCache = {
+          p: { ...this.attributes.p },
+          c: { ...this.attributes.c },
+          a: { ...this.attributes.a },
+          at: Date.now()
+        }
+        this.update({
+          palette: 3.5,
+          color: 0.0,
+          alpha: 1.0,
+          duration: hoverTransitionTime,
+          adjust: false
+        }, true)
+      } else if (this.hoverCache) {
+        // switch back to previous color transition
+        this.clearHover()
+        this.compile()
+      }
+    }
+    this.hover = this.hoverOn
+  }
 
   destroy () {
     this.vertexArray.remove(this.vertexPointer)

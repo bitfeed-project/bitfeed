@@ -23,15 +23,23 @@ export default class TxMondrianPoolScene extends TxPoolScene {
     return logTxSize(value, this.blockWidth)
   }
 
-  place (id, index, size) {
+  place (id, index, size, tx) {
     // console.log(`placing tx at ${index} (size ${size})`)
-    return this.layout.place(size)
+    return this.layout.place(size, tx)
   }
 
   doScroll (offset) {
     super.doScroll(offset)
     this.layout.redraw()
     this.layout.clearOffscreen()
+  }
+
+  // handle mouse-over events - return the tx at this mouse position, if any
+  selectAt (position) {
+    if (this.layout) {
+      const gridPosition = this.screenToGrid(position)
+      return this.layout.getTxInGridCell(gridPosition)
+    } else return null
   }
 }
 
@@ -43,7 +51,7 @@ class MondrianLayout {
 
     this.rowOffset = 0
     this.rows = []
-    this.addRow()
+    this.txMap = [] // map of which txs occupy each grid square
   }
 
   getRow (position) {
@@ -81,6 +89,7 @@ class MondrianLayout {
         this.rowOffset++
         this.destroyRow(head)
         this.rows.shift()
+        this.txMap.shift()
         // console.log(head)
       } else {
         done = true
@@ -249,7 +258,7 @@ class MondrianLayout {
     return { x: slot.x, y: slot.y, r: squareWidth }
   }
 
-  place (size) {
+  place (size, tx) {
     let found = false
     let rowIndex = 0
     let row
@@ -274,7 +283,29 @@ class MondrianLayout {
       const slot = this.addSlot({ x: 0, y: row.y, r: this.width })
       square = this.fillSlot(slot, size)
     }
+
+    // update txMap
+    for (let x = 0; x < square.r; x++) {
+      for (let y = 0; y < square.r; y++) {
+        this.setTxMapCell({ x: square.x + x, y: square.y + y }, tx)
+      }
+    }
+
     return square
+  }
+
+  setTxMapCell (coord, tx) {
+    const offsetY = coord.y - this.rowOffset
+    while (this.txMap.length <= offsetY) {
+      this.txMap.push(new Array(this.width).fill(null))
+    }
+    this.txMap[offsetY][coord.x] = tx
+  }
+
+  getTxInGridCell(coord) {
+    const offsetY = coord.y - this.rowOffset
+    if (this.txMap[offsetY]) return this.txMap[offsetY][coord.x]
+    else return null
   }
 
   slotToSprite (slot) {
