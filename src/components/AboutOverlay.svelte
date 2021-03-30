@@ -4,7 +4,6 @@ import MempoolLegend from '../components/MempoolLegend.svelte'
 import { settings } from '../stores.js'
 
 function onClose () {
-  console.log('about overlay closed')
   localStorage.setItem('seen-welcome-msg', true)
 }
 </script>

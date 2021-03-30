@@ -245,8 +245,6 @@
     })
 
     running = true
-
-    console.log(this)
   })
 </script>
 

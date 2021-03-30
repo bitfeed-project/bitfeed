@@ -217,14 +217,12 @@ export default class TxController {
 
   hideBlock () {
     if (this.blockScene) {
-      console.log('hide block')
       this.blockScene.hide()
     }
   }
 
   showBlock () {
     if (this.blockScene) {
-      console.log('show block')
       this.blockScene.show()
     }
   }

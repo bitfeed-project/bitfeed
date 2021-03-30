@@ -1,3 +1,5 @@
+import config from '../config.js'
+
 export default class TxPoolScene {
   constructor ({ width, height, unit, padding, layer, controller }) {
     this.init({ width, height, unit, padding, layer, controller })
@@ -30,7 +32,7 @@ export default class TxPoolScene {
     this.scrollRateLimitTimer = null
     this.initialised = true
 
-    console.log('pool', this)
+    if (config.dev) console.log('pool', this)
   }
 
   resize ({ width = this.width, height = this.height }) {

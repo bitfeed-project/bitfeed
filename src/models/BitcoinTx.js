@@ -21,7 +21,7 @@ export default class BitcoinTx {
     if (config.donationHash && this.outputs) {
       this.outputs.forEach(output => {
         if (output.script_pub_key.includes(config.donationHash)) {
-          console.log('highlight!', this)
+          console.log('donation!', this)
           this.highlight = true
         }
       })

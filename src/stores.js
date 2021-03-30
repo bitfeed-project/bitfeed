@@ -316,14 +316,11 @@ function createCachedDict (namespace, defaultValues) {
 		...defaultValues
 	}
 
-	console.log('creating cached dict with default values: ', initial)
 	// load from local storage
 	Object.keys(initial).forEach(field => {
 		const val = localStorage.getItem(`${namespace}-${field}`)
 		if (val != null) initial[field] = JSON.parse(val)
 	})
-
-	console.log('loaded cached values: ', initial)
 
 	const { subscribe, set, update } = writable(initial)
 

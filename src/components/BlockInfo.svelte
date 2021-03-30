@@ -44,7 +44,6 @@
   }
 
   function hideBlock () {
-    console.log('hide!')
     dispatch('hideBlock')
   }
 </script>

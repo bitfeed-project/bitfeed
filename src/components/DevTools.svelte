@@ -28,9 +28,7 @@ function addBlock () {
 }
 
 function toggle (setting) {
-  console.log(setting, $devSettings[setting])
   $devSettings[setting] = !$devSettings[setting]
-  console.log($devSettings[setting])
 }
 
 </script>

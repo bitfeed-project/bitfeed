@@ -51,10 +51,10 @@ class TxStream {
   }
 
   reconnect () {
-    console.log('reconnecting websocket')
+    console.log('...reconnecting websocket')
     if (this.reconnectBackoff) clearTimeout(this.reconnectBackoff)
     if (!this.connected) {
-      console.log('actually reconnecting')
+      console.log('......reconnecting')
       if (this.reconnectBackoff < 4000) this.reconnectBackoff *= 2
       this.reconnectTimeout = setTimeout(() => { this.init() }, this.reconnectBackoff)
     }
@@ -89,7 +89,7 @@ class TxStream {
   }
 
   disconnect () {
-    console.log('disconnecting websocket', this.websocket)
+    console.log('disconnecting websocket')
     if (this.websocket) {
       this.websocket.onopen = null
       this.websocket.onclose = null
@@ -124,7 +124,7 @@ class TxStream {
       if (msg && msg.type === 'txn') {
         window.dispatchEvent(new CustomEvent('bitcoin_tx', { detail: msg.txn }))
       } else if (msg && msg.type === 'block') {
-        console.log('Block recieved: ', msg.block)
+        // console.log('Block recieved: ', msg.block)
         window.dispatchEvent(new CustomEvent('bitcoin_block', { detail: msg.block }))
       } else {
         // console.log('unknown message from websocket: ', msg)
@@ -148,12 +148,12 @@ class TxStream {
   }
 
   close () {
-    console.log('closing websocket: ', this.websocket)
+    console.log('closing websocket')
     if (this.websocket) this.websocket.close()
   }
 
   subscribe (type, callback) {
-    console.log('subscribing to bitcoin events')
+    console.log(`subscribing to bitcoin ${type} events`)
     window.addEventListener('bitcoin_'+type, (event) => {
       callback(event.detail)
     })
