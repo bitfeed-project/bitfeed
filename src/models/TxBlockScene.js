@@ -68,19 +68,40 @@ export default class TxBlockScene extends TxMondrianPoolScene {
       })
     }
 
-    this.updateTx(tx, {
-      display: {
-        position: this.pixelsToScreen(pixelPosition),
-        color: tx.highlight ? this.highlightColor : {
-          palette: 0,
-          index: 0,
-          alpha: 1
-        }
-      },
-      duration: this.laidOut ? 1000 : 1500,
-      delay: 0,
-      state: 'block'
-    })
+    const screenPosition = this.pixelsToScreen(pixelPosition)
+    if (this.hidden) {
+      this.updateTx(tx, {
+        display: {
+          position: {
+            x: screenPosition.x,
+            y: screenPosition.y + 50,
+            r: screenPosition.r
+          },
+          color: tx.highlight ? this.highlightColor : {
+            palette: 0,
+            index: 0,
+            alpha: 0
+          }
+        },
+        duration: 0,
+        delay: 0,
+        state: 'block'
+      })
+    } else {
+      this.updateTx(tx, {
+        display: {
+          position: screenPosition,
+          color: tx.highlight ? this.highlightColor : {
+            palette: 0,
+            index: 0,
+            alpha: 1
+          }
+        },
+        duration: this.laidOut ? 1000 : 1500,
+        delay: 0,
+        state: 'block'
+      })
+    }
   }
 
   prepareTxOnScreen (tx, pixelPosition) {
@@ -172,10 +193,10 @@ export default class TxBlockScene extends TxMondrianPoolScene {
   }
 
   layoutAll (args) {
-    if (!this.hidden) {
+    // if (!this.hidden) {
       super.layoutAll(args)
       this.laidOut = true
-    }
+    // }
   }
 
   initialLayout () {
