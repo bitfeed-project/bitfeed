@@ -27,14 +27,24 @@ defmodule BitcoinStream.SocketHandler do
               {:error, reason} ->
                 IO.puts("Error json encoding block: #{reason}");
                 :error
+              _ ->
+                IO.puts("json encoding failed: (unknown reason)")
+                :error
             end
           {:error, reason} ->
             IO.puts("Block decoding failed: #{reason}");
+            :error
+          _ ->
+            IO.puts("Block decoding failed: (unknown reason)")
             :error
         end
 
       {:error, reason} ->
         IO.puts("Reading block file failed: #{reason}");
+        :error
+
+      _ ->
+        IO.puts("Reading block file failed (unknown reason)")
         :error
     end
   end
@@ -49,8 +59,10 @@ defmodule BitcoinStream.SocketHandler do
           {:ok, blockMsg} ->
             {:reply, {:text, blockMsg}, state};
 
-          _ -> {:reply, {:text, 'error'}, state}
+          _ -> {:reply, {:text, "error"}, state}
         end
+      _ ->
+        {:reply, {:text, "?"}, state}
     end
   end
 
