@@ -4,7 +4,6 @@ export default {
   layoutHints: false,
   fps: true,
   websocket_path: '/ws/txs',
-  localSocket: true,
   nofeed: false,
   txDelay: 5000,
   blockTimeout: 10000,
