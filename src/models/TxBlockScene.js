@@ -99,6 +99,7 @@ export default class TxBlockScene extends TxMondrianPoolScene {
         },
         duration: this.laidOut ? 1000 : 1500,
         delay: 0,
+        jitter: this.laidOut ? 0 : 1000,
         state: 'block'
       })
     }

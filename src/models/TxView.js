@@ -2,9 +2,9 @@ import TxSprite from './TxSprite.js'
 
 // converts from this class's update format to TxSprite's update format
 // now, id, value, layer, position, size, palette, color, alpha, duration, adjust
-function toSpriteUpdate(display, duration, start, adjust) {
+function toSpriteUpdate(display, duration, delay, start, adjust) {
   return {
-    now: start || Date.now(),
+    now: (start || Date.now()) + (delay || 0),
     duration: duration,
     ...display,
     ...(display.color != null ? { palette: display.color.palette, color: display.color.index, alpha: display.color.alpha } : { color: null }),
@@ -37,17 +37,18 @@ export default class TxView {
     delay: for queued transitions, how long to wait after current transition
            completes to start.
   */
-  update ({ display, duration, delay, state, start, adjust }) {
+  update ({ display, duration, delay, jitter, state, start, adjust }) {
     this.state = state
+    if (jitter) delay += (Math.random() * jitter)
 
     if (!this.initialised || !this.sprite) {
       this.initialised = true
-      const update = toSpriteUpdate(display, duration, start)
+      const update = toSpriteUpdate(display, duration, delay, start)
       update.id = this.id
       update.value = this.value
       this.sprite = new TxSprite(update, this.vertexArray)
     } else {
-      const update = toSpriteUpdate(display, duration, start, adjust)
+      const update = toSpriteUpdate(display, duration, delay, start, adjust)
       this.sprite.update(update)
     }
   }
