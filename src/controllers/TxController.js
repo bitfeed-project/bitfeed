@@ -5,7 +5,7 @@ import BitcoinTx from '../models/BitcoinTx.js'
 import BitcoinBlock from '../models/BitcoinBlock.js'
 import TxSprite from '../models/TxSprite.js'
 import { FastVertexArray } from '../utils/memory.js'
-import { txQueueLength, txCount, blockVisible, currentBlock, selectedTx } from '../stores.js'
+import { txQueueLength, txCount, mempoolCount, mempoolScreenHeight, blockVisible, currentBlock, selectedTx } from '../stores.js'
 import config from "../config.js"
 
 export default class TxController {
@@ -14,7 +14,7 @@ export default class TxController {
     this.debugVertexArray = new FastVertexArray(1024, TxSprite.dataSize)
     this.txs = {}
     this.expiredTxs = {}
-    this.poolScene = new TxMondrianPoolScene({ width, height, layer: 0.0, controller: this })
+    this.poolScene = new TxMondrianPoolScene({ width, height, layer: 0.0, controller: this, heightStore: mempoolScreenHeight })
     this.blockScene = null
     this.clearBlockTimeout = null
     this.txDelay = 0 //config.txDelay
@@ -84,6 +84,7 @@ export default class TxController {
             txQueueLength.decrement()
             this.txs[tx.id] = tx
             this.poolScene.insert(this.txs[tx.id])
+            mempoolCount.increment()
           } else {
             done = true
             delay = 2001 - timeSince
@@ -120,10 +121,12 @@ export default class TxController {
 
     const blockSize = Math.min(window.innerWidth * 0.75, window.innerHeight / 2.5)
     this.blockScene = new TxBlockScene({ width: blockSize, height: blockSize, layer: 1.0, blockId: block.id, controller: this })
+    let poolCount = 0
     let knownCount = 0
     let unknownCount = 0
     for (let i = 0; i < block.txns.length; i++) {
       if (this.poolScene.remove(block.txns[i].id)) {
+        poolCount++
         knownCount++
         this.txs[block.txns[i].id].setBlock(block.id)
         this.blockScene.insert(this.txs[block.txns[i].id], false)
@@ -148,6 +151,7 @@ export default class TxController {
       this.expiredTxs[block.txns[i].id] = true
     }
     console.log(`New block with ${knownCount} known transactions and ${unknownCount} unknown transactions`)
+    mempoolCount.subtract(poolCount)
     this.blockScene.initialLayout()
     setTimeout(() => { this.poolScene.layoutAll() }, 4000)
 

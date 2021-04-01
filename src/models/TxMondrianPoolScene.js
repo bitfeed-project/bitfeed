@@ -4,8 +4,8 @@ import { logTxSize } from '../utils/misc.js'
 import config from '../config.js'
 
 export default class TxMondrianPoolScene extends TxPoolScene {
-  constructor ({ width, height, unit, padding, layer, controller }) {
-    super({ width, height, unit, padding, layer, controller })
+  constructor ({ width, height, unit, padding, layer, controller, heightStore }) {
+    super({ width, height, unit, padding, layer, controller, heightStore })
   }
 
   resize ({ width, height, unit, padding }) {

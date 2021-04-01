@@ -1,7 +1,9 @@
 import config from '../config.js'
 
 export default class TxPoolScene {
-  constructor ({ width, height, unit, padding, layer, controller }) {
+  constructor ({ width, height, unit, padding, layer, controller, heightStore }) {
+    this.maxHeight = 0
+    this.heightStore = heightStore
     this.init({ width, height, unit, padding, layer, controller })
     this.highlightColor = {
       palette: 3,
@@ -123,8 +125,16 @@ export default class TxPoolScene {
     const gridPosition = this.place(tx.id, sequence, units, tx)
     let pixelPosition = this.gridToPixels(gridPosition)
     tx.setGridPosition(gridPosition)
-    if (this.heightLimit && (pixelPosition.y - pixelPosition.r) > this.heightLimit) {
-      this.scroll(this.heightLimit - (pixelPosition.y - pixelPosition.r))
+    const top = pixelPosition.y + pixelPosition.r
+    const bottom = pixelPosition.y - pixelPosition.r
+    if (top > this.maxHeight) {
+      this.maxHeight = top
+      if (this.heightStore) this.heightStore.set(this.maxHeight)
+    }
+    if (this.heightLimit && bottom > this.heightLimit) {
+      this.scroll(this.heightLimit - bottom)
+      this.maxHeight += (this.heightLimit - bottom)
+      if (this.heightStore) this.heightStore.set(this.maxHeight)
       pixelPosition = this.gridToPixels(gridPosition)
     }
     tx.setPixelPosition(pixelPosition)
@@ -190,6 +200,7 @@ export default class TxPoolScene {
   }
 
   layoutAll (resize = {}) {
+    this.heightLimit = 0
     this.resize(resize)
     this.scene.count = 0
     let ids = this.getHiddenTxList()
@@ -204,21 +215,27 @@ export default class TxPoolScene {
 
     let poolTop = -Infinity
     let poolBottom = Infinity
+    let poolScreenTop = -Infinity
     ids = this.getActiveTxList()
     for (let i = 0; i < ids.length; i++) {
       const position = this.gridToPixels(this.txs[ids[i]].getGridPosition())
       poolTop = Math.max(poolTop, position.y - position.r)
+      poolScreenTop = Math.max(poolScreenTop, position.y + position.r)
       poolBottom = Math.min(poolBottom, position.y - position.r)
     }
 
+    this.heightLimit = poolScreenTop
 
     if (this.heightLimit && poolTop > this.heightLimit) {
       let scrollAmount = this.heightLimit - poolTop
       this.scroll(scrollAmount, true)
+      this.heightLimit += scrollAmount
     } else if (this.heightLimit && poolTop < this.heightLimit) {
       let scrollAmount = Math.min(-this.scene.scroll, this.heightLimit - poolTop)
       this.scroll(scrollAmount, true)
+      this.heightLimit += scrollAmount
     }
+    this.heightStore.set(this.heightLimit)
   }
 
   remove (id) {

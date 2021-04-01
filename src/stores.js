@@ -6,6 +6,9 @@ function createCounter () {
 
 	return {
 		subscribe,
+		set,
+		add: (x) => update(n => n + x),
+		subract: (x) => update(n => n - x),
 		increment: () => update(n => n + 1),
 		decrement: () => update(n => n - 1),
 		reset: () => set(0)
@@ -48,6 +51,8 @@ export const devEvents = writable({
 
 export const txQueueLength = createCounter()
 export const txCount = createCounter()
+export const mempoolCount = createCounter()
+export const mempoolScreenHeight = writable(0)
 export const frameRate = writable(null)
 export const blockVisible = writable(false)
 export const currentBlock = writable(null)

@@ -3,7 +3,7 @@
   import TxController from '../controllers/TxController.js'
   import TxRender from './TxRender.svelte'
   import getTxStream from '../controllers/TxStream.js'
-  import { settings, overlay, serverConnected, serverDelay, txQueueLength, txCount, frameRate, blockVisible, currentBlock, selectedTx, devEvents, devSettings } from '../stores.js'
+  import { settings, overlay, serverConnected, serverDelay, txQueueLength, txCount, mempoolCount, mempoolScreenHeight, frameRate, blockVisible, currentBlock, selectedTx, devEvents, devSettings } from '../stores.js'
   import BitcoinBlock from '../models/BitcoinBlock.js'
   import BlockInfo from '../components/BlockInfo.svelte'
   import TxInfo from '../components/TxInfo.svelte'
@@ -147,6 +147,42 @@
     position: relative;
     width: 100%;
     height: 100%;
+  }
+
+  .mempool-height {
+    position: absolute;
+    bottom: calc(25% + 10px);
+    left: 0;
+    right: 0;
+    margin: auto;
+    padding: 0 .5rem;
+    transition: bottom 1000ms;
+
+    .mempool-count {
+      position: absolute;
+      bottom: .5em;
+      left: 0.5rem;
+      font-size: 0.9rem;
+      color: var(--palette-x);
+
+      // &::before {
+      //   content: '';
+      //   position: absolute;
+      //   left: 0;
+      //   top: 0;
+      //   right: 0;
+      //   bottom: 0;
+      //   background: var(--palette-b);
+      //   opacity: 0.5;
+      // }
+    }
+
+    .height-bar {
+      width: 100%;
+      height: 1px;
+      border-bottom: dashed 2px var(--palette-x);
+      opacity: 0.75;
+    }
   }
 
   .mempool-size-label {
@@ -308,6 +344,11 @@
 <div class="tx-area" class:light-mode={!$settings.darkMode}>
   <div class="canvas-wrapper">
     <TxRender controller={txController} />
+
+    <div class="mempool-height" style="bottom: {$mempoolScreenHeight + 16}px">
+      <div class="height-bar" />
+      <span class="mempool-count">Mempool: { $mempoolCount } unconfirmed</span>
+    </div>
 
     {#if $selectedTx }
       <TxInfo tx={$selectedTx} position={mousePosition} />
