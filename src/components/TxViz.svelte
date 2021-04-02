@@ -349,7 +349,7 @@
   <div class="canvas-wrapper">
     <TxRender controller={txController} />
 
-    <div class="mempool-height" style="bottom: {$mempoolScreenHeight + 16}px">
+    <div class="mempool-height" style="bottom: calc({$mempoolScreenHeight}px + 1rem)">
       <div class="height-bar" />
       <span class="mempool-count">Mempool: { $mempoolCount.toLocaleString() } unconfirmed</span>
     </div>
