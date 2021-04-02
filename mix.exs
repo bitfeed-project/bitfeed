@@ -4,7 +4,7 @@ defmodule BitcoinStream.MixProject do
   def project do
     [
       app: :bitcoin_stream,
-      version: "1.0.1",
+      version: "1.1.0",
       elixir: "~> 1.11",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -36,6 +36,7 @@ defmodule BitcoinStream.MixProject do
       # {:bitcoinex, "~> 0.1.0"},
       # {:bitcoinex, git: "git@github.com:mononaut/bitcoinex.git", tag: "master"},
       {:bitcoinex, path: "../bitcoinex", override: true},
+      {:hackney, "~> 1.15"},
       {:cowboy, "~> 2.4"},
       {:plug, "~> 1.7"},
       {:plug_cowboy, "~> 2.0"},

@@ -2,6 +2,7 @@ defmodule BitcoinStream.SocketHandler do
   @behaviour :cowboy_websocket
 
   alias BitcoinStream.Protocol.Block, as: BitcoinBlock
+  alias BitcoinStream.Mempool, as: Mempool
 
   def init(request, state) do
     {:cowboy_websocket, request, state}
@@ -15,8 +16,8 @@ defmodule BitcoinStream.SocketHandler do
   end
 
   def load_block() do
-    with  {:ok, blockData} <- File.read("block.dat"),
-          {:ok, block} <- BitcoinBlock.decode(blockData),
+    with  {:ok, block_data} <- File.read("block.dat"),
+          {:ok, block} <- BitcoinBlock.decode(block_data),
           {:ok, payload} <- Jason.encode(%{type: "block", block: block})
           do
       {:ok, payload}
@@ -30,18 +31,30 @@ defmodule BitcoinStream.SocketHandler do
     end
   end
 
+  def get_mempool_count_msg() do
+    count = Mempool.get(:mempool);
+    IO.puts("Count: #{count}");
+    "{ \"type\": \"count\", \"count\": #{count}}"
+  end
+
   def websocket_handle({:text, msg}, state) do
-    IO.puts("message received: #{msg}");
+    IO.puts("message received: #{msg} | #{inspect self()}");
     case msg do
       "hb" -> {:reply, {:text, msg}, state};
+
       "block" ->
         IO.puts('block request')
         case load_block() do
-          {:ok, blockMsg} ->
-            {:reply, {:text, blockMsg}, state};
+          {:ok, block_msg} ->
+            {:reply, {:text, block_msg}, state};
 
           _ -> {:reply, {:text, "error"}, state}
         end
+
+      "count" ->
+        count = get_mempool_count_msg();
+        {:reply, {:text, count}, state};
+
       _ ->
         {:reply, {:text, "?"}, state}
     end

@@ -9,6 +9,7 @@ defmodule BitcoinStream.Bridge do
 
   alias BitcoinStream.Protocol.Block, as: BitcoinBlock
   alias BitcoinStream.Protocol.Transaction, as: BitcoinTx
+  alias BitcoinStream.Mempool, as: Mempool
 
   def child_spec(port: port) do
     %{
@@ -54,13 +55,17 @@ defmodule BitcoinStream.Bridge do
     # IO.puts("Forwarding transaction to websocket clients")
     Registry.dispatch(Registry.BitcoinStream, "txs", fn(entries) ->
       for {pid, _} <- entries do
-        IO.puts("Forwarding to pid #{inspect pid}")
+        # IO.puts("Forwarding to pid #{inspect pid}")
         case Jason.encode(%{type: "txn", txn: txn}) do
           {:ok, payload} -> Process.send(pid, payload, []);
           {:error, reason} -> IO.puts("Error json encoding transaction: #{reason}");
         end
       end
     end)
+  end
+
+  def incrementMempool() do
+    Mempool.increment(:mempool)
   end
 
   def sendBlock(block) do
@@ -83,7 +88,8 @@ defmodule BitcoinStream.Bridge do
     case BitcoinTx.decode(payload) do
       {:ok, txn} ->
         sendTxn(txn);
-        IO.puts("new tx")
+        incrementMempool();
+        # IO.puts("new tx")
       {:error, reason} -> IO.puts("Tx decoding failed: #{reason}");
     end
 
@@ -100,6 +106,7 @@ defmodule BitcoinStream.Bridge do
     case BitcoinBlock.decode(payload) do
       {:ok, block} ->
         sendBlock(block);
+        Mempool.sync(:mempool);
         IO.puts("new block")
       {:error, reason} -> IO.puts("Block decoding failed: #{reason}");
     end

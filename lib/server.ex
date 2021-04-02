@@ -3,6 +3,7 @@ defmodule BitcoinStream.Server do
 
   def start(_type, _args) do
     children = [
+      { BitcoinStream.Mempool, [port: 9959, name: :mempool] },
       Plug.Cowboy.child_spec(
         scheme: :http,
         plug: BitcoinStream.Router,
