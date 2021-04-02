@@ -20,6 +20,8 @@ class TxStream {
     }, 789)
 
     this.init()
+
+    console.log('stream', this)
   }
 
   setConnected (connected) {
@@ -68,7 +70,7 @@ class TxStream {
     this.setConnected(true)
     this.heartbeatTimeout = setTimeout(() => {
       this.sendHeartbeat()
-    }, 2000)
+    }, 5000)
   }
 
   sendHeartbeat () {
@@ -86,6 +88,10 @@ class TxStream {
 
   sendBlockRequest () {
     this.websocket.send('block')
+  }
+
+  sendMempoolRequest () {
+    this.websocket.send('count')
   }
 
   disconnect () {
@@ -110,26 +116,32 @@ class TxStream {
     this.reconnectBackoff = 128
     this.sendHeartbeat()
     this.sendBlockRequest()
+    this.sendMempoolRequest()
   }
 
   onmessage (event) {
     if (!event) return
-
     if (event.data === 'hb') {
       this.onHeartbeat()
     } else if (event.data === 'error') {
       // ignore
     } else {
-      const msg = JSON.parse(event.data)
-      if (msg && msg.type === 'txn') {
-        window.dispatchEvent(new CustomEvent('bitcoin_tx', { detail: msg.txn }))
-      } else if (msg && msg.type === 'block') {
-        // console.log('Block recieved: ', msg.block)
-        window.dispatchEvent(new CustomEvent('bitcoin_block', { detail: msg.block }))
-      } else {
+      try {
+        const msg = JSON.parse(event.data)
+        if (msg && msg.type === 'count') {
+          console.log('COUNT MSG:', msg)
+          window.dispatchEvent(new CustomEvent('bitcoin_mempool_count', { detail: msg.count }))
+        } else if (msg && msg.type === 'txn') {
+          window.dispatchEvent(new CustomEvent('bitcoin_tx', { detail: msg.txn }))
+        } else if (msg && msg.type === 'block') {
+          // console.log('Block recieved: ', msg.block)
+          window.dispatchEvent(new CustomEvent('bitcoin_block', { detail: msg.block }))
+        } else {
+          // console.log('unknown message from websocket: ', msg)
+        }
+      } catch (err) {
         // console.log('unknown message from websocket: ', msg)
       }
-
     }
   }
 

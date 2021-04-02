@@ -41,6 +41,10 @@
       })
       txStream.subscribe('block', block => {
         txController.addBlock(block)
+        txStream.sendMempoolRequest()
+      })
+      txStream.subscribe('mempool_count', count => {
+        $mempoolCount = count
       })
     }
 
@@ -347,7 +351,7 @@
 
     <div class="mempool-height" style="bottom: {$mempoolScreenHeight + 16}px">
       <div class="height-bar" />
-      <span class="mempool-count">Mempool: { $mempoolCount } unconfirmed</span>
+      <span class="mempool-count">Mempool: { $mempoolCount.toLocaleString() } unconfirmed</span>
     </div>
 
     {#if $selectedTx }

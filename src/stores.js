@@ -8,7 +8,7 @@ function createCounter () {
 		subscribe,
 		set,
 		add: (x) => update(n => n + x),
-		subract: (x) => update(n => n - x),
+		subtract: (x) => update(n => n - x),
 		increment: () => update(n => n + 1),
 		decrement: () => update(n => n - 1),
 		reset: () => set(0)

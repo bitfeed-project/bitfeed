@@ -200,7 +200,7 @@ export default class TxPoolScene {
   }
 
   layoutAll (resize = {}) {
-    this.heightLimit = 0
+    this.maxHeight = 0
     this.resize(resize)
     this.scene.count = 0
     let ids = this.getHiddenTxList()
@@ -224,18 +224,18 @@ export default class TxPoolScene {
       poolBottom = Math.min(poolBottom, position.y - position.r)
     }
 
-    this.heightLimit = poolScreenTop
+    this.maxHeight = poolScreenTop
 
     if (this.heightLimit && poolTop > this.heightLimit) {
       let scrollAmount = this.heightLimit - poolTop
       this.scroll(scrollAmount, true)
-      this.heightLimit += scrollAmount
+      this.maxHeight += scrollAmount
     } else if (this.heightLimit && poolTop < this.heightLimit) {
       let scrollAmount = Math.min(-this.scene.scroll, this.heightLimit - poolTop)
       this.scroll(scrollAmount, true)
-      this.heightLimit += scrollAmount
+      this.maxHeight += scrollAmount
     }
-    this.heightStore.set(this.heightLimit)
+    if (this.heightStore) this.heightStore.set(this.maxHeight)
   }
 
   remove (id) {
