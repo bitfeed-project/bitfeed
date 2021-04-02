@@ -200,18 +200,6 @@
     transition: color 500ms;
   }
 
-  .sim-controls {
-    position: absolute;
-    top: 50px;
-    left: 0;
-    right: 0;
-    pointer-events: none;
-
-    button {
-      pointer-events: all;
-    }
-  }
-
   .top-bar {
     position: absolute;
     top: 0;
