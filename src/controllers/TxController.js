@@ -275,8 +275,7 @@ export default class TxController {
       }
       this.selectedTx = selected
       selectedTx.set(this.selectedTx)
-      // this.selectionLocked = !!this.selectedTx && !(this.selectionLocked && sameTx)
+      this.selectionLocked = !!this.selectedTx && !(this.selectionLocked && sameTx)
     }
-    this.selectionLocked = !this.selectionLocked
   }
 }
