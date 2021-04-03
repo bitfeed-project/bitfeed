@@ -57,9 +57,9 @@
   }
 
   function resizeCanvas () {
-    var rect = canvas.parentNode.getBoundingClientRect()
-    canvas.width = rect.width
-    canvas.height = rect.height
+    // var rect = canvas.parentNode.getBoundingClientRect()
+    canvas.width = window.innerWidth
+    canvas.height = window.innerHeight
     if (gl) gl.viewport(0, 0, canvas.width, canvas.height)
   }
 
