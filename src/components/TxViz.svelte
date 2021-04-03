@@ -10,6 +10,7 @@
   import Sidebar from '../components/Sidebar.svelte'
   import AboutOverlay from '../components/AboutOverlay.svelte'
   import DonationBar from '../components/DonationBar.svelte'
+  import { integerFormat } from '../utils/format.js'
   import config from '../config.js'
 
   let width = window.innerWidth - 20
@@ -116,7 +117,7 @@
 
   let mousePosition = { x: 0, y: 0 }
 
-  function pointerMove (e) {
+  function onClick (e) {
     mousePosition = {
       x: e.clientX,
       y: e.clientY
@@ -124,6 +125,28 @@
     const position = {
       x: e.clientX,
       y: window.innerHeight - e.clientY
+    }
+    if (txController) txController.mouseClick(position)
+  }
+
+  function pointerMove (e) {
+    if (!txController.selectionLocked) {
+      mousePosition = {
+        x: e.clientX,
+        y: e.clientY
+      }
+      const position = {
+        x: e.clientX,
+        y: window.innerHeight - e.clientY
+      }
+      if (txController) txController.mouseMove(position)
+    }
+  }
+
+  function pointerLeave (e) {
+    const position = {
+      x: null,
+      y: null
     }
     if (txController) txController.mouseMove(position)
   }
@@ -330,21 +353,17 @@
   }
 </style>
 
-<svelte:window on:resize={resize} on:pointermove={pointerMove} on:click={pointerMove} />
+<svelte:window on:resize={resize} on:click={pointerLeave} />
 <!-- <svelte:window on:resize={resize} on:click={pointerMove} /> -->
 
 <div class="tx-area" class:light-mode={!$settings.darkMode}>
-  <div class="canvas-wrapper">
+  <div class="canvas-wrapper" on:pointerleave={pointerLeave} on:pointermove={pointerMove} on:click={onClick}>
     <TxRender controller={txController} />
 
     <div class="mempool-height" style="bottom: calc({$mempoolScreenHeight}px + 1rem)">
       <div class="height-bar" />
-      <span class="mempool-count">Mempool: { $mempoolCount.toLocaleString() } unconfirmed</span>
+      <span class="mempool-count">Mempool: { integerFormat.format($mempoolCount) } unconfirmed</span>
     </div>
-
-    {#if $selectedTx }
-      <TxInfo tx={$selectedTx} position={mousePosition} />
-    {/if}
 
     <div class="block-area-wrapper">
       <div class="spacer"></div>
@@ -360,6 +379,10 @@
       <div class="spacer"></div>
     </div>
   </div>
+
+  {#if $selectedTx }
+    <TxInfo tx={$selectedTx} position={mousePosition} />
+  {/if}
 
   <div class="top-bar">
     <div class="status">

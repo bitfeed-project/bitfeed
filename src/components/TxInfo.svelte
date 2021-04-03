@@ -1,4 +1,6 @@
 <script>
+import { longBtcFormat } from '../utils/format.js'
+
 export let tx
 export let position
 
@@ -12,7 +14,7 @@ $: {
 }
 
 function formatBTC (sats) {
-  return `${(sats/100000000).toFixed(8)} BTC`
+  return `₿ ${longBtcFormat.format(sats/100000000)}`
 }
 </script>
 
@@ -22,11 +24,11 @@ function formatBTC (sats) {
     z-index: 50;
     width: 280px;
     display: block;
-    pointer-events: none;
+    pointer-events: all;
     box-sizing: border-box;
     transform: translateY(20px);
 
-    background: var(--palette-c);
+    background: var(--palette-d);
     color: var(--palette-x);
     padding: .5rem;
 
@@ -45,6 +47,13 @@ function formatBTC (sats) {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+
+    &:hover {
+      .hash {
+        white-space: pre-wrap;
+        word-break: break-all;
+      }
     }
   }
 </style>

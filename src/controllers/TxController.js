@@ -22,6 +22,7 @@ export default class TxController {
     this.knownBlocks = {}
 
     this.selectedTx = null
+    this.selectionLocked = false
 
     this.pendingTxs = []
     this.pendingMap = {}
@@ -248,7 +249,7 @@ export default class TxController {
   }
 
   mouseMove (position) {
-    if (this.poolScene) {
+    if (this.poolScene && !this.selectionLocked) {
       let selected = this.poolScene.selectAt(position)
       if (!selected && this.blockScene && !this.blockScene.hidden) selected = this.blockScene.selectAt(position)
 
@@ -259,5 +260,23 @@ export default class TxController {
       this.selectedTx = selected
       selectedTx.set(this.selectedTx)
     }
+  }
+
+  mouseClick (position) {
+    if (this.poolScene) {
+      let selected = this.poolScene.selectAt(position)
+      if (!selected && this.blockScene && !this.blockScene.hidden) selected = this.blockScene.selectAt(position)
+
+      let sameTx = true
+      if (selected !== this.selectedTx) {
+        sameTx = false
+        if (this.selectedTx) this.selectedTx.hoverOff()
+        if (selected) selected.hoverOn()
+      }
+      this.selectedTx = selected
+      selectedTx.set(this.selectedTx)
+      // this.selectionLocked = !!this.selectedTx && !(this.selectionLocked && sameTx)
+    }
+    this.selectionLocked = !this.selectionLocked
   }
 }

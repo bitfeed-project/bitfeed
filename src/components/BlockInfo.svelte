@@ -4,6 +4,7 @@
   import { createEventDispatcher } from 'svelte'
   import Icon from '../components/Icon.svelte'
   import closeIcon from '../assets/icon/cil-x-circle.svg'
+  import { shortBtcFormat, longBtcFormat, timeFormat, integerFormat } from '../utils/format.js'
 
 	const dispatch = createEventDispatcher()
 
@@ -30,17 +31,23 @@
   }
 
   function formatTime (time) {
-    return (new Date(time)).toLocaleTimeString()
+    return timeFormat.format(time)
   }
 
   function formatBTC (sats) {
-    return `${(sats/100000000).toPrecision(8)} BTC`
+    return `₿ ${shortBtcFormat.format(sats/100000000)}`
   }
 
   function formatBytes (bytes) {
     if (bytes) {
-      return `${bytes.toLocaleString()} bytes`
+      return `${integerFormat.format(bytes)} bytes`
     } else return `unknown size`
+  }
+
+  function formatCount (n) {
+    if (n) {
+      return integerFormat.format(n)
+    } else return '0'
   }
 
   function hideBlock () {
@@ -181,7 +188,7 @@
         </div>
         <div class="data-row">
           <span class="data-field">{ formatBytes(block.bytes) }</span>
-          <span class="data-field">{ block.txnCount } transactions</span>
+          <span class="data-field">{ formatCount(block.txnCount) } transactions</span>
         </div>
     </div>
     <button class="close-button standalone" on:click={hideBlock} out:fly="{{ y: -50, duration: 2000, easing: linear }}" in:fly="{{ y: (restoring ? -50 : 50), duration: (restoring ? 500 : 1000), easing: linear, delay: (restoring ? 0 : newBlockDelay) }}" >

@@ -37,7 +37,7 @@ $: updateContentHeight(open)
 
     .tab-button {
       position: absolute;
-      right: 100%;
+      right: calc(100% - 1px);
 
       display: block;
       padding: 5px;
