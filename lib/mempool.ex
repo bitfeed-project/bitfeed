@@ -27,7 +27,7 @@ defmodule BitcoinStream.Mempool do
   end
 
   def set(pid, n) do
-    Agent.update(pid, &Map.update(&1, :count, 0, fn(x) -> n end))
+    Agent.update(pid, &Map.update(&1, :count, 0, fn(_) -> n end))
   end
 
   def get(pid) do

@@ -82,65 +82,42 @@ defmodule BitcoinStream.Bridge do
   end
 
   defp client_tx_loop(socket) do
-    {:ok, message} = :chumak.recv_multipart(socket);
-    [_topic, payload, _size] = message;
-
-    case BitcoinTx.decode(payload) do
-      {:ok, txn} ->
-        sendTxn(txn);
-        incrementMempool();
-        # IO.puts("new tx")
-      {:error, reason} -> IO.puts("Tx decoding failed: #{reason}");
+    IO.puts("client tx loop");
+    with  {:ok, message} <- :chumak.recv_multipart(socket),
+          [_topic, payload, _size] <- message,
+          {:ok, txn} <- BitcoinTx.decode(payload) do
+      sendTxn(txn);
+      incrementMempool();
+    else
+      {:error, reason} -> IO.puts("Bitcoin node transaction feed bridge error: #{reason}");
+      _ -> IO.puts("Bitcoin node transaction feed bridge error (unknown reason)");
     end
 
     client_tx_loop(socket)
   end
 
   defp client_block_loop(socket) do
-    {:ok, message} = :chumak.recv_multipart(socket);
-    [_topic, payload, _size] = message;
-
-    # keep last block on disk for preloading
-    :ok = File.write("block.dat", payload, [:binary])
-
-    case BitcoinBlock.decode(payload) do
-      {:ok, block} ->
-        sendBlock(block);
-        Mempool.sync(:mempool);
-        IO.puts("new block")
-      {:error, reason} -> IO.puts("Block decoding failed: #{reason}");
+    IO.puts("client block loop");
+    with  {:ok, message} <- :chumak.recv_multipart(socket),
+          [_topic, payload, _size] <- message,
+          :ok <- File.write("block.dat", payload, [:binary]),
+          {:ok, block} <- BitcoinBlock.decode(payload) do
+      sendBlock(block);
+      Mempool.sync(:mempool);
+      IO.puts("new block")
+    else
+      {:error, reason} -> IO.puts("Bitcoin node block feed bridge error: #{reason}");
+      _ -> IO.puts("Bitcoin node block feed bridge error (unknown reason)");
     end
 
     client_block_loop(socket)
   end
 
-  defp server_loop(socket) do
-    {:ok, message} = :chumak.recv(socket);
-    :ok = :chumak.send(socket, "You said: #{message}");
-    server_loop(socket)
-  end
-
   @doc """
-    Create zmq server and begin server loop
-  """
-  def start_server(port) do
-    IO.puts("Starting server on port #{port}");
-    {:ok, socket} = :chumak.socket(:pair);
-    IO.puts("Server socket paired");
-    {:ok, pid} = :chumak.bind(socket, :tcp, 'localhost', port);
-    IO.puts("Server bound");
-    Task.start(fn -> server_loop(socket) end);
-    IO.puts("Spawned server loop");
-    {socket, pid}
-  end
-
-  @doc """
-    Set up demo zmq client and server
+    Set up demo zmq client
   """
   def connect_to_server(port) do
     IO.puts("Starting on #{port}");
-    #{_server_socket, _server_pid} = start_server(port);
-    #IO.puts("Started server");
     {client_socket, _client_pid} = start_client(port);
     IO.puts("Started client");
     client_socket

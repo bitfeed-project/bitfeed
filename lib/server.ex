@@ -4,6 +4,7 @@ defmodule BitcoinStream.Server do
   def start(_type, _args) do
     children = [
       { BitcoinStream.Mempool, [port: 9959, name: :mempool] },
+      BitcoinStream.Metrics.Probe,
       Plug.Cowboy.child_spec(
         scheme: :http,
         plug: BitcoinStream.Router,
@@ -15,8 +16,8 @@ defmodule BitcoinStream.Server do
       Registry.child_spec(
         keys: :duplicate,
         name: Registry.BitcoinStream
-      ),
-      BitcoinStream.Bridge.child_spec(port: 29000)
+      )#,
+      # BitcoinStream.Bridge.child_spec(port: 29000)
     ]
 
     opts = [strategy: :one_for_one, name: BitcoinStream.Application]
@@ -28,6 +29,7 @@ defmodule BitcoinStream.Server do
       {:_,
         [
           {"/ws/txs", BitcoinStream.SocketHandler, []},
+          {"/ws/status", BitcoinStream.Metrics.SocketHandler, []},
           {:_, Plug.Cowboy.Handler, {BitcoinStream.Router, []}}
         ]
       }

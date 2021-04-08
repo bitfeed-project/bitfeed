@@ -1,0 +1,929 @@
+2021-04-08 10:04:47.135 [info] <0.44.0> Application lager started on node nonode@nohost
+2021-04-08 10:04:47.138 [info] <0.44.0> Application hut started on node nonode@nohost
+2021-04-08 10:04:47.146 [info] <0.2280.0> Setup running ...
+2021-04-08 10:04:47.150 [info] <0.2280.0> Directories verified. Res = ok
+2021-04-08 10:04:47.150 [info] <0.2280.0> Setup finished processing hooks (Mode=normal)...
+2021-04-08 10:04:47.150 [info] <0.44.0> Application setup started on node nonode@nohost
+2021-04-08 10:04:47.150 [info] <0.44.0> Application bear started on node nonode@nohost
+2021-04-08 10:04:47.162 [info] <0.44.0> Application folsom started on node nonode@nohost
+2021-04-08 10:04:47.192 [info] <0.2295.0> msg: "Starting reporters with []\n", options: []
+2021-04-08 10:04:47.193 [info] <0.44.0> Application exometer_core started on node nonode@nohost
+2021-04-08 10:04:47.193 [info] <0.44.0> Application pobox started on node nonode@nohost
+2021-04-08 10:04:47.193 [info] <0.44.0> Application elixometer started on node nonode@nohost
+2021-04-08 10:04:47.241 [error] <0.2423.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:04:47.243 [error] <0.2425.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:04:47.244 [info] <0.44.0> Application bitcoin_stream started on node nonode@nohost
+2021-04-08 10:04:47.244 [error] <0.2428.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:04:49.244 [error] <0.2423.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:04:49.246 [error] <0.2425.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:04:49.246 [error] <0.2428.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:04:51.245 [error] <0.2423.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:04:51.248 [error] <0.2425.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:04:51.250 [error] <0.2428.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:04:53.248 [error] <0.2423.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:04:53.251 [error] <0.2428.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:04:53.251 [error] <0.2425.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:04:55.250 [error] <0.2423.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:04:55.252 [error] <0.2428.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:04:55.254 [error] <0.2425.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:04:57.252 [error] <0.2423.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:04:57.255 [error] <0.2428.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:04:57.256 [error] <0.2425.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:04:59.254 [error] <0.2423.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:04:59.256 [error] <0.2428.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:04:59.258 [error] <0.2425.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:01.256 [error] <0.2423.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:01.258 [error] <0.2428.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:01.260 [error] <0.2425.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:03.258 [error] <0.2423.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:03.262 [error] <0.2428.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:03.263 [error] <0.2425.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:05.260 [error] <0.2423.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:05.264 [error] <0.2428.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:05.266 [error] <0.2425.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:07.262 [error] <0.2423.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:07.266 [error] <0.2428.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:07.266 [error] <0.2425.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:09.264 [error] <0.2423.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:09.269 [error] <0.2425.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:09.269 [error] <0.2428.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:11.266 [error] <0.2423.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:11.271 [error] <0.2428.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:11.271 [error] <0.2425.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:13.268 [error] <0.2423.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:13.273 [error] <0.2428.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:13.273 [error] <0.2425.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:15.297 [error] <0.2428.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:15.297 [error] <0.2425.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:15.297 [error] <0.2423.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:17.299 [error] <0.2425.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:17.300 [error] <0.2428.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:17.301 [error] <0.2423.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:19.302 [error] <0.2428.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:19.303 [error] <0.2425.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:19.304 [error] <0.2423.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:21.304 [error] <0.2428.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:21.305 [error] <0.2425.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:21.306 [error] <0.2423.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:23.306 [error] <0.2428.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:23.307 [error] <0.2425.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:23.309 [error] <0.2423.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:25.308 [error] <0.2428.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:25.310 [error] <0.2425.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:25.310 [error] <0.2423.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:27.309 [error] <0.2428.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:27.312 [error] <0.2425.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:27.312 [error] <0.2423.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:29.312 [error] <0.2428.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:29.314 [error] <0.2425.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:29.315 [error] <0.2423.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:31.314 [error] <0.2428.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:31.316 [error] <0.2425.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:31.317 [error] <0.2423.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:33.316 [error] <0.2428.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:33.318 [error] <0.2423.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:33.318 [error] <0.2425.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:35.318 [error] <0.2428.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:35.320 [error] <0.2423.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:35.321 [error] <0.2425.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:37.320 [error] <0.2428.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:37.323 [error] <0.2423.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:37.323 [error] <0.2425.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:39.322 [error] <0.2428.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:39.324 [error] <0.2425.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:39.324 [error] <0.2423.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:41.324 [error] <0.2428.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:41.326 [error] <0.2425.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:41.327 [error] <0.2423.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:43.326 [error] <0.2428.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:43.329 [error] <0.2425.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:05:43.330 [error] <0.2423.0> host: "localhost", port: 29000, connection_error, error: econnrefused
+2021-04-08 10:11:14.786 [info] <0.44.0> Application lager started on node nonode@nohost
+2021-04-08 10:11:14.788 [info] <0.44.0> Application hut started on node nonode@nohost
+2021-04-08 10:11:14.793 [info] <0.439.0> Setup running ...
+2021-04-08 10:11:14.795 [info] <0.439.0> Directories verified. Res = ok
+2021-04-08 10:11:14.795 [info] <0.439.0> Setup finished processing hooks (Mode=normal)...
+2021-04-08 10:11:14.795 [info] <0.44.0> Application setup started on node nonode@nohost
+2021-04-08 10:11:14.796 [info] <0.44.0> Application bear started on node nonode@nohost
+2021-04-08 10:11:14.801 [info] <0.44.0> Application folsom started on node nonode@nohost
+2021-04-08 10:11:14.815 [info] <0.454.0> msg: "Starting reporters with []\n", options: []
+2021-04-08 10:11:14.815 [info] <0.44.0> Application exometer_core started on node nonode@nohost
+2021-04-08 10:11:14.815 [info] <0.44.0> Application pobox started on node nonode@nohost
+2021-04-08 10:11:14.822 [info] <0.44.0> Application elixometer started on node nonode@nohost
+2021-04-08 10:11:14.865 [info] <0.44.0> Application bitcoin_stream started on node nonode@nohost
+2021-04-08 10:14:13.565 [info] <0.44.0> Application lager started on node nonode@nohost
+2021-04-08 10:14:13.568 [info] <0.44.0> Application hut started on node nonode@nohost
+2021-04-08 10:14:13.578 [info] <0.440.0> Setup running ...
+2021-04-08 10:14:13.580 [info] <0.440.0> Directories verified. Res = ok
+2021-04-08 10:14:13.580 [info] <0.440.0> Setup finished processing hooks (Mode=normal)...
+2021-04-08 10:14:13.581 [info] <0.44.0> Application setup started on node nonode@nohost
+2021-04-08 10:14:13.581 [info] <0.44.0> Application bear started on node nonode@nohost
+2021-04-08 10:14:13.588 [info] <0.44.0> Application folsom started on node nonode@nohost
+2021-04-08 10:14:13.611 [info] <0.455.0> msg: "Starting reporters with []\n", options: []
+2021-04-08 10:14:13.612 [info] <0.44.0> Application exometer_core started on node nonode@nohost
+2021-04-08 10:14:13.612 [info] <0.44.0> Application pobox started on node nonode@nohost
+2021-04-08 10:14:13.618 [info] <0.44.0> Application elixometer started on node nonode@nohost
+2021-04-08 10:14:13.675 [info] <0.44.0> Application bitcoin_stream started on node nonode@nohost
+2021-04-08 10:14:53.451 [info] <0.44.0> Application lager started on node nonode@nohost
+2021-04-08 10:14:53.453 [info] <0.44.0> Application hut started on node nonode@nohost
+2021-04-08 10:14:53.458 [info] <0.440.0> Setup running ...
+2021-04-08 10:14:53.460 [info] <0.440.0> Directories verified. Res = ok
+2021-04-08 10:14:53.460 [info] <0.440.0> Setup finished processing hooks (Mode=normal)...
+2021-04-08 10:14:53.460 [info] <0.44.0> Application setup started on node nonode@nohost
+2021-04-08 10:14:53.460 [info] <0.44.0> Application bear started on node nonode@nohost
+2021-04-08 10:14:53.464 [info] <0.44.0> Application folsom started on node nonode@nohost
+2021-04-08 10:14:53.480 [info] <0.455.0> msg: "Starting reporters with []\n", options: []
+2021-04-08 10:14:53.480 [info] <0.44.0> Application exometer_core started on node nonode@nohost
+2021-04-08 10:14:53.480 [info] <0.44.0> Application pobox started on node nonode@nohost
+2021-04-08 10:14:53.485 [info] <0.44.0> Application elixometer started on node nonode@nohost
+2021-04-08 10:14:53.527 [info] <0.44.0> Application bitcoin_stream started on node nonode@nohost
+2021-04-08 10:16:10.863 [info] <0.44.0> Application lager started on node nonode@nohost
+2021-04-08 10:16:10.865 [info] <0.44.0> Application hut started on node nonode@nohost
+2021-04-08 10:16:10.870 [info] <0.439.0> Setup running ...
+2021-04-08 10:16:10.872 [info] <0.439.0> Directories verified. Res = ok
+2021-04-08 10:16:10.872 [info] <0.439.0> Setup finished processing hooks (Mode=normal)...
+2021-04-08 10:16:10.872 [info] <0.44.0> Application setup started on node nonode@nohost
+2021-04-08 10:16:10.872 [info] <0.44.0> Application bear started on node nonode@nohost
+2021-04-08 10:16:10.877 [info] <0.44.0> Application folsom started on node nonode@nohost
+2021-04-08 10:16:10.889 [info] <0.454.0> msg: "Starting reporters with []\n", options: []
+2021-04-08 10:16:10.890 [info] <0.44.0> Application exometer_core started on node nonode@nohost
+2021-04-08 10:16:10.890 [info] <0.44.0> Application pobox started on node nonode@nohost
+2021-04-08 10:16:10.896 [info] <0.44.0> Application elixometer started on node nonode@nohost
+2021-04-08 10:16:10.938 [info] <0.44.0> Application bitcoin_stream started on node nonode@nohost
+2021-04-08 10:18:06.160 [info] <0.44.0> Application lager started on node nonode@nohost
+2021-04-08 10:18:06.162 [info] <0.44.0> Application hut started on node nonode@nohost
+2021-04-08 10:18:06.168 [info] <0.439.0> Setup running ...
+2021-04-08 10:18:06.169 [info] <0.439.0> Directories verified. Res = ok
+2021-04-08 10:18:06.169 [info] <0.439.0> Setup finished processing hooks (Mode=normal)...
+2021-04-08 10:18:06.169 [info] <0.44.0> Application setup started on node nonode@nohost
+2021-04-08 10:18:06.169 [info] <0.44.0> Application bear started on node nonode@nohost
+2021-04-08 10:18:06.174 [info] <0.44.0> Application folsom started on node nonode@nohost
+2021-04-08 10:18:06.185 [info] <0.454.0> msg: "Starting reporters with []\n", options: []
+2021-04-08 10:18:06.186 [info] <0.44.0> Application exometer_core started on node nonode@nohost
+2021-04-08 10:18:06.186 [info] <0.44.0> Application pobox started on node nonode@nohost
+2021-04-08 10:18:06.192 [info] <0.44.0> Application elixometer started on node nonode@nohost
+2021-04-08 10:18:06.231 [info] <0.44.0> Application bitcoin_stream started on node nonode@nohost
+2021-04-08 10:19:26.439 [info] <0.44.0> Application lager started on node nonode@nohost
+2021-04-08 10:19:26.441 [info] <0.44.0> Application hut started on node nonode@nohost
+2021-04-08 10:19:26.446 [info] <0.439.0> Setup running ...
+2021-04-08 10:19:26.447 [info] <0.439.0> Directories verified. Res = ok
+2021-04-08 10:19:26.448 [info] <0.439.0> Setup finished processing hooks (Mode=normal)...
+2021-04-08 10:19:26.448 [info] <0.44.0> Application setup started on node nonode@nohost
+2021-04-08 10:19:26.448 [info] <0.44.0> Application bear started on node nonode@nohost
+2021-04-08 10:19:26.452 [info] <0.44.0> Application folsom started on node nonode@nohost
+2021-04-08 10:19:26.465 [info] <0.454.0> msg: "Starting reporters with []\n", options: []
+2021-04-08 10:19:26.465 [info] <0.44.0> Application exometer_core started on node nonode@nohost
+2021-04-08 10:19:26.465 [info] <0.44.0> Application pobox started on node nonode@nohost
+2021-04-08 10:19:26.471 [info] <0.44.0> Application elixometer started on node nonode@nohost
+2021-04-08 10:19:26.512 [info] <0.44.0> Application bitcoin_stream started on node nonode@nohost
+2021-04-08 10:20:05.032 [info] <0.44.0> Application lager started on node nonode@nohost
+2021-04-08 10:20:05.033 [info] <0.44.0> Application hut started on node nonode@nohost
+2021-04-08 10:20:05.039 [info] <0.439.0> Setup running ...
+2021-04-08 10:20:05.040 [info] <0.439.0> Directories verified. Res = ok
+2021-04-08 10:20:05.041 [info] <0.439.0> Setup finished processing hooks (Mode=normal)...
+2021-04-08 10:20:05.041 [info] <0.44.0> Application setup started on node nonode@nohost
+2021-04-08 10:20:05.041 [info] <0.44.0> Application bear started on node nonode@nohost
+2021-04-08 10:20:05.046 [info] <0.44.0> Application folsom started on node nonode@nohost
+2021-04-08 10:20:05.057 [info] <0.454.0> msg: "Starting reporters with []\n", options: []
+2021-04-08 10:20:05.057 [info] <0.44.0> Application exometer_core started on node nonode@nohost
+2021-04-08 10:20:05.057 [info] <0.44.0> Application pobox started on node nonode@nohost
+2021-04-08 10:20:05.062 [info] <0.44.0> Application elixometer started on node nonode@nohost
+2021-04-08 10:20:05.102 [info] <0.44.0> Application bitcoin_stream started on node nonode@nohost
+2021-04-08 10:25:16.470 [info] <0.44.0> Application lager started on node nonode@nohost
+2021-04-08 10:25:16.472 [info] <0.44.0> Application hut started on node nonode@nohost
+2021-04-08 10:25:16.478 [info] <0.439.0> Setup running ...
+2021-04-08 10:25:16.480 [info] <0.439.0> Directories verified. Res = ok
+2021-04-08 10:25:16.480 [info] <0.439.0> Setup finished processing hooks (Mode=normal)...
+2021-04-08 10:25:16.480 [info] <0.44.0> Application setup started on node nonode@nohost
+2021-04-08 10:25:16.480 [info] <0.44.0> Application bear started on node nonode@nohost
+2021-04-08 10:25:16.485 [info] <0.44.0> Application folsom started on node nonode@nohost
+2021-04-08 10:25:16.495 [info] <0.454.0> msg: "Starting reporters with []\n", options: []
+2021-04-08 10:25:16.496 [info] <0.44.0> Application exometer_core started on node nonode@nohost
+2021-04-08 10:25:16.496 [info] <0.44.0> Application pobox started on node nonode@nohost
+2021-04-08 10:25:16.501 [info] <0.44.0> Application elixometer started on node nonode@nohost
+2021-04-08 10:25:16.542 [info] <0.44.0> Application bitcoin_stream started on node nonode@nohost
+2021-04-08 10:27:14.079 [info] <0.44.0> Application lager started on node nonode@nohost
+2021-04-08 10:27:14.082 [info] <0.44.0> Application hut started on node nonode@nohost
+2021-04-08 10:27:14.087 [info] <0.479.0> Setup running ...
+2021-04-08 10:27:14.089 [info] <0.479.0> Directories verified. Res = ok
+2021-04-08 10:27:14.090 [info] <0.479.0> Setup finished processing hooks (Mode=normal)...
+2021-04-08 10:27:14.090 [info] <0.44.0> Application setup started on node nonode@nohost
+2021-04-08 10:27:14.090 [info] <0.44.0> Application bear started on node nonode@nohost
+2021-04-08 10:27:14.096 [info] <0.44.0> Application folsom started on node nonode@nohost
+2021-04-08 10:27:14.107 [info] <0.494.0> msg: "Starting reporters with []\n", options: []
+2021-04-08 10:27:14.107 [info] <0.44.0> Application exometer_core started on node nonode@nohost
+2021-04-08 10:27:14.107 [info] <0.44.0> Application pobox started on node nonode@nohost
+2021-04-08 10:27:14.112 [info] <0.44.0> Application elixometer started on node nonode@nohost
+2021-04-08 10:27:14.143 [error] <0.510.0> Supervisor 'Elixir.BitcoinStream.Application' had child {ranch_listener_sup,'Elixir.BitcoinStream.Router.HTTP'} started with ranch_listener_sup:start_link('Elixir.BitcoinStream.Router.HTTP', ranch_tcp, #{max_connections => 16384,num_acceptors => 100,socket_opts => [{port,4000}]}, cowboy_clear, #{env => #{dispatch => [{'_',[],[{[<<"ws">>,<<"txs">>],[],'Elixir.BitcoinStream.SocketHandler',...},...]}]},...}) at undefined exit with reason {'EXIT',{noproc,{gen_server,call,[ranch_server,{set_new_listener_opts,'Elixir.BitcoinStream.Router.HTTP',16384,#{max_connections => 16384,num_acceptors => 100,socket_opts => [{port,4000}]},#{env => #{dispatch => [{'_',[],[{[<<"ws">>,<<"txs">>],[],'Elixir.BitcoinStream.SocketHandler',[]},{[<<"ws">>,<<"status">>],[],'Elixir.BitcoinStream.Metrics.SocketHandler',[]},{'_',[],'Elixir.Plug.Cowboy.Handler',{'Elixir.BitcoinStream.Router',[]}}]}]},stream_handlers => [cowboy_telemetry_h,cowboy_stream_h]},...}]}}} in context start_error
+2021-04-08 10:27:46.304 [info] <0.44.0> Application lager started on node nonode@nohost
+2021-04-08 10:27:46.306 [info] <0.44.0> Application hut started on node nonode@nohost
+2021-04-08 10:27:46.313 [info] <0.479.0> Setup running ...
+2021-04-08 10:27:46.314 [info] <0.479.0> Directories verified. Res = ok
+2021-04-08 10:27:46.315 [info] <0.479.0> Setup finished processing hooks (Mode=normal)...
+2021-04-08 10:27:46.315 [info] <0.44.0> Application setup started on node nonode@nohost
+2021-04-08 10:27:46.315 [info] <0.44.0> Application bear started on node nonode@nohost
+2021-04-08 10:27:46.320 [info] <0.44.0> Application folsom started on node nonode@nohost
+2021-04-08 10:27:46.332 [info] <0.494.0> msg: "Starting reporters with []\n", options: []
+2021-04-08 10:27:46.332 [info] <0.44.0> Application exometer_core started on node nonode@nohost
+2021-04-08 10:27:46.332 [info] <0.44.0> Application pobox started on node nonode@nohost
+2021-04-08 10:27:46.338 [info] <0.44.0> Application elixometer started on node nonode@nohost
+2021-04-08 10:27:46.340 [info] <0.44.0> Application chumak started on node nonode@nohost
+2021-04-08 10:27:46.422 [info] <0.44.0> Application tzdata started on node nonode@nohost
+2021-04-08 10:27:46.422 [info] <0.44.0> Application combine started on node nonode@nohost
+2021-04-08 10:27:46.424 [info] <0.44.0> Application gettext started on node nonode@nohost
+2021-04-08 10:27:46.428 [info] <0.44.0> Application timex started on node nonode@nohost
+2021-04-08 10:27:46.428 [info] <0.44.0> Application decimal started on node nonode@nohost
+2021-04-08 10:27:46.428 [info] <0.44.0> Application bitcoinex started on node nonode@nohost
+2021-04-08 10:27:46.428 [info] <0.44.0> Application cowlib started on node nonode@nohost
+2021-04-08 10:27:46.432 [info] <0.44.0> Application ranch started on node nonode@nohost
+2021-04-08 10:27:46.435 [info] <0.44.0> Application cowboy started on node nonode@nohost
+2021-04-08 10:27:46.435 [info] <0.44.0> Application eex started on node nonode@nohost
+2021-04-08 10:27:46.441 [info] <0.44.0> Application mime started on node nonode@nohost
+2021-04-08 10:27:46.442 [info] <0.44.0> Application plug_crypto started on node nonode@nohost
+2021-04-08 10:27:46.446 [info] <0.44.0> Application telemetry started on node nonode@nohost
+2021-04-08 10:27:46.448 [info] <0.44.0> Application plug started on node nonode@nohost
+2021-04-08 10:27:46.448 [info] <0.44.0> Application cowboy_telemetry started on node nonode@nohost
+2021-04-08 10:27:46.449 [info] <0.44.0> Application plug_cowboy started on node nonode@nohost
+2021-04-08 10:27:46.449 [info] <0.44.0> Application jason started on node nonode@nohost
+2021-04-08 10:27:46.488 [info] <0.44.0> Application bitcoin_stream started on node nonode@nohost
+2021-04-08 10:28:11.792 [info] <0.44.0> Application lager started on node nonode@nohost
+2021-04-08 10:28:11.794 [info] <0.44.0> Application hut started on node nonode@nohost
+2021-04-08 10:28:11.800 [info] <0.381.0> Setup running ...
+2021-04-08 10:28:11.802 [info] <0.381.0> Directories verified. Res = ok
+2021-04-08 10:28:11.802 [info] <0.381.0> Setup finished processing hooks (Mode=normal)...
+2021-04-08 10:28:11.802 [info] <0.44.0> Application setup started on node nonode@nohost
+2021-04-08 10:28:11.802 [info] <0.44.0> Application bear started on node nonode@nohost
+2021-04-08 10:28:11.807 [info] <0.44.0> Application folsom started on node nonode@nohost
+2021-04-08 10:28:11.821 [info] <0.396.0> msg: "Starting reporters with []\n", options: []
+2021-04-08 10:28:11.822 [info] <0.44.0> Application exometer_core started on node nonode@nohost
+2021-04-08 10:28:11.822 [info] <0.44.0> Application pobox started on node nonode@nohost
+2021-04-08 10:28:11.828 [info] <0.44.0> Application elixometer started on node nonode@nohost
+2021-04-08 10:28:11.829 [info] <0.44.0> Application chumak started on node nonode@nohost
+2021-04-08 10:28:11.909 [info] <0.44.0> Application tzdata started on node nonode@nohost
+2021-04-08 10:28:11.909 [info] <0.44.0> Application combine started on node nonode@nohost
+2021-04-08 10:28:11.911 [info] <0.44.0> Application gettext started on node nonode@nohost
+2021-04-08 10:28:11.915 [info] <0.44.0> Application timex started on node nonode@nohost
+2021-04-08 10:28:11.915 [info] <0.44.0> Application decimal started on node nonode@nohost
+2021-04-08 10:28:11.915 [info] <0.44.0> Application bitcoinex started on node nonode@nohost
+2021-04-08 10:28:11.915 [info] <0.44.0> Application cowlib started on node nonode@nohost
+2021-04-08 10:28:11.919 [info] <0.44.0> Application ranch started on node nonode@nohost
+2021-04-08 10:28:11.921 [info] <0.44.0> Application cowboy started on node nonode@nohost
+2021-04-08 10:28:11.921 [info] <0.44.0> Application eex started on node nonode@nohost
+2021-04-08 10:28:11.927 [info] <0.44.0> Application mime started on node nonode@nohost
+2021-04-08 10:28:11.929 [info] <0.44.0> Application plug_crypto started on node nonode@nohost
+2021-04-08 10:28:11.932 [info] <0.44.0> Application telemetry started on node nonode@nohost
+2021-04-08 10:28:11.934 [info] <0.44.0> Application plug started on node nonode@nohost
+2021-04-08 10:28:11.934 [info] <0.44.0> Application cowboy_telemetry started on node nonode@nohost
+2021-04-08 10:28:11.935 [info] <0.44.0> Application plug_cowboy started on node nonode@nohost
+2021-04-08 10:28:11.935 [info] <0.44.0> Application jason started on node nonode@nohost
+2021-04-08 10:28:11.971 [info] <0.44.0> Application bitcoin_stream started on node nonode@nohost
+2021-04-08 10:38:14.348 [info] <0.44.0> Application lager started on node nonode@nohost
+2021-04-08 10:38:14.350 [info] <0.44.0> Application hut started on node nonode@nohost
+2021-04-08 10:38:14.355 [info] <0.365.0> Setup running ...
+2021-04-08 10:38:14.356 [info] <0.365.0> Directories verified. Res = ok
+2021-04-08 10:38:14.357 [info] <0.365.0> Setup finished processing hooks (Mode=normal)...
+2021-04-08 10:38:14.357 [info] <0.44.0> Application setup started on node nonode@nohost
+2021-04-08 10:38:14.357 [info] <0.44.0> Application bear started on node nonode@nohost
+2021-04-08 10:38:14.362 [info] <0.44.0> Application folsom started on node nonode@nohost
+2021-04-08 10:38:14.362 [info] <0.44.0> Application parse_trans started on node nonode@nohost
+2021-04-08 10:38:14.371 [info] <0.381.0> msg: "Starting reporters with []\n", options: []
+2021-04-08 10:38:14.372 [info] <0.44.0> Application exometer_core started on node nonode@nohost
+2021-04-08 10:38:14.372 [info] <0.44.0> Application pobox started on node nonode@nohost
+2021-04-08 10:38:14.376 [info] <0.44.0> Application elixometer started on node nonode@nohost
+2021-04-08 10:38:14.378 [info] <0.44.0> Application chumak started on node nonode@nohost
+2021-04-08 10:38:14.378 [info] <0.44.0> Application unicode_util_compat started on node nonode@nohost
+2021-04-08 10:38:14.378 [info] <0.44.0> Application idna started on node nonode@nohost
+2021-04-08 10:38:14.378 [info] <0.44.0> Application mimerl started on node nonode@nohost
+2021-04-08 10:38:14.378 [info] <0.44.0> Application certifi started on node nonode@nohost
+2021-04-08 10:38:14.378 [info] <0.44.0> Application ssl_verify_fun started on node nonode@nohost
+2021-04-08 10:38:14.378 [info] <0.44.0> Application metrics started on node nonode@nohost
+2021-04-08 10:38:14.387 [info] <0.44.0> Application hackney started on node nonode@nohost
+2021-04-08 10:38:14.461 [info] <0.44.0> Application tzdata started on node nonode@nohost
+2021-04-08 10:38:14.461 [info] <0.44.0> Application combine started on node nonode@nohost
+2021-04-08 10:38:14.463 [info] <0.44.0> Application gettext started on node nonode@nohost
+2021-04-08 10:38:14.467 [info] <0.44.0> Application timex started on node nonode@nohost
+2021-04-08 10:38:14.467 [info] <0.44.0> Application decimal started on node nonode@nohost
+2021-04-08 10:38:14.467 [info] <0.44.0> Application bitcoinex started on node nonode@nohost
+2021-04-08 10:38:14.467 [info] <0.44.0> Application cowlib started on node nonode@nohost
+2021-04-08 10:38:14.470 [info] <0.44.0> Application ranch started on node nonode@nohost
+2021-04-08 10:38:14.472 [info] <0.44.0> Application cowboy started on node nonode@nohost
+2021-04-08 10:38:14.473 [info] <0.44.0> Application eex started on node nonode@nohost
+2021-04-08 10:38:14.478 [info] <0.44.0> Application mime started on node nonode@nohost
+2021-04-08 10:38:14.479 [info] <0.44.0> Application plug_crypto started on node nonode@nohost
+2021-04-08 10:38:14.482 [info] <0.44.0> Application telemetry started on node nonode@nohost
+2021-04-08 10:38:14.484 [info] <0.44.0> Application plug started on node nonode@nohost
+2021-04-08 10:38:14.484 [info] <0.44.0> Application cowboy_telemetry started on node nonode@nohost
+2021-04-08 10:38:14.485 [info] <0.44.0> Application plug_cowboy started on node nonode@nohost
+2021-04-08 10:38:14.485 [info] <0.44.0> Application jason started on node nonode@nohost
+2021-04-08 10:38:14.529 [info] <0.44.0> Application bitcoin_stream started on node nonode@nohost
+2021-04-08 10:46:50.476 [info] <0.44.0> Application lager started on node nonode@nohost
+2021-04-08 10:46:50.478 [info] <0.44.0> Application hut started on node nonode@nohost
+2021-04-08 10:46:50.484 [info] <0.479.0> Setup running ...
+2021-04-08 10:46:50.486 [info] <0.479.0> Directories verified. Res = ok
+2021-04-08 10:46:50.486 [info] <0.479.0> Setup finished processing hooks (Mode=normal)...
+2021-04-08 10:46:50.486 [info] <0.44.0> Application setup started on node nonode@nohost
+2021-04-08 10:46:50.486 [info] <0.44.0> Application bear started on node nonode@nohost
+2021-04-08 10:46:50.491 [info] <0.44.0> Application folsom started on node nonode@nohost
+2021-04-08 10:46:50.501 [info] <0.494.0> msg: "Starting reporters with []\n", options: []
+2021-04-08 10:46:50.501 [info] <0.44.0> Application exometer_core started on node nonode@nohost
+2021-04-08 10:46:50.501 [info] <0.44.0> Application pobox started on node nonode@nohost
+2021-04-08 10:46:50.504 [info] <0.44.0> Application elixometer started on node nonode@nohost
+2021-04-08 10:46:50.505 [info] <0.44.0> Application chumak started on node nonode@nohost
+2021-04-08 10:46:50.587 [info] <0.44.0> Application tzdata started on node nonode@nohost
+2021-04-08 10:46:50.587 [info] <0.44.0> Application combine started on node nonode@nohost
+2021-04-08 10:46:50.589 [info] <0.44.0> Application gettext started on node nonode@nohost
+2021-04-08 10:46:50.593 [info] <0.44.0> Application timex started on node nonode@nohost
+2021-04-08 10:46:50.593 [info] <0.44.0> Application decimal started on node nonode@nohost
+2021-04-08 10:46:50.593 [info] <0.44.0> Application bitcoinex started on node nonode@nohost
+2021-04-08 10:46:50.593 [info] <0.44.0> Application cowlib started on node nonode@nohost
+2021-04-08 10:46:50.596 [info] <0.44.0> Application ranch started on node nonode@nohost
+2021-04-08 10:46:50.599 [info] <0.44.0> Application cowboy started on node nonode@nohost
+2021-04-08 10:46:50.599 [info] <0.44.0> Application eex started on node nonode@nohost
+2021-04-08 10:46:50.605 [info] <0.44.0> Application mime started on node nonode@nohost
+2021-04-08 10:46:50.606 [info] <0.44.0> Application plug_crypto started on node nonode@nohost
+2021-04-08 10:46:50.609 [info] <0.44.0> Application telemetry started on node nonode@nohost
+2021-04-08 10:46:50.611 [info] <0.44.0> Application plug started on node nonode@nohost
+2021-04-08 10:46:50.611 [info] <0.44.0> Application cowboy_telemetry started on node nonode@nohost
+2021-04-08 10:46:50.612 [info] <0.44.0> Application plug_cowboy started on node nonode@nohost
+2021-04-08 10:46:50.613 [info] <0.44.0> Application jason started on node nonode@nohost
+2021-04-08 10:46:50.646 [info] <0.44.0> Application bitcoin_stream started on node nonode@nohost
+2021-04-08 10:49:03.229 [info] <0.44.0> Application lager started on node nonode@nohost
+2021-04-08 10:49:03.231 [info] <0.44.0> Application hut started on node nonode@nohost
+2021-04-08 10:49:03.236 [info] <0.364.0> Setup running ...
+2021-04-08 10:49:03.238 [info] <0.364.0> Directories verified. Res = ok
+2021-04-08 10:49:03.239 [info] <0.364.0> Setup finished processing hooks (Mode=normal)...
+2021-04-08 10:49:03.239 [info] <0.44.0> Application setup started on node nonode@nohost
+2021-04-08 10:49:03.239 [info] <0.44.0> Application bear started on node nonode@nohost
+2021-04-08 10:49:03.243 [info] <0.44.0> Application folsom started on node nonode@nohost
+2021-04-08 10:49:03.243 [info] <0.44.0> Application parse_trans started on node nonode@nohost
+2021-04-08 10:49:03.255 [info] <0.380.0> msg: "Starting reporters with []\n", options: []
+2021-04-08 10:49:03.255 [info] <0.44.0> Application exometer_core started on node nonode@nohost
+2021-04-08 10:49:03.255 [info] <0.44.0> Application pobox started on node nonode@nohost
+2021-04-08 10:49:03.261 [info] <0.44.0> Application elixometer started on node nonode@nohost
+2021-04-08 10:49:03.264 [info] <0.44.0> Application chumak started on node nonode@nohost
+2021-04-08 10:49:03.264 [info] <0.44.0> Application unicode_util_compat started on node nonode@nohost
+2021-04-08 10:49:03.264 [info] <0.44.0> Application idna started on node nonode@nohost
+2021-04-08 10:49:03.264 [info] <0.44.0> Application mimerl started on node nonode@nohost
+2021-04-08 10:49:03.265 [info] <0.44.0> Application certifi started on node nonode@nohost
+2021-04-08 10:49:03.265 [info] <0.44.0> Application ssl_verify_fun started on node nonode@nohost
+2021-04-08 10:49:03.265 [info] <0.44.0> Application metrics started on node nonode@nohost
+2021-04-08 10:49:03.278 [info] <0.44.0> Application hackney started on node nonode@nohost
+2021-04-08 10:49:03.356 [info] <0.44.0> Application tzdata started on node nonode@nohost
+2021-04-08 10:49:03.356 [info] <0.44.0> Application combine started on node nonode@nohost
+2021-04-08 10:49:03.358 [info] <0.44.0> Application gettext started on node nonode@nohost
+2021-04-08 10:49:03.362 [info] <0.44.0> Application timex started on node nonode@nohost
+2021-04-08 10:49:03.362 [info] <0.44.0> Application decimal started on node nonode@nohost
+2021-04-08 10:49:03.362 [info] <0.44.0> Application bitcoinex started on node nonode@nohost
+2021-04-08 10:49:03.362 [info] <0.44.0> Application cowlib started on node nonode@nohost
+2021-04-08 10:49:03.365 [info] <0.44.0> Application ranch started on node nonode@nohost
+2021-04-08 10:49:03.367 [info] <0.44.0> Application cowboy started on node nonode@nohost
+2021-04-08 10:49:03.367 [info] <0.44.0> Application eex started on node nonode@nohost
+2021-04-08 10:49:03.373 [info] <0.44.0> Application mime started on node nonode@nohost
+2021-04-08 10:49:03.374 [info] <0.44.0> Application plug_crypto started on node nonode@nohost
+2021-04-08 10:49:03.377 [info] <0.44.0> Application telemetry started on node nonode@nohost
+2021-04-08 10:49:03.379 [info] <0.44.0> Application plug started on node nonode@nohost
+2021-04-08 10:49:03.379 [info] <0.44.0> Application cowboy_telemetry started on node nonode@nohost
+2021-04-08 10:49:03.380 [info] <0.44.0> Application plug_cowboy started on node nonode@nohost
+2021-04-08 10:49:03.381 [info] <0.44.0> Application jason started on node nonode@nohost
+2021-04-08 10:49:03.424 [info] <0.44.0> Application bitcoin_stream started on node nonode@nohost
+2021-04-08 10:49:23.672 [info] <0.44.0> Application lager started on node nonode@nohost
+2021-04-08 10:49:23.674 [info] <0.44.0> Application hut started on node nonode@nohost
+2021-04-08 10:49:23.679 [info] <0.350.0> Setup running ...
+2021-04-08 10:49:23.681 [info] <0.350.0> Directories verified. Res = ok
+2021-04-08 10:49:23.681 [info] <0.350.0> Setup finished processing hooks (Mode=normal)...
+2021-04-08 10:49:23.681 [info] <0.44.0> Application setup started on node nonode@nohost
+2021-04-08 10:49:23.681 [info] <0.44.0> Application bear started on node nonode@nohost
+2021-04-08 10:49:23.685 [info] <0.44.0> Application folsom started on node nonode@nohost
+2021-04-08 10:49:23.685 [info] <0.44.0> Application parse_trans started on node nonode@nohost
+2021-04-08 10:49:23.699 [info] <0.366.0> msg: "Starting reporters with []\n", options: []
+2021-04-08 10:49:23.701 [info] <0.44.0> Application exometer_core started on node nonode@nohost
+2021-04-08 10:49:23.701 [info] <0.44.0> Application pobox started on node nonode@nohost
+2021-04-08 10:49:23.707 [info] <0.44.0> Application elixometer started on node nonode@nohost
+2021-04-08 10:49:23.709 [info] <0.44.0> Application chumak started on node nonode@nohost
+2021-04-08 10:49:23.709 [info] <0.44.0> Application unicode_util_compat started on node nonode@nohost
+2021-04-08 10:49:23.709 [info] <0.44.0> Application idna started on node nonode@nohost
+2021-04-08 10:49:23.709 [info] <0.44.0> Application mimerl started on node nonode@nohost
+2021-04-08 10:49:23.709 [info] <0.44.0> Application certifi started on node nonode@nohost
+2021-04-08 10:49:23.709 [info] <0.44.0> Application ssl_verify_fun started on node nonode@nohost
+2021-04-08 10:49:23.709 [info] <0.44.0> Application metrics started on node nonode@nohost
+2021-04-08 10:49:23.719 [info] <0.44.0> Application hackney started on node nonode@nohost
+2021-04-08 10:49:23.804 [info] <0.44.0> Application tzdata started on node nonode@nohost
+2021-04-08 10:49:23.804 [info] <0.44.0> Application combine started on node nonode@nohost
+2021-04-08 10:49:23.806 [info] <0.44.0> Application gettext started on node nonode@nohost
+2021-04-08 10:49:23.809 [info] <0.44.0> Application timex started on node nonode@nohost
+2021-04-08 10:49:23.810 [info] <0.44.0> Application decimal started on node nonode@nohost
+2021-04-08 10:49:23.810 [info] <0.44.0> Application bitcoinex started on node nonode@nohost
+2021-04-08 10:49:23.810 [info] <0.44.0> Application cowlib started on node nonode@nohost
+2021-04-08 10:49:23.813 [info] <0.44.0> Application ranch started on node nonode@nohost
+2021-04-08 10:49:23.816 [info] <0.44.0> Application cowboy started on node nonode@nohost
+2021-04-08 10:49:23.816 [info] <0.44.0> Application eex started on node nonode@nohost
+2021-04-08 10:49:23.822 [info] <0.44.0> Application mime started on node nonode@nohost
+2021-04-08 10:49:23.823 [info] <0.44.0> Application plug_crypto started on node nonode@nohost
+2021-04-08 10:49:23.826 [info] <0.44.0> Application telemetry started on node nonode@nohost
+2021-04-08 10:49:23.828 [info] <0.44.0> Application plug started on node nonode@nohost
+2021-04-08 10:49:23.828 [info] <0.44.0> Application cowboy_telemetry started on node nonode@nohost
+2021-04-08 10:49:23.830 [info] <0.44.0> Application plug_cowboy started on node nonode@nohost
+2021-04-08 10:49:23.830 [info] <0.44.0> Application jason started on node nonode@nohost
+2021-04-08 10:49:23.875 [info] <0.44.0> Application bitcoin_stream started on node nonode@nohost
+2021-04-08 10:52:58.827 [info] <0.44.0> Application lager started on node nonode@nohost
+2021-04-08 10:52:58.829 [info] <0.44.0> Application hut started on node nonode@nohost
+2021-04-08 10:52:58.835 [info] <0.479.0> Setup running ...
+2021-04-08 10:52:58.837 [info] <0.479.0> Directories verified. Res = ok
+2021-04-08 10:52:58.837 [info] <0.479.0> Setup finished processing hooks (Mode=normal)...
+2021-04-08 10:52:58.837 [info] <0.44.0> Application setup started on node nonode@nohost
+2021-04-08 10:52:58.838 [info] <0.44.0> Application bear started on node nonode@nohost
+2021-04-08 10:52:58.843 [info] <0.44.0> Application folsom started on node nonode@nohost
+2021-04-08 10:52:58.853 [info] <0.494.0> msg: "Starting reporters with [{reporters,\n                             [{'Elixir.BitcoinStream.ExometerReportDash',\n                                  []}]}]\n", options: []
+2021-04-08 10:52:58.854 [info] <0.44.0> Application exometer_core started on node nonode@nohost
+2021-04-08 10:52:58.854 [info] <0.44.0> Application pobox started on node nonode@nohost
+2021-04-08 10:52:58.859 [info] <0.44.0> Application elixometer started on node nonode@nohost
+2021-04-08 10:52:58.861 [info] <0.44.0> Application chumak started on node nonode@nohost
+2021-04-08 10:52:58.942 [info] <0.44.0> Application tzdata started on node nonode@nohost
+2021-04-08 10:52:58.942 [info] <0.44.0> Application combine started on node nonode@nohost
+2021-04-08 10:52:58.945 [info] <0.44.0> Application gettext started on node nonode@nohost
+2021-04-08 10:52:58.948 [info] <0.44.0> Application timex started on node nonode@nohost
+2021-04-08 10:52:58.948 [info] <0.44.0> Application decimal started on node nonode@nohost
+2021-04-08 10:52:58.948 [info] <0.44.0> Application bitcoinex started on node nonode@nohost
+2021-04-08 10:52:58.948 [info] <0.44.0> Application cowlib started on node nonode@nohost
+2021-04-08 10:52:58.951 [info] <0.44.0> Application ranch started on node nonode@nohost
+2021-04-08 10:52:58.954 [info] <0.44.0> Application cowboy started on node nonode@nohost
+2021-04-08 10:52:58.954 [info] <0.44.0> Application eex started on node nonode@nohost
+2021-04-08 10:52:58.960 [info] <0.44.0> Application mime started on node nonode@nohost
+2021-04-08 10:52:58.961 [info] <0.44.0> Application plug_crypto started on node nonode@nohost
+2021-04-08 10:52:58.965 [info] <0.44.0> Application telemetry started on node nonode@nohost
+2021-04-08 10:52:58.967 [info] <0.44.0> Application plug started on node nonode@nohost
+2021-04-08 10:52:58.967 [info] <0.44.0> Application cowboy_telemetry started on node nonode@nohost
+2021-04-08 10:52:58.968 [info] <0.44.0> Application plug_cowboy started on node nonode@nohost
+2021-04-08 10:52:58.968 [info] <0.44.0> Application jason started on node nonode@nohost
+2021-04-08 10:52:59.016 [info] <0.44.0> Application bitcoin_stream started on node nonode@nohost
+2021-04-08 10:53:00.484 [error] <0.498.0>@Elixir.BitcoinStream.ExometerReportDash:exometer_report:16 CRASH REPORT Process 'Elixir.BitcoinStream.ExometerReportDash' with 0 neighbours crashed with reason: bad argument in 'Elixir.BitcoinStream.ExometerReportDash':exometer_report/5 line 16
+2021-04-08 10:53:00.486 [error] <0.494.0> msg: "badarg\nKey = {key,'Elixir.BitcoinStream.ExometerReportDash',\n           [<<\"bitfeed_dash\">>,<<\"dev\">>,<<\"timers\">>,<<\"timed\">>,\n            <<\"function\">>],\n           95,true,[]}\nTrace: [{exometer_report,report_values,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1557}]},\n        {exometer_report,do_report,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1228}]},\n        {exometer_report,handle_report,4,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1211}]},\n        {exometer_report,handle_info,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1126}]},\n        {gen_server,try_dispatch,4,[{file,\"gen_server.erl\"},{line,689}]},\n        {gen_server,handle_msg,6,[{file,\"gen_server.erl\"},{line,765}]},\n        {proc_lib,init_p_do_apply,3,[{file,\"proc_lib.erl\"},{line,226}]}]", options: []
+2021-04-08 10:53:00.490 [error] <0.494.0> msg: "badarg\nKey = {key,'Elixir.BitcoinStream.ExometerReportDash',\n           [<<\"bitfeed_dash\">>,<<\"dev\">>,<<\"timers\">>,<<\"timed\">>,\n            <<\"function\">>],\n           99,true,[]}\nTrace: [{exometer_report,report_values,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1557}]},\n        {exometer_report,do_report,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1228}]},\n        {exometer_report,handle_report,4,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1211}]},\n        {exometer_report,handle_info,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1126}]},\n        {gen_server,try_dispatch,4,[{file,\"gen_server.erl\"},{line,689}]},\n        {gen_server,handle_msg,6,[{file,\"gen_server.erl\"},{line,765}]},\n        {proc_lib,init_p_do_apply,3,[{file,\"proc_lib.erl\"},{line,226}]}]", options: []
+2021-04-08 10:53:00.490 [error] <0.494.0> msg: "badarg\nKey = {key,'Elixir.BitcoinStream.ExometerReportDash',\n           [<<\"bitfeed_dash\">>,<<\"dev\">>,<<\"timers\">>,<<\"timed\">>,\n            <<\"function\">>],\n           999,true,[]}\nTrace: [{exometer_report,report_values,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1557}]},\n        {exometer_report,do_report,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1228}]},\n        {exometer_report,handle_report,4,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1211}]},\n        {exometer_report,handle_info,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1126}]},\n        {gen_server,try_dispatch,4,[{file,\"gen_server.erl\"},{line,689}]},\n        {gen_server,handle_msg,6,[{file,\"gen_server.erl\"},{line,765}]},\n        {proc_lib,init_p_do_apply,3,[{file,\"proc_lib.erl\"},{line,226}]}]", options: []
+2021-04-08 10:53:01.492 [error] <0.690.0>@Elixir.BitcoinStream.ExometerReportDash:exometer_report:16 CRASH REPORT Process 'Elixir.BitcoinStream.ExometerReportDash' with 0 neighbours crashed with reason: bad argument in 'Elixir.BitcoinStream.ExometerReportDash':exometer_report/5 line 16
+2021-04-08 10:53:01.494 [error] <0.494.0> msg: "badarg\nKey = {key,'Elixir.BitcoinStream.ExometerReportDash',\n           [<<\"bitfeed_dash\">>,<<\"dev\">>,<<\"timers\">>,<<\"timed\">>,\n            <<\"function\">>],\n           median,true,[]}\nTrace: [{exometer_report,report_values,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1557}]},\n        {exometer_report,do_report,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1228}]},\n        {exometer_report,handle_report,4,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1211}]},\n        {exometer_report,handle_info,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1126}]},\n        {gen_server,try_dispatch,4,[{file,\"gen_server.erl\"},{line,689}]},\n        {gen_server,handle_msg,6,[{file,\"gen_server.erl\"},{line,765}]},\n        {proc_lib,init_p_do_apply,3,[{file,\"proc_lib.erl\"},{line,226}]}]", options: []
+2021-04-08 10:53:01.496 [error] <0.494.0> msg: "badarg\nKey = {key,'Elixir.BitcoinStream.ExometerReportDash',\n           [<<\"bitfeed_dash\">>,<<\"dev\">>,<<\"timers\">>,<<\"timed\">>,\n            <<\"function\">>],\n           min,true,[]}\nTrace: [{exometer_report,report_values,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1557}]},\n        {exometer_report,do_report,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1228}]},\n        {exometer_report,handle_report,4,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1211}]},\n        {exometer_report,handle_info,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1126}]},\n        {gen_server,try_dispatch,4,[{file,\"gen_server.erl\"},{line,689}]},\n        {gen_server,handle_msg,6,[{file,\"gen_server.erl\"},{line,765}]},\n        {proc_lib,init_p_do_apply,3,[{file,\"proc_lib.erl\"},{line,226}]}]", options: []
+2021-04-08 10:53:01.498 [error] <0.494.0> msg: "badarg\nKey = {key,'Elixir.BitcoinStream.ExometerReportDash',\n           [<<\"bitfeed_dash\">>,<<\"dev\">>,<<\"timers\">>,<<\"timed\">>,\n            <<\"function\">>],\n           n,true,[]}\nTrace: [{exometer_report,report_values,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1557}]},\n        {exometer_report,do_report,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1228}]},\n        {exometer_report,handle_report,4,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1211}]},\n        {exometer_report,handle_info,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1126}]},\n        {gen_server,try_dispatch,4,[{file,\"gen_server.erl\"},{line,689}]},\n        {gen_server,handle_msg,6,[{file,\"gen_server.erl\"},{line,765}]},\n        {proc_lib,init_p_do_apply,3,[{file,\"proc_lib.erl\"},{line,226}]}]", options: []
+2021-04-08 10:53:02.500 [error] <0.691.0>@Elixir.BitcoinStream.ExometerReportDash:exometer_report:16 CRASH REPORT Process 'Elixir.BitcoinStream.ExometerReportDash' with 0 neighbours crashed with reason: bad argument in 'Elixir.BitcoinStream.ExometerReportDash':exometer_report/5 line 16
+2021-04-08 10:53:02.502 [error] <0.494.0> msg: "badarg\nKey = {key,'Elixir.BitcoinStream.ExometerReportDash',\n           [<<\"bitfeed_dash\">>,<<\"dev\">>,<<\"timers\">>,<<\"timed\">>,\n            <<\"function\">>],\n           999,true,[]}\nTrace: [{exometer_report,report_values,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1557}]},\n        {exometer_report,do_report,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1228}]},\n        {exometer_report,handle_report,4,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1211}]},\n        {exometer_report,handle_info,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1126}]},\n        {gen_server,try_dispatch,4,[{file,\"gen_server.erl\"},{line,689}]},\n        {gen_server,handle_msg,6,[{file,\"gen_server.erl\"},{line,765}]},\n        {proc_lib,init_p_do_apply,3,[{file,\"proc_lib.erl\"},{line,226}]}]", options: []
+2021-04-08 10:53:02.502 [error] <0.494.0> msg: "badarg\nKey = {key,'Elixir.BitcoinStream.ExometerReportDash',\n           [<<\"bitfeed_dash\">>,<<\"dev\">>,<<\"timers\">>,<<\"timed\">>,\n            <<\"function\">>],\n           max,true,[]}\nTrace: [{exometer_report,report_values,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1557}]},\n        {exometer_report,do_report,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1228}]},\n        {exometer_report,handle_report,4,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1211}]},\n        {exometer_report,handle_info,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1126}]},\n        {gen_server,try_dispatch,4,[{file,\"gen_server.erl\"},{line,689}]},\n        {gen_server,handle_msg,6,[{file,\"gen_server.erl\"},{line,765}]},\n        {proc_lib,init_p_do_apply,3,[{file,\"proc_lib.erl\"},{line,226}]}]", options: []
+2021-04-08 10:53:02.503 [error] <0.494.0> msg: "badarg\nKey = {key,'Elixir.BitcoinStream.ExometerReportDash',\n           [<<\"bitfeed_dash\">>,<<\"dev\">>,<<\"timers\">>,<<\"timed\">>,\n            <<\"function\">>],\n           mean,true,[]}\nTrace: [{exometer_report,report_values,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1557}]},\n        {exometer_report,do_report,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1228}]},\n        {exometer_report,handle_report,4,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1211}]},\n        {exometer_report,handle_info,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1126}]},\n        {gen_server,try_dispatch,4,[{file,\"gen_server.erl\"},{line,689}]},\n        {gen_server,handle_msg,6,[{file,\"gen_server.erl\"},{line,765}]},\n        {proc_lib,init_p_do_apply,3,[{file,\"proc_lib.erl\"},{line,226}]}]", options: []
+2021-04-08 10:53:02.503 [error] <0.494.0> msg: "badarg\nKey = {key,'Elixir.BitcoinStream.ExometerReportDash',\n           [<<\"bitfeed_dash\">>,<<\"dev\">>,<<\"timers\">>,<<\"timed\">>,\n            <<\"function\">>],\n           median,true,[]}\nTrace: [{exometer_report,report_values,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1557}]},\n        {exometer_report,do_report,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1228}]},\n        {exometer_report,handle_report,4,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1211}]},\n        {exometer_report,handle_info,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1126}]},\n        {gen_server,try_dispatch,4,[{file,\"gen_server.erl\"},{line,689}]},\n        {gen_server,handle_msg,6,[{file,\"gen_server.erl\"},{line,765}]},\n        {proc_lib,init_p_do_apply,3,[{file,\"proc_lib.erl\"},{line,226}]}]", options: []
+2021-04-08 10:53:02.504 [error] <0.494.0> msg: "badarg\nKey = {key,'Elixir.BitcoinStream.ExometerReportDash',\n           [<<\"bitfeed_dash\">>,<<\"dev\">>,<<\"timers\">>,<<\"timed\">>,\n            <<\"function\">>],\n           min,true,[]}\nTrace: [{exometer_report,report_values,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1557}]},\n        {exometer_report,do_report,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1228}]},\n        {exometer_report,handle_report,4,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1211}]},\n        {exometer_report,handle_info,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1126}]},\n        {gen_server,try_dispatch,4,[{file,\"gen_server.erl\"},{line,689}]},\n        {gen_server,handle_msg,6,[{file,\"gen_server.erl\"},{line,765}]},\n        {proc_lib,init_p_do_apply,3,[{file,\"proc_lib.erl\"},{line,226}]}]", options: []
+2021-04-08 10:53:02.505 [error] <0.494.0> msg: "badarg\nKey = {key,'Elixir.BitcoinStream.ExometerReportDash',\n           [<<\"bitfeed_dash\">>,<<\"dev\">>,<<\"timers\">>,<<\"timed\">>,\n            <<\"function\">>],\n           n,true,[]}\nTrace: [{exometer_report,report_values,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1557}]},\n        {exometer_report,do_report,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1228}]},\n        {exometer_report,handle_report,4,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1211}]},\n        {exometer_report,handle_info,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1126}]},\n        {gen_server,try_dispatch,4,[{file,\"gen_server.erl\"},{line,689}]},\n        {gen_server,handle_msg,6,[{file,\"gen_server.erl\"},{line,765}]},\n        {proc_lib,init_p_do_apply,3,[{file,\"proc_lib.erl\"},{line,226}]}]", options: []
+2021-04-08 10:53:03.507 [error] <0.692.0>@Elixir.BitcoinStream.ExometerReportDash:exometer_report:16 CRASH REPORT Process 'Elixir.BitcoinStream.ExometerReportDash' with 0 neighbours crashed with reason: bad argument in 'Elixir.BitcoinStream.ExometerReportDash':exometer_report/5 line 16
+2021-04-08 10:53:03.508 [error] <0.494.0> msg: "badarg\nKey = {key,'Elixir.BitcoinStream.ExometerReportDash',\n           [<<\"bitfeed_dash\">>,<<\"dev\">>,<<\"timers\">>,<<\"timed\">>,\n            <<\"function\">>],\n           99,true,[]}\nTrace: [{exometer_report,report_values,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1557}]},\n        {exometer_report,do_report,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1228}]},\n        {exometer_report,handle_report,4,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1211}]},\n        {exometer_report,handle_info,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1126}]},\n        {gen_server,try_dispatch,4,[{file,\"gen_server.erl\"},{line,689}]},\n        {gen_server,handle_msg,6,[{file,\"gen_server.erl\"},{line,765}]},\n        {proc_lib,init_p_do_apply,3,[{file,\"proc_lib.erl\"},{line,226}]}]", options: []
+2021-04-08 10:53:03.509 [error] <0.494.0> msg: "badarg\nKey = {key,'Elixir.BitcoinStream.ExometerReportDash',\n           [<<\"bitfeed_dash\">>,<<\"dev\">>,<<\"timers\">>,<<\"timed\">>,\n            <<\"function\">>],\n           999,true,[]}\nTrace: [{exometer_report,report_values,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1557}]},\n        {exometer_report,do_report,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1228}]},\n        {exometer_report,handle_report,4,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1211}]},\n        {exometer_report,handle_info,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1126}]},\n        {gen_server,try_dispatch,4,[{file,\"gen_server.erl\"},{line,689}]},\n        {gen_server,handle_msg,6,[{file,\"gen_server.erl\"},{line,765}]},\n        {proc_lib,init_p_do_apply,3,[{file,\"proc_lib.erl\"},{line,226}]}]", options: []
+2021-04-08 10:53:03.509 [error] <0.494.0> msg: "badarg\nKey = {key,'Elixir.BitcoinStream.ExometerReportDash',\n           [<<\"bitfeed_dash\">>,<<\"dev\">>,<<\"timers\">>,<<\"timed\">>,\n            <<\"function\">>],\n           max,true,[]}\nTrace: [{exometer_report,report_values,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1557}]},\n        {exometer_report,do_report,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1228}]},\n        {exometer_report,handle_report,4,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1211}]},\n        {exometer_report,handle_info,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1126}]},\n        {gen_server,try_dispatch,4,[{file,\"gen_server.erl\"},{line,689}]},\n        {gen_server,handle_msg,6,[{file,\"gen_server.erl\"},{line,765}]},\n        {proc_lib,init_p_do_apply,3,[{file,\"proc_lib.erl\"},{line,226}]}]", options: []
+2021-04-08 10:53:03.510 [error] <0.494.0> msg: "badarg\nKey = {key,'Elixir.BitcoinStream.ExometerReportDash',\n           [<<\"bitfeed_dash\">>,<<\"dev\">>,<<\"timers\">>,<<\"timed\">>,\n            <<\"function\">>],\n           mean,true,[]}\nTrace: [{exometer_report,report_values,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1557}]},\n        {exometer_report,do_report,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1228}]},\n        {exometer_report,handle_report,4,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1211}]},\n        {exometer_report,handle_info,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1126}]},\n        {gen_server,try_dispatch,4,[{file,\"gen_server.erl\"},{line,689}]},\n        {gen_server,handle_msg,6,[{file,\"gen_server.erl\"},{line,765}]},\n        {proc_lib,init_p_do_apply,3,[{file,\"proc_lib.erl\"},{line,226}]}]", options: []
+2021-04-08 10:53:03.511 [error] <0.494.0> msg: "badarg\nKey = {key,'Elixir.BitcoinStream.ExometerReportDash',\n           [<<\"bitfeed_dash\">>,<<\"dev\">>,<<\"timers\">>,<<\"timed\">>,\n            <<\"function\">>],\n           median,true,[]}\nTrace: [{exometer_report,report_values,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1557}]},\n        {exometer_report,do_report,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1228}]},\n        {exometer_report,handle_report,4,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1211}]},\n        {exometer_report,handle_info,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1126}]},\n        {gen_server,try_dispatch,4,[{file,\"gen_server.erl\"},{line,689}]},\n        {gen_server,handle_msg,6,[{file,\"gen_server.erl\"},{line,765}]},\n        {proc_lib,init_p_do_apply,3,[{file,\"proc_lib.erl\"},{line,226}]}]", options: []
+2021-04-08 10:53:03.511 [error] <0.494.0> msg: "badarg\nKey = {key,'Elixir.BitcoinStream.ExometerReportDash',\n           [<<\"bitfeed_dash\">>,<<\"dev\">>,<<\"timers\">>,<<\"timed\">>,\n            <<\"function\">>],\n           min,true,[]}\nTrace: [{exometer_report,report_values,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1557}]},\n        {exometer_report,do_report,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1228}]},\n        {exometer_report,handle_report,4,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1211}]},\n        {exometer_report,handle_info,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1126}]},\n        {gen_server,try_dispatch,4,[{file,\"gen_server.erl\"},{line,689}]},\n        {gen_server,handle_msg,6,[{file,\"gen_server.erl\"},{line,765}]},\n        {proc_lib,init_p_do_apply,3,[{file,\"proc_lib.erl\"},{line,226}]}]", options: []
+2021-04-08 10:53:03.512 [error] <0.494.0> msg: "badarg\nKey = {key,'Elixir.BitcoinStream.ExometerReportDash',\n           [<<\"bitfeed_dash\">>,<<\"dev\">>,<<\"timers\">>,<<\"timed\">>,\n            <<\"function\">>],\n           n,true,[]}\nTrace: [{exometer_report,report_values,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1557}]},\n        {exometer_report,do_report,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1228}]},\n        {exometer_report,handle_report,4,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1211}]},\n        {exometer_report,handle_info,2,\n                         [{file,\"/home/rob/Documents/DioxideLabs/Projects/Self/Bitfeed/Server/bitcoin_stream/deps/exometer_core/src/exometer_report.erl\"},\n                          {line,1126}]},\n        {gen_server,try_dispatch,4,[{file,\"gen_server.erl\"},{line,689}]},\n        {gen_server,handle_msg,6,[{file,\"gen_server.erl\"},{line,765}]},\n        {proc_lib,init_p_do_apply,3,[{file,\"proc_lib.erl\"},{line,226}]}]", options: []
+2021-04-08 10:55:03.283 [info] <0.44.0> Application lager started on node nonode@nohost
+2021-04-08 10:55:03.285 [info] <0.44.0> Application hut started on node nonode@nohost
+2021-04-08 10:55:03.291 [info] <0.364.0> Setup running ...
+2021-04-08 10:55:03.293 [info] <0.364.0> Directories verified. Res = ok
+2021-04-08 10:55:03.293 [info] <0.364.0> Setup finished processing hooks (Mode=normal)...
+2021-04-08 10:55:03.293 [info] <0.44.0> Application setup started on node nonode@nohost
+2021-04-08 10:55:03.294 [info] <0.44.0> Application bear started on node nonode@nohost
+2021-04-08 10:55:03.298 [info] <0.44.0> Application folsom started on node nonode@nohost
+2021-04-08 10:55:03.298 [info] <0.44.0> Application parse_trans started on node nonode@nohost
+2021-04-08 10:55:03.312 [info] <0.380.0> msg: "Starting reporters with [{reporters,\n                             [{'Elixir.BitcoinStream.ExometerReportDash',\n                                  []}]}]\n", options: []
+2021-04-08 10:55:03.312 [info] <0.44.0> Application exometer_core started on node nonode@nohost
+2021-04-08 10:55:03.312 [info] <0.44.0> Application pobox started on node nonode@nohost
+2021-04-08 10:55:03.318 [info] <0.44.0> Application elixometer started on node nonode@nohost
+2021-04-08 10:55:03.321 [info] <0.44.0> Application chumak started on node nonode@nohost
+2021-04-08 10:55:03.321 [info] <0.44.0> Application unicode_util_compat started on node nonode@nohost
+2021-04-08 10:55:03.321 [info] <0.44.0> Application idna started on node nonode@nohost
+2021-04-08 10:55:03.321 [info] <0.44.0> Application mimerl started on node nonode@nohost
+2021-04-08 10:55:03.321 [info] <0.44.0> Application certifi started on node nonode@nohost
+2021-04-08 10:55:03.321 [info] <0.44.0> Application ssl_verify_fun started on node nonode@nohost
+2021-04-08 10:55:03.321 [info] <0.44.0> Application metrics started on node nonode@nohost
+2021-04-08 10:55:03.333 [info] <0.44.0> Application hackney started on node nonode@nohost
+2021-04-08 10:55:03.414 [info] <0.44.0> Application tzdata started on node nonode@nohost
+2021-04-08 10:55:03.414 [info] <0.44.0> Application combine started on node nonode@nohost
+2021-04-08 10:55:03.416 [info] <0.44.0> Application gettext started on node nonode@nohost
+2021-04-08 10:55:03.419 [info] <0.44.0> Application timex started on node nonode@nohost
+2021-04-08 10:55:03.420 [info] <0.44.0> Application decimal started on node nonode@nohost
+2021-04-08 10:55:03.420 [info] <0.44.0> Application bitcoinex started on node nonode@nohost
+2021-04-08 10:55:03.420 [info] <0.44.0> Application cowlib started on node nonode@nohost
+2021-04-08 10:55:03.422 [info] <0.44.0> Application ranch started on node nonode@nohost
+2021-04-08 10:55:03.424 [info] <0.44.0> Application cowboy started on node nonode@nohost
+2021-04-08 10:55:03.425 [info] <0.44.0> Application eex started on node nonode@nohost
+2021-04-08 10:55:03.430 [info] <0.44.0> Application mime started on node nonode@nohost
+2021-04-08 10:55:03.431 [info] <0.44.0> Application plug_crypto started on node nonode@nohost
+2021-04-08 10:55:03.434 [info] <0.44.0> Application telemetry started on node nonode@nohost
+2021-04-08 10:55:03.436 [info] <0.44.0> Application plug started on node nonode@nohost
+2021-04-08 10:55:03.436 [info] <0.44.0> Application cowboy_telemetry started on node nonode@nohost
+2021-04-08 10:55:03.437 [info] <0.44.0> Application plug_cowboy started on node nonode@nohost
+2021-04-08 10:55:03.437 [info] <0.44.0> Application jason started on node nonode@nohost
+2021-04-08 10:55:03.478 [info] <0.44.0> Application bitcoin_stream started on node nonode@nohost
+2021-04-08 10:55:43.158 [info] <0.44.0> Application lager started on node nonode@nohost
+2021-04-08 10:55:43.160 [info] <0.44.0> Application hut started on node nonode@nohost
+2021-04-08 10:55:43.166 [info] <0.364.0> Setup running ...
+2021-04-08 10:55:43.168 [info] <0.364.0> Directories verified. Res = ok
+2021-04-08 10:55:43.168 [info] <0.364.0> Setup finished processing hooks (Mode=normal)...
+2021-04-08 10:55:43.168 [info] <0.44.0> Application setup started on node nonode@nohost
+2021-04-08 10:55:43.168 [info] <0.44.0> Application bear started on node nonode@nohost
+2021-04-08 10:55:43.172 [info] <0.44.0> Application folsom started on node nonode@nohost
+2021-04-08 10:55:43.173 [info] <0.44.0> Application parse_trans started on node nonode@nohost
+2021-04-08 10:55:43.185 [info] <0.380.0> msg: "Starting reporters with [{reporters,\n                             [{'Elixir.BitcoinStream.ExometerReportDash',\n                                  []}]}]\n", options: []
+2021-04-08 10:55:43.185 [info] <0.44.0> Application exometer_core started on node nonode@nohost
+2021-04-08 10:55:43.185 [info] <0.44.0> Application pobox started on node nonode@nohost
+2021-04-08 10:55:43.193 [info] <0.44.0> Application elixometer started on node nonode@nohost
+2021-04-08 10:55:43.195 [info] <0.44.0> Application chumak started on node nonode@nohost
+2021-04-08 10:55:43.195 [info] <0.44.0> Application unicode_util_compat started on node nonode@nohost
+2021-04-08 10:55:43.195 [info] <0.44.0> Application idna started on node nonode@nohost
+2021-04-08 10:55:43.195 [info] <0.44.0> Application mimerl started on node nonode@nohost
+2021-04-08 10:55:43.195 [info] <0.44.0> Application certifi started on node nonode@nohost
+2021-04-08 10:55:43.195 [info] <0.44.0> Application ssl_verify_fun started on node nonode@nohost
+2021-04-08 10:55:43.195 [info] <0.44.0> Application metrics started on node nonode@nohost
+2021-04-08 10:55:43.207 [info] <0.44.0> Application hackney started on node nonode@nohost
+2021-04-08 10:55:43.291 [info] <0.44.0> Application tzdata started on node nonode@nohost
+2021-04-08 10:55:43.291 [info] <0.44.0> Application combine started on node nonode@nohost
+2021-04-08 10:55:43.293 [info] <0.44.0> Application gettext started on node nonode@nohost
+2021-04-08 10:55:43.296 [info] <0.44.0> Application timex started on node nonode@nohost
+2021-04-08 10:55:43.296 [info] <0.44.0> Application decimal started on node nonode@nohost
+2021-04-08 10:55:43.296 [info] <0.44.0> Application bitcoinex started on node nonode@nohost
+2021-04-08 10:55:43.296 [info] <0.44.0> Application cowlib started on node nonode@nohost
+2021-04-08 10:55:43.299 [info] <0.44.0> Application ranch started on node nonode@nohost
+2021-04-08 10:55:43.301 [info] <0.44.0> Application cowboy started on node nonode@nohost
+2021-04-08 10:55:43.302 [info] <0.44.0> Application eex started on node nonode@nohost
+2021-04-08 10:55:43.307 [info] <0.44.0> Application mime started on node nonode@nohost
+2021-04-08 10:55:43.308 [info] <0.44.0> Application plug_crypto started on node nonode@nohost
+2021-04-08 10:55:43.311 [info] <0.44.0> Application telemetry started on node nonode@nohost
+2021-04-08 10:55:43.313 [info] <0.44.0> Application plug started on node nonode@nohost
+2021-04-08 10:55:43.313 [info] <0.44.0> Application cowboy_telemetry started on node nonode@nohost
+2021-04-08 10:55:43.314 [info] <0.44.0> Application plug_cowboy started on node nonode@nohost
+2021-04-08 10:55:43.314 [info] <0.44.0> Application jason started on node nonode@nohost
+2021-04-08 10:55:43.355 [info] <0.44.0> Application bitcoin_stream started on node nonode@nohost
+2021-04-08 11:01:07.320 [info] <0.44.0> Application lager started on node nonode@nohost
+2021-04-08 11:01:07.323 [info] <0.44.0> Application hut started on node nonode@nohost
+2021-04-08 11:01:07.328 [info] <0.479.0> Setup running ...
+2021-04-08 11:01:07.330 [info] <0.479.0> Directories verified. Res = ok
+2021-04-08 11:01:07.331 [info] <0.479.0> Setup finished processing hooks (Mode=normal)...
+2021-04-08 11:01:07.331 [info] <0.44.0> Application setup started on node nonode@nohost
+2021-04-08 11:01:07.331 [info] <0.44.0> Application bear started on node nonode@nohost
+2021-04-08 11:01:07.336 [info] <0.44.0> Application folsom started on node nonode@nohost
+2021-04-08 11:01:07.345 [info] <0.494.0> msg: "Starting reporters with [{reporters,\n                             [{'Elixir.BitcoinStream.ExometerReportDash',\n                                  []}]}]\n", options: []
+2021-04-08 11:01:07.355 [info] <0.44.0> Application exometer_core started on node nonode@nohost
+2021-04-08 11:01:07.355 [info] <0.44.0> Application pobox started on node nonode@nohost
+2021-04-08 11:01:07.359 [info] <0.44.0> Application elixometer started on node nonode@nohost
+2021-04-08 11:01:07.360 [info] <0.44.0> Application chumak started on node nonode@nohost
+2021-04-08 11:01:07.434 [info] <0.44.0> Application tzdata started on node nonode@nohost
+2021-04-08 11:01:07.435 [info] <0.44.0> Application combine started on node nonode@nohost
+2021-04-08 11:01:07.437 [info] <0.44.0> Application gettext started on node nonode@nohost
+2021-04-08 11:01:07.440 [info] <0.44.0> Application timex started on node nonode@nohost
+2021-04-08 11:01:07.440 [info] <0.44.0> Application decimal started on node nonode@nohost
+2021-04-08 11:01:07.440 [info] <0.44.0> Application bitcoinex started on node nonode@nohost
+2021-04-08 11:01:07.440 [info] <0.44.0> Application cowlib started on node nonode@nohost
+2021-04-08 11:01:07.444 [info] <0.44.0> Application ranch started on node nonode@nohost
+2021-04-08 11:01:07.446 [info] <0.44.0> Application cowboy started on node nonode@nohost
+2021-04-08 11:01:07.446 [info] <0.44.0> Application eex started on node nonode@nohost
+2021-04-08 11:01:07.452 [info] <0.44.0> Application mime started on node nonode@nohost
+2021-04-08 11:01:07.453 [info] <0.44.0> Application plug_crypto started on node nonode@nohost
+2021-04-08 11:01:07.456 [info] <0.44.0> Application telemetry started on node nonode@nohost
+2021-04-08 11:01:07.458 [info] <0.44.0> Application plug started on node nonode@nohost
+2021-04-08 11:01:07.458 [info] <0.44.0> Application cowboy_telemetry started on node nonode@nohost
+2021-04-08 11:01:07.459 [info] <0.44.0> Application plug_cowboy started on node nonode@nohost
+2021-04-08 11:01:07.459 [info] <0.44.0> Application jason started on node nonode@nohost
+2021-04-08 11:01:07.497 [info] <0.44.0> Application bitcoin_stream started on node nonode@nohost
+2021-04-08 11:04:14.501 [info] <0.44.0> Application lager started on node nonode@nohost
+2021-04-08 11:04:14.503 [info] <0.44.0> Application hut started on node nonode@nohost
+2021-04-08 11:04:14.509 [info] <0.479.0> Setup running ...
+2021-04-08 11:04:14.512 [info] <0.479.0> Directories verified. Res = ok
+2021-04-08 11:04:14.512 [info] <0.479.0> Setup finished processing hooks (Mode=normal)...
+2021-04-08 11:04:14.512 [info] <0.44.0> Application setup started on node nonode@nohost
+2021-04-08 11:04:14.512 [info] <0.44.0> Application bear started on node nonode@nohost
+2021-04-08 11:04:14.517 [info] <0.44.0> Application folsom started on node nonode@nohost
+2021-04-08 11:04:14.528 [info] <0.494.0> msg: "Starting reporters with [{reporters,\n                             [{'Elixir.BitcoinStream.ExometerReportDash',[]}]},\n                         {subscribers,\n                             [{'Elixir.BitcoinStream.ExometerReportDash',\n                                  [bitcoin_stream,webapp,resp_time],\n                                  [min,max,mean,'95','90'],\n                                  1000,true},\n                              {'Elixir.BitcoinStream.ExometerReportDash',\n                                  [erlang,memory],\n                                  [atom,binary,ets,processes,total],\n                                  1000,true},\n                              {'Elixir.BitcoinStream.ExometerReportDash',\n                                  [bitcoin_stream,webapp,resp_count],\n                                  one,1000,true},\n                              {'Elixir.BitcoinStream.ExometerReportDash',\n                                  [erlang,statistics],\n                                  run_queue,1000,true}]}]\n", options: []
+2021-04-08 11:04:14.541 [info] <0.44.0> Application exometer_core started on node nonode@nohost
+2021-04-08 11:04:14.541 [info] <0.44.0> Application pobox started on node nonode@nohost
+2021-04-08 11:04:14.545 [info] <0.44.0> Application elixometer started on node nonode@nohost
+2021-04-08 11:04:14.547 [info] <0.44.0> Application chumak started on node nonode@nohost
+2021-04-08 11:04:14.627 [info] <0.44.0> Application tzdata started on node nonode@nohost
+2021-04-08 11:04:14.628 [info] <0.44.0> Application combine started on node nonode@nohost
+2021-04-08 11:04:14.630 [info] <0.44.0> Application gettext started on node nonode@nohost
+2021-04-08 11:04:14.633 [info] <0.44.0> Application timex started on node nonode@nohost
+2021-04-08 11:04:14.634 [info] <0.44.0> Application decimal started on node nonode@nohost
+2021-04-08 11:04:14.634 [info] <0.44.0> Application bitcoinex started on node nonode@nohost
+2021-04-08 11:04:14.634 [info] <0.44.0> Application cowlib started on node nonode@nohost
+2021-04-08 11:04:14.637 [info] <0.44.0> Application ranch started on node nonode@nohost
+2021-04-08 11:04:14.640 [info] <0.44.0> Application cowboy started on node nonode@nohost
+2021-04-08 11:04:14.640 [info] <0.44.0> Application eex started on node nonode@nohost
+2021-04-08 11:04:14.646 [info] <0.44.0> Application mime started on node nonode@nohost
+2021-04-08 11:04:14.647 [info] <0.44.0> Application plug_crypto started on node nonode@nohost
+2021-04-08 11:04:14.651 [info] <0.44.0> Application telemetry started on node nonode@nohost
+2021-04-08 11:04:14.653 [info] <0.44.0> Application plug started on node nonode@nohost
+2021-04-08 11:04:14.653 [info] <0.44.0> Application cowboy_telemetry started on node nonode@nohost
+2021-04-08 11:04:14.654 [info] <0.44.0> Application plug_cowboy started on node nonode@nohost
+2021-04-08 11:04:14.655 [info] <0.44.0> Application jason started on node nonode@nohost
+2021-04-08 11:04:14.686 [info] <0.44.0> Application bitcoin_stream started on node nonode@nohost
+2021-04-08 11:24:48.099 [info] <0.44.0> Application lager started on node nonode@nohost
+2021-04-08 11:24:48.101 [info] <0.44.0> Application hut started on node nonode@nohost
+2021-04-08 11:24:48.106 [info] <0.485.0> Setup running ...
+2021-04-08 11:24:48.108 [info] <0.485.0> Directories verified. Res = ok
+2021-04-08 11:24:48.108 [info] <0.485.0> Setup finished processing hooks (Mode=normal)...
+2021-04-08 11:24:48.108 [info] <0.44.0> Application setup started on node nonode@nohost
+2021-04-08 11:24:48.108 [info] <0.44.0> Application bear started on node nonode@nohost
+2021-04-08 11:24:48.113 [info] <0.44.0> Application folsom started on node nonode@nohost
+2021-04-08 11:24:48.122 [info] <0.500.0> msg: "Starting reporters with [{reporters,\n                             [{'Elixir.BitcoinStream.ExometerReportDash',[]}]},\n                         {subscribers,\n                             [{'Elixir.BitcoinStream.ExometerReportDash',\n                                  [erlang,memory],\n                                  [atom,binary,ets,processes,total],\n                                  1000,true},\n                              {'Elixir.BitcoinStream.ExometerReportDash',\n                                  [erlang,statistics],\n                                  run_queue,1000,true}]}]\n", options: []
+2021-04-08 11:24:48.126 [info] <0.44.0> Application exometer_core started on node nonode@nohost
+2021-04-08 11:24:48.126 [info] <0.44.0> Application pobox started on node nonode@nohost
+2021-04-08 11:24:48.130 [info] <0.44.0> Application elixometer started on node nonode@nohost
+2021-04-08 11:24:48.131 [info] <0.44.0> Application chumak started on node nonode@nohost
+2021-04-08 11:24:48.210 [info] <0.44.0> Application tzdata started on node nonode@nohost
+2021-04-08 11:24:48.210 [info] <0.44.0> Application combine started on node nonode@nohost
+2021-04-08 11:24:48.212 [info] <0.44.0> Application gettext started on node nonode@nohost
+2021-04-08 11:24:48.216 [info] <0.44.0> Application timex started on node nonode@nohost
+2021-04-08 11:24:48.216 [info] <0.44.0> Application decimal started on node nonode@nohost
+2021-04-08 11:24:48.216 [info] <0.44.0> Application bitcoinex started on node nonode@nohost
+2021-04-08 11:24:48.216 [info] <0.44.0> Application cowlib started on node nonode@nohost
+2021-04-08 11:24:48.220 [info] <0.44.0> Application ranch started on node nonode@nohost
+2021-04-08 11:24:48.223 [info] <0.44.0> Application cowboy started on node nonode@nohost
+2021-04-08 11:24:48.223 [info] <0.44.0> Application eex started on node nonode@nohost
+2021-04-08 11:24:48.229 [info] <0.44.0> Application mime started on node nonode@nohost
+2021-04-08 11:24:48.230 [info] <0.44.0> Application plug_crypto started on node nonode@nohost
+2021-04-08 11:24:48.233 [info] <0.44.0> Application telemetry started on node nonode@nohost
+2021-04-08 11:24:48.235 [info] <0.44.0> Application plug started on node nonode@nohost
+2021-04-08 11:24:48.235 [info] <0.44.0> Application cowboy_telemetry started on node nonode@nohost
+2021-04-08 11:24:48.237 [info] <0.44.0> Application plug_cowboy started on node nonode@nohost
+2021-04-08 11:24:48.237 [info] <0.44.0> Application jason started on node nonode@nohost
+2021-04-08 11:24:48.259 [error] <0.579.0> Supervisor 'Elixir.BitcoinStream.Application' had child 'Elixir.BitcoinStream.Metrics.Probe' started with 'Elixir.BitcoinStream.Metrics.Probe':start_link([]) at undefined exit with reason {'EXIT',{undef,[{'Elixir.BitcoinStream.Metrics.Probe',start_link,[[]],[]},{supervisor,do_start_child_i,3,[{file,"supervisor.erl"},{line,385}]},{supervisor,do_start_child,2,[{file,"supervisor.erl"},{line,371}]},{supervisor,'-start_children/2-fun-0-',3,[{file,"supervisor.erl"},{line,355}]},{supervisor,children_map,4,[{file,"supervisor.erl"},{line,1171}]},{supervisor,init_children,2,[{file,"supervisor.erl"},{line,321}]},{gen_server,init_it,2,[{file,"gen_server.erl"},{line,417}]},{gen_server,init_it,...}]}} in context start_error
+2021-04-08 11:24:48.260 [error] <0.577.0> CRASH REPORT Process <0.577.0> with 0 neighbours exited with reason: {{shutdown,{failed_to_start_child,'Elixir.BitcoinStream.Metrics.Probe',{'EXIT',{undef,[{'Elixir.BitcoinStream.Metrics.Probe',start_link,[[]],[]},{supervisor,do_start_child_i,3,[{file,"supervisor.erl"},{line,385}]},{supervisor,do_start_child,2,[{file,"supervisor.erl"},{line,371}]},{supervisor,'-start_children/2-fun-0-',3,[{file,"supervisor.erl"},{line,355}]},{supervisor,children_map,4,[{file,"supervisor.erl"},{line,1171}]},{supervisor,init_children,2,[{file,"supervisor.erl"},{line,321}]},{gen_server,...},...]}}}},...} in application_master:init/4 line 138
+2021-04-08 11:27:20.025 [info] <0.44.0> Application lager started on node nonode@nohost
+2021-04-08 11:27:20.027 [info] <0.44.0> Application hut started on node nonode@nohost
+2021-04-08 11:27:20.032 [info] <0.365.0> Setup running ...
+2021-04-08 11:27:20.034 [info] <0.365.0> Directories verified. Res = ok
+2021-04-08 11:27:20.034 [info] <0.365.0> Setup finished processing hooks (Mode=normal)...
+2021-04-08 11:27:20.034 [info] <0.44.0> Application setup started on node nonode@nohost
+2021-04-08 11:27:20.034 [info] <0.44.0> Application bear started on node nonode@nohost
+2021-04-08 11:27:20.039 [info] <0.44.0> Application folsom started on node nonode@nohost
+2021-04-08 11:27:20.039 [info] <0.44.0> Application parse_trans started on node nonode@nohost
+2021-04-08 11:27:20.053 [info] <0.381.0> msg: "Starting reporters with [{reporters,\n                             [{'Elixir.BitcoinStream.ExometerReportDash',[]}]},\n                         {subscribers,\n                             [{'Elixir.BitcoinStream.ExometerReportDash',\n                                  [erlang,memory],\n                                  [atom,binary,ets,processes,total],\n                                  1000,true},\n                              {'Elixir.BitcoinStream.ExometerReportDash',\n                                  [erlang,statistics],\n                                  run_queue,1000,true}]}]\n", options: []
+2021-04-08 11:27:20.059 [info] <0.44.0> Application exometer_core started on node nonode@nohost
+2021-04-08 11:27:20.059 [info] <0.44.0> Application pobox started on node nonode@nohost
+2021-04-08 11:27:20.063 [info] <0.44.0> Application elixometer started on node nonode@nohost
+2021-04-08 11:27:20.065 [info] <0.44.0> Application chumak started on node nonode@nohost
+2021-04-08 11:27:20.065 [info] <0.44.0> Application unicode_util_compat started on node nonode@nohost
+2021-04-08 11:27:20.065 [info] <0.44.0> Application idna started on node nonode@nohost
+2021-04-08 11:27:20.065 [info] <0.44.0> Application mimerl started on node nonode@nohost
+2021-04-08 11:27:20.065 [info] <0.44.0> Application certifi started on node nonode@nohost
+2021-04-08 11:27:20.066 [info] <0.44.0> Application ssl_verify_fun started on node nonode@nohost
+2021-04-08 11:27:20.066 [info] <0.44.0> Application metrics started on node nonode@nohost
+2021-04-08 11:27:20.076 [info] <0.44.0> Application hackney started on node nonode@nohost
+2021-04-08 11:27:20.153 [info] <0.44.0> Application tzdata started on node nonode@nohost
+2021-04-08 11:27:20.153 [info] <0.44.0> Application combine started on node nonode@nohost
+2021-04-08 11:27:20.155 [info] <0.44.0> Application gettext started on node nonode@nohost
+2021-04-08 11:27:20.158 [info] <0.44.0> Application timex started on node nonode@nohost
+2021-04-08 11:27:20.158 [info] <0.44.0> Application decimal started on node nonode@nohost
+2021-04-08 11:27:20.158 [info] <0.44.0> Application bitcoinex started on node nonode@nohost
+2021-04-08 11:27:20.159 [info] <0.44.0> Application cowlib started on node nonode@nohost
+2021-04-08 11:27:20.162 [info] <0.44.0> Application ranch started on node nonode@nohost
+2021-04-08 11:27:20.164 [info] <0.44.0> Application cowboy started on node nonode@nohost
+2021-04-08 11:27:20.164 [info] <0.44.0> Application eex started on node nonode@nohost
+2021-04-08 11:27:20.169 [info] <0.44.0> Application mime started on node nonode@nohost
+2021-04-08 11:27:20.170 [info] <0.44.0> Application plug_crypto started on node nonode@nohost
+2021-04-08 11:27:20.173 [info] <0.44.0> Application telemetry started on node nonode@nohost
+2021-04-08 11:27:20.174 [info] <0.44.0> Application plug started on node nonode@nohost
+2021-04-08 11:27:20.175 [info] <0.44.0> Application cowboy_telemetry started on node nonode@nohost
+2021-04-08 11:27:20.176 [info] <0.44.0> Application plug_cowboy started on node nonode@nohost
+2021-04-08 11:27:20.176 [info] <0.44.0> Application jason started on node nonode@nohost
+2021-04-08 11:27:20.204 [error] <0.472.0> Supervisor 'Elixir.BitcoinStream.Application' had child 'Elixir.BitcoinStream.Metrics.Probe' started with 'Elixir.BitcoinStream.Metrics.Probe':start_link([]) at undefined exit with reason {'EXIT',{undef,[{'Elixir.BitcoinStream.Metrics.Probe',start_link,[[]],[]},{supervisor,do_start_child_i,3,[{file,"supervisor.erl"},{line,385}]},{supervisor,do_start_child,2,[{file,"supervisor.erl"},{line,371}]},{supervisor,'-start_children/2-fun-0-',3,[{file,"supervisor.erl"},{line,355}]},{supervisor,children_map,4,[{file,"supervisor.erl"},{line,1171}]},{supervisor,init_children,2,[{file,"supervisor.erl"},{line,321}]},{gen_server,init_it,2,[{file,"gen_server.erl"},{line,417}]},{gen_server,init_it,...}]}} in context start_error
+2021-04-08 11:27:20.204 [error] <0.470.0> CRASH REPORT Process <0.470.0> with 0 neighbours exited with reason: {{shutdown,{failed_to_start_child,'Elixir.BitcoinStream.Metrics.Probe',{'EXIT',{undef,[{'Elixir.BitcoinStream.Metrics.Probe',start_link,[[]],[]},{supervisor,do_start_child_i,3,[{file,"supervisor.erl"},{line,385}]},{supervisor,do_start_child,2,[{file,"supervisor.erl"},{line,371}]},{supervisor,'-start_children/2-fun-0-',3,[{file,"supervisor.erl"},{line,355}]},{supervisor,children_map,4,[{file,"supervisor.erl"},{line,1171}]},{supervisor,init_children,2,[{file,"supervisor.erl"},{line,321}]},{gen_server,...},...]}}}},...} in application_master:init/4 line 138
+2021-04-08 11:27:52.610 [info] <0.44.0> Application lager started on node nonode@nohost
+2021-04-08 11:27:52.612 [info] <0.44.0> Application hut started on node nonode@nohost
+2021-04-08 11:27:52.617 [info] <0.365.0> Setup running ...
+2021-04-08 11:27:52.619 [info] <0.365.0> Directories verified. Res = ok
+2021-04-08 11:27:52.619 [info] <0.365.0> Setup finished processing hooks (Mode=normal)...
+2021-04-08 11:27:52.619 [info] <0.44.0> Application setup started on node nonode@nohost
+2021-04-08 11:27:52.619 [info] <0.44.0> Application bear started on node nonode@nohost
+2021-04-08 11:27:52.624 [info] <0.44.0> Application folsom started on node nonode@nohost
+2021-04-08 11:27:52.624 [info] <0.44.0> Application parse_trans started on node nonode@nohost
+2021-04-08 11:27:52.639 [info] <0.381.0> msg: "Starting reporters with [{reporters,\n                             [{'Elixir.BitcoinStream.ExometerReportDash',[]}]},\n                         {subscribers,\n                             [{'Elixir.BitcoinStream.ExometerReportDash',\n                                  [erlang,memory],\n                                  [atom,binary,ets,processes,total],\n                                  1000,true},\n                              {'Elixir.BitcoinStream.ExometerReportDash',\n                                  [erlang,statistics],\n                                  run_queue,1000,true}]}]\n", options: []
+2021-04-08 11:27:52.645 [info] <0.44.0> Application exometer_core started on node nonode@nohost
+2021-04-08 11:27:52.645 [info] <0.44.0> Application pobox started on node nonode@nohost
+2021-04-08 11:27:52.650 [info] <0.44.0> Application elixometer started on node nonode@nohost
+2021-04-08 11:27:52.652 [info] <0.44.0> Application chumak started on node nonode@nohost
+2021-04-08 11:27:52.652 [info] <0.44.0> Application unicode_util_compat started on node nonode@nohost
+2021-04-08 11:27:52.652 [info] <0.44.0> Application idna started on node nonode@nohost
+2021-04-08 11:27:52.652 [info] <0.44.0> Application mimerl started on node nonode@nohost
+2021-04-08 11:27:52.652 [info] <0.44.0> Application certifi started on node nonode@nohost
+2021-04-08 11:27:52.652 [info] <0.44.0> Application ssl_verify_fun started on node nonode@nohost
+2021-04-08 11:27:52.652 [info] <0.44.0> Application metrics started on node nonode@nohost
+2021-04-08 11:27:52.663 [info] <0.44.0> Application hackney started on node nonode@nohost
+2021-04-08 11:27:52.740 [info] <0.44.0> Application tzdata started on node nonode@nohost
+2021-04-08 11:27:52.740 [info] <0.44.0> Application combine started on node nonode@nohost
+2021-04-08 11:27:52.742 [info] <0.44.0> Application gettext started on node nonode@nohost
+2021-04-08 11:27:52.745 [info] <0.44.0> Application timex started on node nonode@nohost
+2021-04-08 11:27:52.745 [info] <0.44.0> Application decimal started on node nonode@nohost
+2021-04-08 11:27:52.745 [info] <0.44.0> Application bitcoinex started on node nonode@nohost
+2021-04-08 11:27:52.745 [info] <0.44.0> Application cowlib started on node nonode@nohost
+2021-04-08 11:27:52.748 [info] <0.44.0> Application ranch started on node nonode@nohost
+2021-04-08 11:27:52.750 [info] <0.44.0> Application cowboy started on node nonode@nohost
+2021-04-08 11:27:52.750 [info] <0.44.0> Application eex started on node nonode@nohost
+2021-04-08 11:27:52.756 [info] <0.44.0> Application mime started on node nonode@nohost
+2021-04-08 11:27:52.757 [info] <0.44.0> Application plug_crypto started on node nonode@nohost
+2021-04-08 11:27:52.760 [info] <0.44.0> Application telemetry started on node nonode@nohost
+2021-04-08 11:27:52.761 [info] <0.44.0> Application plug started on node nonode@nohost
+2021-04-08 11:27:52.761 [info] <0.44.0> Application cowboy_telemetry started on node nonode@nohost
+2021-04-08 11:27:52.762 [info] <0.44.0> Application plug_cowboy started on node nonode@nohost
+2021-04-08 11:27:52.763 [info] <0.44.0> Application jason started on node nonode@nohost
+2021-04-08 11:27:52.789 [error] <0.472.0> Supervisor 'Elixir.BitcoinStream.Application' had child 'Elixir.BitcoinStream.Metrics.Probe' started with 'Elixir.BitcoinStream.Metrics.Probe':start_link([]) at undefined exit with reason {'EXIT',{undef,[{'Elixir.BitcoinStream.Metrics.Probe',start_link,[[]],[]},{supervisor,do_start_child_i,3,[{file,"supervisor.erl"},{line,385}]},{supervisor,do_start_child,2,[{file,"supervisor.erl"},{line,371}]},{supervisor,'-start_children/2-fun-0-',3,[{file,"supervisor.erl"},{line,355}]},{supervisor,children_map,4,[{file,"supervisor.erl"},{line,1171}]},{supervisor,init_children,2,[{file,"supervisor.erl"},{line,321}]},{gen_server,init_it,2,[{file,"gen_server.erl"},{line,417}]},{gen_server,init_it,...}]}} in context start_error
+2021-04-08 11:27:52.789 [error] <0.470.0> CRASH REPORT Process <0.470.0> with 0 neighbours exited with reason: {{shutdown,{failed_to_start_child,'Elixir.BitcoinStream.Metrics.Probe',{'EXIT',{undef,[{'Elixir.BitcoinStream.Metrics.Probe',start_link,[[]],[]},{supervisor,do_start_child_i,3,[{file,"supervisor.erl"},{line,385}]},{supervisor,do_start_child,2,[{file,"supervisor.erl"},{line,371}]},{supervisor,'-start_children/2-fun-0-',3,[{file,"supervisor.erl"},{line,355}]},{supervisor,children_map,4,[{file,"supervisor.erl"},{line,1171}]},{supervisor,init_children,2,[{file,"supervisor.erl"},{line,321}]},{gen_server,...},...]}}}},...} in application_master:init/4 line 138
+2021-04-08 11:28:06.098 [info] <0.44.0> Application lager started on node nonode@nohost
+2021-04-08 11:28:06.100 [info] <0.44.0> Application hut started on node nonode@nohost
+2021-04-08 11:28:06.105 [info] <0.365.0> Setup running ...
+2021-04-08 11:28:06.107 [info] <0.365.0> Directories verified. Res = ok
+2021-04-08 11:28:06.107 [info] <0.365.0> Setup finished processing hooks (Mode=normal)...
+2021-04-08 11:28:06.107 [info] <0.44.0> Application setup started on node nonode@nohost
+2021-04-08 11:28:06.107 [info] <0.44.0> Application bear started on node nonode@nohost
+2021-04-08 11:28:06.112 [info] <0.44.0> Application folsom started on node nonode@nohost
+2021-04-08 11:28:06.112 [info] <0.44.0> Application parse_trans started on node nonode@nohost
+2021-04-08 11:28:06.126 [info] <0.381.0> msg: "Starting reporters with [{reporters,\n                             [{'Elixir.BitcoinStream.ExometerReportDash',[]}]},\n                         {subscribers,\n                             [{'Elixir.BitcoinStream.ExometerReportDash',\n                                  [erlang,memory],\n                                  [atom,binary,ets,processes,total],\n                                  1000,true},\n                              {'Elixir.BitcoinStream.ExometerReportDash',\n                                  [erlang,statistics],\n                                  run_queue,1000,true}]}]\n", options: []
+2021-04-08 11:28:06.133 [info] <0.44.0> Application exometer_core started on node nonode@nohost
+2021-04-08 11:28:06.133 [info] <0.44.0> Application pobox started on node nonode@nohost
+2021-04-08 11:28:06.138 [info] <0.44.0> Application elixometer started on node nonode@nohost
+2021-04-08 11:28:06.139 [info] <0.44.0> Application chumak started on node nonode@nohost
+2021-04-08 11:28:06.139 [info] <0.44.0> Application unicode_util_compat started on node nonode@nohost
+2021-04-08 11:28:06.139 [info] <0.44.0> Application idna started on node nonode@nohost
+2021-04-08 11:28:06.140 [info] <0.44.0> Application mimerl started on node nonode@nohost
+2021-04-08 11:28:06.140 [info] <0.44.0> Application certifi started on node nonode@nohost
+2021-04-08 11:28:06.140 [info] <0.44.0> Application ssl_verify_fun started on node nonode@nohost
+2021-04-08 11:28:06.140 [info] <0.44.0> Application metrics started on node nonode@nohost
+2021-04-08 11:28:06.150 [info] <0.44.0> Application hackney started on node nonode@nohost
+2021-04-08 11:28:06.231 [info] <0.44.0> Application tzdata started on node nonode@nohost
+2021-04-08 11:28:06.231 [info] <0.44.0> Application combine started on node nonode@nohost
+2021-04-08 11:28:06.233 [info] <0.44.0> Application gettext started on node nonode@nohost
+2021-04-08 11:28:06.236 [info] <0.44.0> Application timex started on node nonode@nohost
+2021-04-08 11:28:06.236 [info] <0.44.0> Application decimal started on node nonode@nohost
+2021-04-08 11:28:06.236 [info] <0.44.0> Application bitcoinex started on node nonode@nohost
+2021-04-08 11:28:06.236 [info] <0.44.0> Application cowlib started on node nonode@nohost
+2021-04-08 11:28:06.240 [info] <0.44.0> Application ranch started on node nonode@nohost
+2021-04-08 11:28:06.242 [info] <0.44.0> Application cowboy started on node nonode@nohost
+2021-04-08 11:28:06.242 [info] <0.44.0> Application eex started on node nonode@nohost
+2021-04-08 11:28:06.247 [info] <0.44.0> Application mime started on node nonode@nohost
+2021-04-08 11:28:06.248 [info] <0.44.0> Application plug_crypto started on node nonode@nohost
+2021-04-08 11:28:06.251 [info] <0.44.0> Application telemetry started on node nonode@nohost
+2021-04-08 11:28:06.252 [info] <0.44.0> Application plug started on node nonode@nohost
+2021-04-08 11:28:06.252 [info] <0.44.0> Application cowboy_telemetry started on node nonode@nohost
+2021-04-08 11:28:06.254 [info] <0.44.0> Application plug_cowboy started on node nonode@nohost
+2021-04-08 11:28:06.254 [info] <0.44.0> Application jason started on node nonode@nohost
+2021-04-08 11:28:06.296 [info] <0.44.0> Application bitcoin_stream started on node nonode@nohost
+2021-04-08 11:28:07.290 [error] <0.478.0>@Elixir.BitcoinStream.Metrics.Probe:handle_info:26 gen_server <0.478.0> terminated with reason: bad arithmetic expression in 'Elixir.BitcoinStream.Metrics.Probe':handle_info/2 line 26
+2021-04-08 11:28:07.348 [error] <0.478.0>@Elixir.BitcoinStream.Metrics.Probe:handle_info:26 CRASH REPORT Process <0.478.0> with 0 neighbours crashed with reason: bad arithmetic expression in 'Elixir.BitcoinStream.Metrics.Probe':handle_info/2 line 26
+2021-04-08 11:28:07.348 [error] <0.472.0>@Elixir.BitcoinStream.Metrics.Probe:handle_info:26 Supervisor 'Elixir.BitcoinStream.Application' had child 'Elixir.BitcoinStream.Metrics.Probe' started with 'Elixir.BitcoinStream.Metrics.Probe':start_link([]) at <0.478.0> exit with reason bad arithmetic expression in 'Elixir.BitcoinStream.Metrics.Probe':handle_info/2 line 26 in context child_terminated
+2021-04-08 11:28:08.350 [error] <0.587.0>@Elixir.BitcoinStream.Metrics.Probe:handle_info:26 gen_server <0.587.0> terminated with reason: bad arithmetic expression in 'Elixir.BitcoinStream.Metrics.Probe':handle_info/2 line 26
+2021-04-08 11:28:08.352 [error] <0.587.0>@Elixir.BitcoinStream.Metrics.Probe:handle_info:26 CRASH REPORT Process <0.587.0> with 0 neighbours crashed with reason: bad arithmetic expression in 'Elixir.BitcoinStream.Metrics.Probe':handle_info/2 line 26
+2021-04-08 11:28:08.352 [error] <0.472.0>@Elixir.BitcoinStream.Metrics.Probe:handle_info:26 Supervisor 'Elixir.BitcoinStream.Application' had child 'Elixir.BitcoinStream.Metrics.Probe' started with 'Elixir.BitcoinStream.Metrics.Probe':start_link([]) at <0.587.0> exit with reason bad arithmetic expression in 'Elixir.BitcoinStream.Metrics.Probe':handle_info/2 line 26 in context child_terminated
+2021-04-08 11:28:09.354 [error] <0.588.0>@Elixir.BitcoinStream.Metrics.Probe:handle_info:26 gen_server <0.588.0> terminated with reason: bad arithmetic expression in 'Elixir.BitcoinStream.Metrics.Probe':handle_info/2 line 26
+2021-04-08 11:28:09.356 [error] <0.588.0>@Elixir.BitcoinStream.Metrics.Probe:handle_info:26 CRASH REPORT Process <0.588.0> with 0 neighbours crashed with reason: bad arithmetic expression in 'Elixir.BitcoinStream.Metrics.Probe':handle_info/2 line 26
+2021-04-08 11:28:09.356 [error] <0.472.0>@Elixir.BitcoinStream.Metrics.Probe:handle_info:26 Supervisor 'Elixir.BitcoinStream.Application' had child 'Elixir.BitcoinStream.Metrics.Probe' started with 'Elixir.BitcoinStream.Metrics.Probe':start_link([]) at <0.588.0> exit with reason bad arithmetic expression in 'Elixir.BitcoinStream.Metrics.Probe':handle_info/2 line 26 in context child_terminated
+2021-04-08 11:28:56.567 [info] <0.44.0> Application lager started on node nonode@nohost
+2021-04-08 11:28:56.569 [info] <0.44.0> Application hut started on node nonode@nohost
+2021-04-08 11:28:56.575 [info] <0.365.0> Setup running ...
+2021-04-08 11:28:56.577 [info] <0.365.0> Directories verified. Res = ok
+2021-04-08 11:28:56.577 [info] <0.365.0> Setup finished processing hooks (Mode=normal)...
+2021-04-08 11:28:56.577 [info] <0.44.0> Application setup started on node nonode@nohost
+2021-04-08 11:28:56.577 [info] <0.44.0> Application bear started on node nonode@nohost
+2021-04-08 11:28:56.581 [info] <0.44.0> Application folsom started on node nonode@nohost
+2021-04-08 11:28:56.581 [info] <0.44.0> Application parse_trans started on node nonode@nohost
+2021-04-08 11:28:56.596 [info] <0.381.0> msg: "Starting reporters with [{reporters,\n                             [{'Elixir.BitcoinStream.ExometerReportDash',[]}]},\n                         {subscribers,\n                             [{'Elixir.BitcoinStream.ExometerReportDash',\n                                  [erlang,memory],\n                                  [atom,binary,ets,processes,total],\n                                  1000,true},\n                              {'Elixir.BitcoinStream.ExometerReportDash',\n                                  [erlang,statistics],\n                                  run_queue,1000,true}]}]\n", options: []
+2021-04-08 11:28:56.601 [info] <0.44.0> Application exometer_core started on node nonode@nohost
+2021-04-08 11:28:56.601 [info] <0.44.0> Application pobox started on node nonode@nohost
+2021-04-08 11:28:56.607 [info] <0.44.0> Application elixometer started on node nonode@nohost
+2021-04-08 11:28:56.609 [info] <0.44.0> Application chumak started on node nonode@nohost
+2021-04-08 11:28:56.609 [info] <0.44.0> Application unicode_util_compat started on node nonode@nohost
+2021-04-08 11:28:56.609 [info] <0.44.0> Application idna started on node nonode@nohost
+2021-04-08 11:28:56.609 [info] <0.44.0> Application mimerl started on node nonode@nohost
+2021-04-08 11:28:56.609 [info] <0.44.0> Application certifi started on node nonode@nohost
+2021-04-08 11:28:56.609 [info] <0.44.0> Application ssl_verify_fun started on node nonode@nohost
+2021-04-08 11:28:56.610 [info] <0.44.0> Application metrics started on node nonode@nohost
+2021-04-08 11:28:56.619 [info] <0.44.0> Application hackney started on node nonode@nohost
+2021-04-08 11:28:56.697 [info] <0.44.0> Application tzdata started on node nonode@nohost
+2021-04-08 11:28:56.697 [info] <0.44.0> Application combine started on node nonode@nohost
+2021-04-08 11:28:56.700 [info] <0.44.0> Application gettext started on node nonode@nohost
+2021-04-08 11:28:56.703 [info] <0.44.0> Application timex started on node nonode@nohost
+2021-04-08 11:28:56.703 [info] <0.44.0> Application decimal started on node nonode@nohost
+2021-04-08 11:28:56.703 [info] <0.44.0> Application bitcoinex started on node nonode@nohost
+2021-04-08 11:28:56.703 [info] <0.44.0> Application cowlib started on node nonode@nohost
+2021-04-08 11:28:56.706 [info] <0.44.0> Application ranch started on node nonode@nohost
+2021-04-08 11:28:56.708 [info] <0.44.0> Application cowboy started on node nonode@nohost
+2021-04-08 11:28:56.709 [info] <0.44.0> Application eex started on node nonode@nohost
+2021-04-08 11:28:56.714 [info] <0.44.0> Application mime started on node nonode@nohost
+2021-04-08 11:28:56.715 [info] <0.44.0> Application plug_crypto started on node nonode@nohost
+2021-04-08 11:28:56.718 [info] <0.44.0> Application telemetry started on node nonode@nohost
+2021-04-08 11:28:56.720 [info] <0.44.0> Application plug started on node nonode@nohost
+2021-04-08 11:28:56.720 [info] <0.44.0> Application cowboy_telemetry started on node nonode@nohost
+2021-04-08 11:28:56.721 [info] <0.44.0> Application plug_cowboy started on node nonode@nohost
+2021-04-08 11:28:56.721 [info] <0.44.0> Application jason started on node nonode@nohost
+2021-04-08 11:28:56.766 [info] <0.44.0> Application bitcoin_stream started on node nonode@nohost
+2021-04-08 11:33:04.861 [info] <0.44.0> Application lager started on node nonode@nohost
+2021-04-08 11:33:04.863 [info] <0.44.0> Application hut started on node nonode@nohost
+2021-04-08 11:33:04.868 [info] <0.365.0> Setup running ...
+2021-04-08 11:33:04.871 [info] <0.365.0> Directories verified. Res = ok
+2021-04-08 11:33:04.871 [info] <0.365.0> Setup finished processing hooks (Mode=normal)...
+2021-04-08 11:33:04.871 [info] <0.44.0> Application setup started on node nonode@nohost
+2021-04-08 11:33:04.871 [info] <0.44.0> Application bear started on node nonode@nohost
+2021-04-08 11:33:04.876 [info] <0.44.0> Application folsom started on node nonode@nohost
+2021-04-08 11:33:04.876 [info] <0.44.0> Application parse_trans started on node nonode@nohost
+2021-04-08 11:33:04.891 [info] <0.381.0> msg: "Starting reporters with [{reporters,\n                             [{'Elixir.BitcoinStream.ExometerReportDash',[]}]},\n                         {subscribers,\n                             [{'Elixir.BitcoinStream.ExometerReportDash',\n                                  [erlang,memory],\n                                  [atom,binary,ets,processes,total],\n                                  1000,true},\n                              {'Elixir.BitcoinStream.ExometerReportDash',\n                                  [erlang,statistics],\n                                  run_queue,1000,true}]}]\n", options: []
+2021-04-08 11:33:04.898 [info] <0.44.0> Application exometer_core started on node nonode@nohost
+2021-04-08 11:33:04.898 [info] <0.44.0> Application pobox started on node nonode@nohost
+2021-04-08 11:33:04.903 [info] <0.44.0> Application elixometer started on node nonode@nohost
+2021-04-08 11:33:04.905 [info] <0.44.0> Application chumak started on node nonode@nohost
+2021-04-08 11:33:04.905 [info] <0.44.0> Application unicode_util_compat started on node nonode@nohost
+2021-04-08 11:33:04.905 [info] <0.44.0> Application idna started on node nonode@nohost
+2021-04-08 11:33:04.905 [info] <0.44.0> Application mimerl started on node nonode@nohost
+2021-04-08 11:33:04.905 [info] <0.44.0> Application certifi started on node nonode@nohost
+2021-04-08 11:33:04.905 [info] <0.44.0> Application ssl_verify_fun started on node nonode@nohost
+2021-04-08 11:33:04.905 [info] <0.44.0> Application metrics started on node nonode@nohost
+2021-04-08 11:33:04.918 [info] <0.44.0> Application hackney started on node nonode@nohost
+2021-04-08 11:33:04.998 [info] <0.44.0> Application tzdata started on node nonode@nohost
+2021-04-08 11:33:04.998 [info] <0.44.0> Application combine started on node nonode@nohost
+2021-04-08 11:33:05.002 [info] <0.44.0> Application gettext started on node nonode@nohost
+2021-04-08 11:33:05.005 [info] <0.44.0> Application timex started on node nonode@nohost
+2021-04-08 11:33:05.005 [info] <0.44.0> Application decimal started on node nonode@nohost
+2021-04-08 11:33:05.005 [info] <0.44.0> Application bitcoinex started on node nonode@nohost
+2021-04-08 11:33:05.006 [info] <0.44.0> Application cowlib started on node nonode@nohost
+2021-04-08 11:33:05.009 [info] <0.44.0> Application ranch started on node nonode@nohost
+2021-04-08 11:33:05.011 [info] <0.44.0> Application cowboy started on node nonode@nohost
+2021-04-08 11:33:05.011 [info] <0.44.0> Application eex started on node nonode@nohost
+2021-04-08 11:33:05.016 [info] <0.44.0> Application mime started on node nonode@nohost
+2021-04-08 11:33:05.017 [info] <0.44.0> Application plug_crypto started on node nonode@nohost
+2021-04-08 11:33:05.020 [info] <0.44.0> Application telemetry started on node nonode@nohost
+2021-04-08 11:33:05.022 [info] <0.44.0> Application plug started on node nonode@nohost
+2021-04-08 11:33:05.022 [info] <0.44.0> Application cowboy_telemetry started on node nonode@nohost
+2021-04-08 11:33:05.023 [info] <0.44.0> Application plug_cowboy started on node nonode@nohost
+2021-04-08 11:33:05.023 [info] <0.44.0> Application jason started on node nonode@nohost
+2021-04-08 11:33:05.062 [info] <0.44.0> Application bitcoin_stream started on node nonode@nohost
+2021-04-08 11:35:17.559 [info] <0.44.0> Application lager started on node nonode@nohost
+2021-04-08 11:35:17.561 [info] <0.44.0> Application hut started on node nonode@nohost
+2021-04-08 11:35:17.567 [info] <0.485.0> Setup running ...
+2021-04-08 11:35:17.569 [info] <0.485.0> Directories verified. Res = ok
+2021-04-08 11:35:17.569 [info] <0.485.0> Setup finished processing hooks (Mode=normal)...
+2021-04-08 11:35:17.569 [info] <0.44.0> Application setup started on node nonode@nohost
+2021-04-08 11:35:17.569 [info] <0.44.0> Application bear started on node nonode@nohost
+2021-04-08 11:35:17.575 [info] <0.44.0> Application folsom started on node nonode@nohost
+2021-04-08 11:35:17.586 [info] <0.500.0> msg: "Starting reporters with [{reporters,\n                             [{'Elixir.BitcoinStream.ExometerReportDash',[]}]},\n                         {subscribers,\n                             [{'Elixir.BitcoinStream.ExometerReportDash',\n                                  [erlang,memory],\n                                  [atom,binary,ets,processes,total],\n                                  1000,true},\n                              {'Elixir.BitcoinStream.ExometerReportDash',\n                                  [erlang,statistics],\n                                  run_queue,1000,true}]}]\n", options: []
+2021-04-08 11:35:17.591 [info] <0.44.0> Application exometer_core started on node nonode@nohost
+2021-04-08 11:35:17.591 [info] <0.44.0> Application pobox started on node nonode@nohost
+2021-04-08 11:35:17.598 [info] <0.44.0> Application elixometer started on node nonode@nohost
+2021-04-08 11:35:17.599 [info] <0.44.0> Application chumak started on node nonode@nohost
+2021-04-08 11:35:17.680 [info] <0.44.0> Application tzdata started on node nonode@nohost
+2021-04-08 11:35:17.680 [info] <0.44.0> Application combine started on node nonode@nohost
+2021-04-08 11:35:17.682 [info] <0.44.0> Application gettext started on node nonode@nohost
+2021-04-08 11:35:17.686 [info] <0.44.0> Application timex started on node nonode@nohost
+2021-04-08 11:35:17.686 [info] <0.44.0> Application decimal started on node nonode@nohost
+2021-04-08 11:35:17.686 [info] <0.44.0> Application bitcoinex started on node nonode@nohost
+2021-04-08 11:35:17.686 [info] <0.44.0> Application cowlib started on node nonode@nohost
+2021-04-08 11:35:17.690 [info] <0.44.0> Application ranch started on node nonode@nohost
+2021-04-08 11:35:17.692 [info] <0.44.0> Application cowboy started on node nonode@nohost
+2021-04-08 11:35:17.692 [info] <0.44.0> Application eex started on node nonode@nohost
+2021-04-08 11:35:17.698 [info] <0.44.0> Application mime started on node nonode@nohost
+2021-04-08 11:35:17.699 [info] <0.44.0> Application plug_crypto started on node nonode@nohost
+2021-04-08 11:35:17.702 [info] <0.44.0> Application telemetry started on node nonode@nohost
+2021-04-08 11:35:17.703 [info] <0.44.0> Application plug started on node nonode@nohost
+2021-04-08 11:35:17.704 [info] <0.44.0> Application cowboy_telemetry started on node nonode@nohost
+2021-04-08 11:35:17.705 [info] <0.44.0> Application plug_cowboy started on node nonode@nohost
+2021-04-08 11:35:17.705 [info] <0.44.0> Application jason started on node nonode@nohost
+2021-04-08 11:35:17.742 [info] <0.44.0> Application bitcoin_stream started on node nonode@nohost
+2021-04-08 11:36:46.308 [info] <0.44.0> Application lager started on node nonode@nohost
+2021-04-08 11:36:46.310 [info] <0.44.0> Application hut started on node nonode@nohost
+2021-04-08 11:36:46.316 [info] <0.365.0> Setup running ...
+2021-04-08 11:36:46.318 [info] <0.365.0> Directories verified. Res = ok
+2021-04-08 11:36:46.318 [info] <0.365.0> Setup finished processing hooks (Mode=normal)...
+2021-04-08 11:36:46.318 [info] <0.44.0> Application setup started on node nonode@nohost
+2021-04-08 11:36:46.318 [info] <0.44.0> Application bear started on node nonode@nohost
+2021-04-08 11:36:46.324 [info] <0.44.0> Application folsom started on node nonode@nohost
+2021-04-08 11:36:46.324 [info] <0.44.0> Application parse_trans started on node nonode@nohost
+2021-04-08 11:36:46.342 [info] <0.381.0> msg: "Starting reporters with [{reporters,\n                             [{'Elixir.BitcoinStream.ExometerReportDash',[]}]},\n                         {subscribers,\n                             [{'Elixir.BitcoinStream.ExometerReportDash',\n                                  [erlang,memory],\n                                  [atom,binary,ets,processes,total],\n                                  1000,true},\n                              {'Elixir.BitcoinStream.ExometerReportDash',\n                                  [erlang,statistics],\n                                  run_queue,1000,true}]}]\n", options: []
+2021-04-08 11:36:46.350 [info] <0.44.0> Application exometer_core started on node nonode@nohost
+2021-04-08 11:36:46.350 [info] <0.44.0> Application pobox started on node nonode@nohost
+2021-04-08 11:36:46.355 [info] <0.44.0> Application elixometer started on node nonode@nohost
+2021-04-08 11:36:46.357 [info] <0.44.0> Application chumak started on node nonode@nohost
+2021-04-08 11:36:46.357 [info] <0.44.0> Application unicode_util_compat started on node nonode@nohost
+2021-04-08 11:36:46.357 [info] <0.44.0> Application idna started on node nonode@nohost
+2021-04-08 11:36:46.357 [info] <0.44.0> Application mimerl started on node nonode@nohost
+2021-04-08 11:36:46.357 [info] <0.44.0> Application certifi started on node nonode@nohost
+2021-04-08 11:36:46.357 [info] <0.44.0> Application ssl_verify_fun started on node nonode@nohost
+2021-04-08 11:36:46.357 [info] <0.44.0> Application metrics started on node nonode@nohost
+2021-04-08 11:36:46.370 [info] <0.44.0> Application hackney started on node nonode@nohost
+2021-04-08 11:36:46.451 [info] <0.44.0> Application tzdata started on node nonode@nohost
+2021-04-08 11:36:46.451 [info] <0.44.0> Application combine started on node nonode@nohost
+2021-04-08 11:36:46.453 [info] <0.44.0> Application gettext started on node nonode@nohost
+2021-04-08 11:36:46.456 [info] <0.44.0> Application timex started on node nonode@nohost
+2021-04-08 11:36:46.456 [info] <0.44.0> Application decimal started on node nonode@nohost
+2021-04-08 11:36:46.456 [info] <0.44.0> Application bitcoinex started on node nonode@nohost
+2021-04-08 11:36:46.456 [info] <0.44.0> Application cowlib started on node nonode@nohost
+2021-04-08 11:36:46.459 [info] <0.44.0> Application ranch started on node nonode@nohost
+2021-04-08 11:36:46.462 [info] <0.44.0> Application cowboy started on node nonode@nohost
+2021-04-08 11:36:46.462 [info] <0.44.0> Application eex started on node nonode@nohost
+2021-04-08 11:36:46.467 [info] <0.44.0> Application mime started on node nonode@nohost
+2021-04-08 11:36:46.468 [info] <0.44.0> Application plug_crypto started on node nonode@nohost
+2021-04-08 11:36:46.471 [info] <0.44.0> Application telemetry started on node nonode@nohost
+2021-04-08 11:36:46.473 [info] <0.44.0> Application plug started on node nonode@nohost
+2021-04-08 11:36:46.473 [info] <0.44.0> Application cowboy_telemetry started on node nonode@nohost
+2021-04-08 11:36:46.474 [info] <0.44.0> Application plug_cowboy started on node nonode@nohost
+2021-04-08 11:36:46.474 [info] <0.44.0> Application jason started on node nonode@nohost
+2021-04-08 11:36:46.524 [info] <0.44.0> Application bitcoin_stream started on node nonode@nohost
