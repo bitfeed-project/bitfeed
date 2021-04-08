@@ -112,6 +112,8 @@ export default class TxController {
       return
     }
 
+    this.poolScene.scrollLock = true
+
     const block = (blockData && blockData.isBlock) ? blockData : new BitcoinBlock(blockData)
     this.knownBlocks[block.id] = true
     if (this.clearBlockTimeout) clearTimeout(this.clearBlockTimeout)
@@ -154,7 +156,7 @@ export default class TxController {
     console.log(`New block with ${knownCount} known transactions and ${unknownCount} unknown transactions`)
     mempoolCount.subtract(poolCount)
     this.blockScene.initialLayout()
-    setTimeout(() => { this.poolScene.layoutAll() }, 4000)
+    setTimeout(() => { this.poolScene.scrollLock = false; this.poolScene.layoutAll() }, 4000)
 
     currentBlock.set(block)
     blockVisible.set(true)
@@ -214,7 +216,7 @@ export default class TxController {
         version: 'simulated',
         time: Date.now(),
         id: `simulated_${i}_${Math.random()}`,
-        value: value || Math.floor(Math.pow(2,(0.1-(Math.log(1 - Math.random()))) * 8)) // horrible but plausible distribution of tx values
+        value: value || Math.min(10000, Math.floor(Math.pow(2,(0.1-(Math.log(1 - Math.random()))) * 8))) // horrible but plausible distribution of tx values
         // value: value || Math.pow(10,Math.floor(Math.random() * 5))
       }, this.vertexArray))
     }

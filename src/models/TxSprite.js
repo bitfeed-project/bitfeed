@@ -55,7 +55,7 @@ export default class TxSprite {
     this.compile()
   }
 
-  update({ now = Date.now(), layer, position, palette, color, alpha, duration, minDuration, adjust }, internal) {
+  update ({ now = Date.now(), layer, position, palette, color, alpha, duration, minDuration, adjust }, internal) {
     // if (!internal && (palette || color || alpha)) this.clearHover()
     if (!internal && (palette != null || color != null || alpha != null)) this.clearHover()
     const offsetTime = now - timeOffset

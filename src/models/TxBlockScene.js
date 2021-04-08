@@ -62,7 +62,6 @@ export default class TxBlockScene extends TxMondrianPoolScene {
             alpha: 1
           }
         },
-        duration: 1500,
         delay: 0,
         state: 'ready'
       })
@@ -97,9 +96,9 @@ export default class TxBlockScene extends TxMondrianPoolScene {
             alpha: 1
           }
         },
-        duration: this.laidOut ? 1000 : 1500,
+        duration: this.laidOut ? 1000 : 2000,
         delay: 0,
-        jitter: this.laidOut ? 0 : 1000,
+        jitter: this.laidOut ? 0 : 1500,
         state: 'block'
       })
     }
@@ -121,7 +120,6 @@ export default class TxBlockScene extends TxMondrianPoolScene {
             alpha: 1
           }
         },
-        duration: 1500,
         delay: 0,
         state: 'ready'
       })

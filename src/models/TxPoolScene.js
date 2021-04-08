@@ -78,32 +78,48 @@ export default class TxPoolScene {
     }
   }
 
-  redrawTx (tx) {
-    if (tx.view.initialised) {
+  redrawTx (tx, now) {
+    if (tx && tx.view && tx.view.initialised) {
       const pixelPosition = this.gridToPixels(tx.getGridPosition())
       tx.setPixelPosition(pixelPosition)
       this.updateTx(tx, {
         display: {
           position: this.pixelsToScreen(pixelPosition)
         },
-        duration: 500,
+        duration: 1000,
+        start: now,
         minDuration: 250,
         adjust: true
       })
     }
   }
 
-  doScroll (offset) {
+  updateChunk (ids) {
+    const now = Date.now()
+    for (let i = 0; i < ids.length; i++) {
+      this.redrawTx(this.txs[ids[i]], now)
+    }
+  }
+
+  async doScroll (offset) {
     const ids = this.getTxList()
     this.scene.scroll += offset
-    for (let i = 0; i < ids.length; i++) {
-      this.redrawTx(this.txs[ids[i]])
+    const processingChunks = []
+    for (let i = 0; i < ids.length; i+=200) {
+      processingChunks.push(new Promise((resolve, reject) => {
+        setTimeout(() => {
+          this.updateChunk(ids.slice(i, i+200))
+          resolve()
+        }, 0)
+      }))
     }
+    await Promise.all(processingChunks)
     this.clearOffscreenTxs()
   }
 
   scroll (offset, force) {
-    this.doScroll(offset)
+    if (!this.scrollLock) this.doScroll(offset)
+    else console.log("can't scroll - locked out!")
     // if (!this.scrollRateLimitTimer || force || Date.now() > (this.scrollRateLimitTimer + 1000)) {
     //   this.scrollRateLimitTimer = Date.now()
     //   this.doScroll(offset)
@@ -158,7 +174,6 @@ export default class TxPoolScene {
             alpha: 1
           }
         },
-        duration: 1500,
         delay: 0,
         state: 'ready'
       })
@@ -172,7 +187,7 @@ export default class TxPoolScene {
             alpha: 1
           }
         },
-        duration: 1500,
+        duration: 2500,
         delay: 0,
         state: 'pool'
       })
@@ -191,7 +206,7 @@ export default class TxPoolScene {
         display: {
           position: this.pixelsToScreen(pixelPosition)
         },
-        duration: 1000,
+        duration: 1500,
         minDuration: 1000,
         delay: 0,
         adjust: true
