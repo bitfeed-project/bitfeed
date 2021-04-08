@@ -16,8 +16,8 @@ defmodule BitcoinStream.Server do
       Registry.child_spec(
         keys: :duplicate,
         name: Registry.BitcoinStream
-      )#,
-      # BitcoinStream.Bridge.child_spec(port: 29000)
+      ),
+      BitcoinStream.Bridge.child_spec(port: 29000)
     ]
 
     opts = [strategy: :one_for_one, name: BitcoinStream.Application]
