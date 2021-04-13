@@ -10,6 +10,9 @@
 
   let canvas
   let gl
+  let nativeAntialias
+  let displayWidth
+  let displayHeight
   let shaderProgram
   let aspectRatio
   let sceneScale = [1.0, 1.0]
@@ -58,8 +61,15 @@
 
   function resizeCanvas () {
     // var rect = canvas.parentNode.getBoundingClientRect()
-    canvas.width = window.innerWidth
-    canvas.height = window.innerHeight
+    displayWidth = window.innerWidth
+    displayHeight = window.innerHeight
+    if (!nativeAntialias) {
+      canvas.width = displayWidth * 2
+      canvas.height = displayHeight * 2
+    } else {
+      canvas.width = displayWidth
+      canvas.height = displayHeight
+    }
     if (gl) gl.viewport(0, 0, canvas.width, canvas.height)
   }
 
@@ -129,7 +139,7 @@
 
     /* SET UP SHADER UNIFORMS */
     // screen dimensions
-    gl.uniform2f(gl.getUniformLocation(shaderProgram, 'screenSize'), canvas.width, canvas.height)
+    gl.uniform2f(gl.getUniformLocation(shaderProgram, 'screenSize'), displayWidth, displayHeight)
     // frame timestamp
     const now = Date.now() - baseTime
     gl.uniform1f(gl.getUniformLocation(shaderProgram, 'now'), now)
@@ -202,10 +212,11 @@
   }
 
   onMount(() => {
-    resizeCanvas()
     gl = canvas.getContext('webgl')
+    nativeAntialias = gl.getContextAttributes().antialias
+    resizeCanvas()
+    console.log('antialiasing?', nativeAntialias)
 
-    gl.viewport(0, 0, canvas.width, canvas.height)
     gl.clearColor(0.0, 0.0, 0.0, 0.0)
     gl.clear(gl.COLOR_BUFFER_BIT)
 
@@ -248,7 +259,7 @@
   })
 </script>
 
-<style>
+<style type="text/scss">
 .tx-scene {
   position: absolute;
   left: 0;
@@ -257,6 +268,11 @@
   bottom: 0;
   /* pointer-events: none; */
   overflow: hidden;
+
+  &.sim-antialias {
+    transform: scale(0.5);
+    transform-origin: top left;
+  }
 }
 </style>
 
@@ -264,5 +280,6 @@
 
 <canvas
   class="tx-scene"
+  class:sim-antialias={!nativeAntialias}
   bind:this={canvas}
 ></canvas>
