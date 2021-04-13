@@ -136,6 +136,7 @@ function toggleExpanded (){
 
         .copy-button, .qr-button {
           position: relative;
+          margin: 0 .25em;
           font-size: 1.5rem;
           cursor: pointer;
 
@@ -152,10 +153,15 @@ function toggleExpanded (){
         }
       }
 
+      .donation-info {
+        text-align: justify;
+      }
+
       .expandable-content {
         max-height: 0;
         transition: max-height 300ms;
         overflow: hidden;
+        padding: 0 0.5em;
 
         .donation-info {
           font-size: 0.8em;
