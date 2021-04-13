@@ -360,7 +360,7 @@
   <div class="canvas-wrapper" on:pointerleave={pointerLeave} on:pointermove={pointerMove} on:click={onClick}>
     <TxRender controller={txController} />
 
-    <div class="mempool-height" style="bottom: calc({$mempoolScreenHeight}px + 1rem)">
+    <div class="mempool-height" style="bottom: calc({$mempoolScreenHeight + 20}px)">
       <div class="height-bar" />
       <span class="mempool-count">Mempool: { integerFormat.format($mempoolCount) } unconfirmed</span>
     </div>
