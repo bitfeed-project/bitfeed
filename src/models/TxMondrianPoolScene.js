@@ -23,9 +23,12 @@ export default class TxMondrianPoolScene extends TxPoolScene {
     return logTxSize(value, this.blockWidth)
   }
 
-  place (id, index, size, tx) {
+  place (tx, index, size) {
     // console.log(`placing tx at ${index} (size ${size})`)
-    return this.layout.place(size, tx)
+    const position = this.layout.place(tx, size)
+    tx.gridPosition.x = position.x
+    tx.gridPosition.y = position.y
+    tx.gridPosition.r = position.r
   }
 
   doScroll (offset) {
@@ -258,7 +261,7 @@ class MondrianLayout {
     return { x: slot.x, y: slot.y, r: squareWidth }
   }
 
-  place (size, tx) {
+  place (tx, size) {
     let found = false
     let rowIndex = 0
     let row

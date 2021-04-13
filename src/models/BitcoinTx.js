@@ -6,6 +6,9 @@ export default class BitcoinTx {
     this.version = version
     this.id = id
     this.vertexArray = vertexArray
+    this.pixelPosition = { x: 0, y: 0, r: 0}
+    this.screenPosition = { x: 0, y: 0, r: 0}
+    this.gridPosition = { x: 0, y: 0, r: 0}
 
     if (inputs && outputs) {
       this.inputs = inputs
@@ -48,28 +51,11 @@ export default class BitcoinTx {
     this.state = this.block ? 'block' : 'pool'
   }
 
-  updateView (update) {
-    if (this.view) this.view.update(update)
-  }
-
   hoverOn () {
     if (this.view) this.view.setHover(true)
   }
 
   hoverOff () {
     if (this.view) this.view.setHover(false)
-  }
-
-  setGridPosition (position) {
-    this.gridPosition = position
-  }
-  getGridPosition () {
-    if (this.gridPosition) return this.gridPosition
-  }
-  setPixelPosition (position) {
-    this.pixelPosition = position
-  }
-  getPixelPosition () {
-    if (this.pixelPosition) return this.pixelPosition
   }
 }

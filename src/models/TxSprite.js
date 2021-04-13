@@ -31,12 +31,14 @@ function interpolateAttributeStart(attribute, now, label, binaryAttribute) {
 
 export default class TxSprite {
 
-  constructor({ now = Date.now(), id, value, layer, position, palette, color, alpha }, vertexArray) {
+  constructor({ now = Date.now(), layer, position, palette, color, alpha }, vertexArray) {
     const offsetTime = now - timeOffset
-    this.id = id
-    this.value = value
     this.layer = layer
     this.vertexArray = vertexArray
+    this.vertexData = Array(VI.length).fill(0)
+    this.updateMap = {
+      x: 0, y: 0, r: 0, p: 0, c: 0, a: 0
+    }
 
     this.attributes = {
       x: { a: position.x, b: position.x, t: offsetTime, v: 0, d: 0 },
@@ -61,24 +63,22 @@ export default class TxSprite {
     const offsetTime = now - timeOffset
     const v = duration > 0 ? (1 / duration) : 0
 
-    let update = {
-      x: position ? position.x : null,
-      y: position ? position.y : null,
-      r: position ? position.r : null,
-      p: palette,
-      c: color,
-      a: alpha
+    this.updateMap.x = position ? position.x : null
+    this.updateMap.y = position ? position.y : null
+    this.updateMap.r = position ? position.r : null
+    this.updateMap.p = palette
+    this.updateMap.c = color
+    this.updateMap.a = alpha
+
+    if (this.updateMap.x || this.updateMap.y || this.updateMap.r) {
+      if (this.updateMap.x == null) this.updateMap.x = this.attributes.x.b
+      if (this.updateMap.y == null) this.updateMap.y = this.attributes.y.b
+      if (this.updateMap.r == null) this.updateMap.r = this.attributes.r.b
     }
 
-    if (update.x || update.y || update.r) {
-      if (update.x == null) update.x = this.attributes.x.b
-      if (update.y == null) update.y = this.attributes.y.b
-      if (update.r == null) update.r = this.attributes.r.b
-    }
-
-    for (const key of Object.keys(update)) {
+    for (const key of Object.keys(this.updateMap)) {
       // for each non-null attribute:
-      if (update[key] != null) {
+      if (this.updateMap[key] != null) {
         // calculate current interpolated value, and set as 'from' (except the non-interpolatable palette attribute)
         interpolateAttributeStart(this.attributes[key], offsetTime, key, key === 'p')
         // interpolateAttributeStart(this.attributes[key], offsetTime, key)
@@ -94,7 +94,7 @@ export default class TxSprite {
           this.attributes[key].d = minDuration
         }
         // set 'to' to target value
-        this.attributes[key].b = update[key]
+        this.attributes[key].b = this.updateMap[key]
       }
     }
 
@@ -133,14 +133,23 @@ export default class TxSprite {
 
   compile () {
     const size = this.attributes.r
-    this.vertexData = [
-      ...this.compileVertex({ x: { a: -size.a, b: -size.b }, y: { a: -size.a, b: -size.b }}),
-      ...this.compileVertex({ x: { a: size.a, b: size.b }, y: { a: size.a, b: size.b }}),
-      ...this.compileVertex({ x: { a: size.a, b: size.b }, y: { a: -size.a, b: -size.b }}),
-      ...this.compileVertex({ x: { a: -size.a, b: -size.b }, y: { a: -size.a, b: -size.b }}),
-      ...this.compileVertex({ x: { a: size.a, b: size.b }, y: { a: size.a, b: size.b }}),
-      ...this.compileVertex({ x: { a: -size.a, b: -size.b }, y: { a: size.a, b: size.b }})
-    ]
+
+    // update vertex data in place
+    // ugly, but avoids allocating and spreading large temporary arrays
+    for (let step = 0; step < VI.length; step++) {
+      // components of each field in the vertex array are defined by an entry in VI:
+      // VI[i].a is the attribute, VI[i].f is the inner field, VI[i].offA and VI[i].offB are offset factors
+      this.vertexData[step] = this.attributes[VI[step].a][VI[step].f] + (VI[step].offA * size.a)  + (VI[step].offB * size.b)
+    }
+
+    // this.vertexData = [
+    //   ...this.compileVertex({ x: { a: -size.a, b: -size.b }, y: { a: -size.a, b: -size.b }}),
+    //   ...this.compileVertex({ x: { a: size.a, b: size.b }, y: { a: size.a, b: size.b }}),
+    //   ...this.compileVertex({ x: { a: size.a, b: size.b }, y: { a: -size.a, b: -size.b }}),
+    //   ...this.compileVertex({ x: { a: -size.a, b: -size.b }, y: { a: -size.a, b: -size.b }}),
+    //   ...this.compileVertex({ x: { a: size.a, b: size.b }, y: { a: size.a, b: size.b }}),
+    //   ...this.compileVertex({ x: { a: -size.a, b: -size.b }, y: { a: size.a, b: size.b }})
+    // ]
     this.vertexArray.setData(this.vertexPointer, this.vertexData)
   }
 
@@ -206,3 +215,24 @@ export default class TxSprite {
 TxSprite.vertexSize = 20
 TxSprite.vertexCount = 6
 TxSprite.dataSize = TxSprite.vertexSize * TxSprite.vertexCount
+
+const VI = []
+;([
+  [-1,-1],
+  [ 1, 1],
+  [ 1,-1],
+  [-1,-1],
+  [ 1, 1],
+  [-1, 1]
+]).forEach(offsets => {
+  ;(['x','y','p','c','a']).forEach((attribute, aIndex) => {
+    ;(['a','b','t','v']).forEach(field => {
+      VI.push({
+        a: attribute,
+        f: field,
+        offA: (attribute === 'x' || attribute === 'y') && (field === 'a') ? offsets[aIndex] : 0,
+        offB: (attribute === 'x' || attribute === 'y') && (field === 'b') ? offsets[aIndex] : 0
+      })
+    })
+  })
+})

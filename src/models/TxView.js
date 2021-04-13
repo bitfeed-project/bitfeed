@@ -22,7 +22,10 @@ export default class TxView {
   }
 
   destroy () {
-    if (this.sprite) this.sprite.destroy()
+    if (this.sprite) {
+      this.sprite.destroy()
+      this.sprite = null
+    }
   }
 
   /*
@@ -43,13 +46,14 @@ export default class TxView {
 
     if (!this.initialised || !this.sprite) {
       this.initialised = true
-      const update = toSpriteUpdate(display, duration, delay, start)
-      update.id = this.id
-      update.value = this.value
-      this.sprite = new TxSprite(update, this.vertexArray)
+      this.sprite = new TxSprite(
+        toSpriteUpdate(display, duration, delay, start),
+        this.vertexArray
+      )
     } else {
-      const update = toSpriteUpdate(display, duration, delay, start, adjust)
-      this.sprite.update(update)
+      this.sprite.update(
+        toSpriteUpdate(display, duration, delay, start, adjust)
+      )
     }
   }
 
