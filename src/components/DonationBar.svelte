@@ -17,6 +17,8 @@ let addressElement
 let showCopyButton = true
 let expanded = false
 let qrHidden = true
+let qrLocked = false
+let qrElement
 
 onMount(() => {
   showCopyButton = (navigator && navigator.clipboard && navigator.clipboard.writeText) || !!addressElement
@@ -50,6 +52,20 @@ function showQR () {
 
 function hideQR () {
   qrHidden = true
+}
+
+function clickaway (event) {
+  console.log('clickaway', event)
+  if (!qrElement.contains(event.target)) {
+    qrLocked = false
+    window.removeEventListener('click', clickaway)
+  }
+}
+
+function toggleQR () {
+  console.log('toggleQR', qrElement)
+  qrLocked = !qrLocked
+  window.addEventListener('click', clickaway)
 }
 
 function toggleExpanded (){
@@ -218,7 +234,7 @@ function toggleExpanded (){
             {/if}
           </button>
         {/if}
-        <div class="qr-button" title="Show QR" on:pointerover={showQR} on:pointerenter={showQR} on:pointerleave={hideQR} on:pointerout={hideQR} on:pointercancel={hideQR}>
+        <div class="qr-button" title="Show QR" on:pointerover={showQR} on:pointerenter={showQR} on:pointerleave={hideQR} on:pointerout={hideQR} on:pointercancel={hideQR} on:click={toggleQR} bind:this={qrElement}>
           <Icon icon={qrIcon} color="var(--palette-x)" />
         </div>
       </div>
@@ -241,7 +257,7 @@ function toggleExpanded (){
       <img src="/img/qr.png" alt="" class="address-qr" transition:fade={{ duration: 300 }} >
     {/if} -->
   </div>
-  {#if !qrHidden}
+  {#if !qrHidden || qrLocked}
     <img src="/img/qr.png" alt="" class="address-qr" transition:fade={{ duration: 300 }} >
   {/if}
   <div class="open-close-button" on:click={toggleExpanded}>
