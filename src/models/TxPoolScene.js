@@ -90,7 +90,7 @@ export default class TxPoolScene {
   }
 
   updateChunk (ids) {
-    const now = Date.now()
+    const now = performance.now()
     for (let i = 0; i < ids.length; i++) {
       this.redrawTx(this.txs[ids[i]], now)
     }
@@ -118,8 +118,8 @@ export default class TxPoolScene {
   scroll (offset, force) {
     if (!this.scrollLock) this.doScroll(offset)
     else console.log("can't scroll - locked out!")
-    // if (!this.scrollRateLimitTimer || force || Date.now() > (this.scrollRateLimitTimer + 1000)) {
-    //   this.scrollRateLimitTimer = Date.now()
+    // if (!this.scrollRateLimitTimer || force || performance.now() > (this.scrollRateLimitTimer + 1000)) {
+    //   this.scrollRateLimitTimer = performance.now()
     //   this.doScroll(offset)
     //   return true
     // } else return false

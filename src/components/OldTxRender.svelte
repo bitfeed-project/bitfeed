@@ -14,7 +14,7 @@
   let sceneScale = [1.0, 1.0]
   let lastTime = 0.0
 
-  const baseTime = Date.now()
+  const baseTime = performance.now()
 
   // Vertex information
   let pointArray
@@ -132,7 +132,7 @@
     // screen dimensions
     gl.uniform2f(gl.getUniformLocation(shaderProgram, 'screenSize'), canvas.width, canvas.height)
     // frame timestamp
-    const now = Date.now() - baseTime
+    const now = performance.now() - baseTime
     gl.uniform1f(gl.getUniformLocation(shaderProgram, 'now'), now)
     // gl.uniform1f(gl.getUniformLocation(shaderProgram, 'opacityTarget'), $darkMode ? 0.1 : 0.4)
     // Color mapping textures

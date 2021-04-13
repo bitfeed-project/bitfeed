@@ -3,7 +3,7 @@
   import TxController from '../controllers/TxController.js'
   import TxRender from './TxRender.svelte'
   import getTxStream from '../controllers/TxStream.js'
-  import { settings, overlay, serverConnected, serverDelay, txQueueLength, txCount, mempoolCount, mempoolScreenHeight, frameRate, blockVisible, currentBlock, selectedTx, devEvents, devSettings } from '../stores.js'
+  import { settings, overlay, serverConnected, serverDelay, txQueueLength, txCount, mempoolCount, mempoolScreenHeight, frameRate, avgFrameRate, blockVisible, currentBlock, selectedTx, devEvents, devSettings } from '../stores.js'
   import BitcoinBlock from '../models/BitcoinBlock.js'
   import BlockInfo from '../components/BlockInfo.svelte'
   import TxInfo from '../components/TxInfo.svelte'
@@ -77,7 +77,7 @@
     //   value: 10000,
     //   prev_block: 'also_fake',
     //   merkle_root: 'merkle',
-    //   timestamp: Date.now(),
+    //   timestamp: performance.now(),
     //   bits: 'none',
     //   txn_count: 20,
     //   txns: (new Array(100)).fill(0).map((x, i) => {
@@ -101,12 +101,12 @@
   $: connectionColor = ($serverConnected && $serverDelay < 5000) ? ($serverDelay < 500 ? 'good' : 'ok') : 'bad'
   $: connectionTitle = ($serverConnected && $serverDelay < 5000) ? ($serverDelay < 500 ? 'Streaming live transactions' : 'Unstable connection') : 'Disconnected'
   $: {
-    if (lastFrameUpdate + 250 < Date.now()) {
+    if (lastFrameUpdate + 250 < performance.now()) {
       frameRateLabel = Number($frameRate).toFixed(1) + ' FPS'
-      lastFrameUpdate = Date.now()
+      lastFrameUpdate = performance.now()
     }
   }
-  $: frameRateColor = $frameRate > 40 ? 'good' : ($frameRate > 20 ? 'ok' : 'bad')
+  $: frameRateColor = $avgFrameRate > 40 ? 'good' : ($avgFrameRate > 20 ? 'ok' : 'bad')
 
 	const debounce = v => {
 		clearTimeout(timer);

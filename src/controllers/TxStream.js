@@ -8,14 +8,14 @@ class TxStream {
     this.websocket = null
     this.setConnected(false)
     this.setDelay(0)
-    this.lastBeat = Date.now()
+    this.lastBeat = performance.now()
 
     this.reconnectTimeout = null
     this.heartbeatTimeout = null
 
     this.delayInterval = setInterval(() => {
       if (this.lastBeat && this.connected) {
-        this.setDelay(Date.now() - this.lastBeat)
+        this.setDelay(performance.now() - this.lastBeat)
       }
     }, 789)
 
@@ -65,7 +65,7 @@ class TxStream {
   onHeartbeat () {
     if (this.heartbeatTimeout) clearTimeout(this.heartbeatTimeout)
     if (this.reconnectTimeout) clearTimeout(this.reconnectTimeout)
-    this.setDelay(Date.now() - this.lastBeat)
+    this.setDelay(performance.now() - this.lastBeat)
     this.lastBeat = null
     this.setConnected(true)
     this.heartbeatTimeout = setTimeout(() => {
@@ -75,12 +75,12 @@ class TxStream {
 
   sendHeartbeat () {
     if (this.heartbeatTimeout) clearTimeout(this.heartbeatTimeout)
-    this.lastBeat = Date.now()
+    this.lastBeat = performance.now()
     if (this.websocket && this.websocket.readyState === WebSocket.OPEN) {
-      this.lastBeat = Date.now()
+      this.lastBeat = performance.now()
       this.websocket.send('hb')
       this.heartbeatTimeout = setTimeout(() => {
-        this.setDelay(Date.now() - this.lastBeat)
+        this.setDelay(performance.now() - this.lastBeat)
         this.disconnect()
       }, 5000)
     }

@@ -56,7 +56,7 @@ export default class TxController {
   addTx (txData) {
     const tx = new BitcoinTx(txData, this.vertexArray)
     if (!this.txs[tx.id] && !this.expiredTxs[tx.id]) {
-      this.pendingTxs.push([tx, Date.now()])
+      this.pendingTxs.push([tx, performance.now()])
       this.pendingTxs[tx.id] = tx
       txQueueLength.increment()
     }
@@ -77,7 +77,7 @@ export default class TxController {
           delete this.pendingMap[tx.id]
           txQueueLength.decrement()
         } else {
-          const timeSince = Date.now() - this.pendingTxs[0][1]
+          const timeSince = performance.now() - this.pendingTxs[0][1]
           if (timeSince > this.txDelay) {
             if (this.txDelay < this.maxTxDelay) this.txDelay += 10
             const tx = this.pendingTxs.shift()[0]

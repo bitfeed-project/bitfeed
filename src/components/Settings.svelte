@@ -1,12 +1,12 @@
 <script>
 import SidebarMenuItem from '../components/SidebarMenuItem.svelte'
-import { settings } from '../stores.js'
+import { settings, nativeAntialias } from '../stores.js'
 
 function toggle(setting) {
   $settings[setting] = !$settings[setting]
 }
 
-const settingConfig = {
+let settingConfig = {
   showNetworkStatus: {
     label: 'Show Network Status'
   },
@@ -20,6 +20,15 @@ const settingConfig = {
     label: 'Show Donation Info'
   }
 }
+$: {
+  if ($nativeAntialias) {
+    settingConfig.fancyGraphics = false
+  } else {
+    settingConfig.fancyGraphics = {
+      label: 'Fancy Graphics'
+    }
+  }
+}
 
 function getSettingLabel(setting) {
   if (settingConfig[setting]) return settingConfig[setting].label
@@ -28,5 +37,7 @@ function getSettingLabel(setting) {
 </script>
 
 {#each Object.keys($settings) as setting (setting) }
-  <SidebarMenuItem active={$settings[setting]} on:click={() => { toggle(setting) }} label={getSettingLabel(setting)} />
+  {#if settingConfig[setting]}
+    <SidebarMenuItem active={$settings[setting]} on:click={() => { toggle(setting) }} label={getSettingLabel(setting)} />
+  {/if}
 {/each}

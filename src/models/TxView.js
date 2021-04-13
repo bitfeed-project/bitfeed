@@ -4,7 +4,7 @@ import TxSprite from './TxSprite.js'
 // now, id, value, layer, position, size, palette, color, alpha, duration, adjust
 function toSpriteUpdate(display, duration, delay, start, adjust) {
   return {
-    now: (start || Date.now()) + (delay || 0),
+    now: (start || performance.now()) + (delay || 0),
     duration: duration,
     ...display,
     ...(display.color != null ? { palette: display.color.palette, color: display.color.index, alpha: display.color.alpha } : { color: null }),

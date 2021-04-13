@@ -12,10 +12,10 @@
     return tx.status === 'mempool'
   }).length
 
-  let lastFrame = Date.now()
-  let nextBlock = Date.now()
+  let lastFrame = performance.now()
+  let nextBlock = performance.now()
   function fakeTxStream () {
-    const now = Date.now()
+    const now = performance.now()
     let elapsed = now - lastFrame
     lastFrame = now
     let txDice = Math.random() * 250

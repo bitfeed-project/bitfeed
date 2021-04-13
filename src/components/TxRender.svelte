@@ -5,12 +5,13 @@
   import TxSprite from '../models/TxSprite.js'
   import { interpolateHcl } from 'd3-interpolate'
   import { color } from 'd3-color'
-  import { darkMode, frameRate } from '../stores.js'
+  import { darkMode, frameRate, avgFrameRate, nativeAntialias, settings } from '../stores.js'
   import config from '../config.js'
 
   let canvas
   let gl
-  let nativeAntialias
+  let simulateAntialiasing = false
+  let autoSetGraphicsMode = false
   let displayWidth
   let displayHeight
   let shaderProgram
@@ -19,10 +20,11 @@
   let pointArray
   let debugPointArray
 
-  let lastTime = Date.now()
+  let lastTime = performance.now()
   let rawFrameRate = 0
-
-  const baseTime = Date.now()
+  const frameRateSamples = Array(60).fill(60)
+  const frameRateReducer = (acc, rate) => { return acc + rate }
+  let frameRateSampleIndex = 0
 
   const nullPointArray = new Float32Array()
 
@@ -59,18 +61,25 @@
     if (running) run()
   }
 
+  $: {
+    simulateAntialiasing = !$nativeAntialias && $settings.fancyGraphics
+    resizeCanvas()
+  }
+
   function resizeCanvas () {
     // var rect = canvas.parentNode.getBoundingClientRect()
-    displayWidth = window.innerWidth
-    displayHeight = window.innerHeight
-    if (!nativeAntialias) {
-      canvas.width = displayWidth * 2
-      canvas.height = displayHeight * 2
-    } else {
-      canvas.width = displayWidth
-      canvas.height = displayHeight
+    if (canvas) {
+      displayWidth = window.innerWidth
+      displayHeight = window.innerHeight
+      if (simulateAntialiasing) {
+        canvas.width = displayWidth * 2
+        canvas.height = displayHeight * 2
+      } else {
+        canvas.width = displayWidth
+        canvas.height = displayHeight
+      }
+      if (gl) gl.viewport(0, 0, canvas.width, canvas.height)
     }
-    if (gl) gl.viewport(0, 0, canvas.width, canvas.height)
   }
 
   function getTxPointArray () {
@@ -124,7 +133,10 @@
     return program
   }
 
-  function run () {
+  function run (now) {
+    if (!now) {
+      now = performance.now()
+    }
     // /* RESET DRAWING AREA */
 
     /* LOAD VERTEX DATA */
@@ -141,7 +153,6 @@
     // screen dimensions
     gl.uniform2f(gl.getUniformLocation(shaderProgram, 'screenSize'), displayWidth, displayHeight)
     // frame timestamp
-    const now = Date.now() - baseTime
     gl.uniform1f(gl.getUniformLocation(shaderProgram, 'now'), now)
     gl.uniform1i(gl.getUniformLocation(shaderProgram, 'colorTexture'), 0);
 
@@ -160,9 +171,17 @@
       gl.drawArrays(gl.TRIANGLES, 0, pointArray.length / TxSprite.vertexSize)
     }
 
-    const frameTime = now - lastTime
-    rawFrameRate = Math.max(1, (rawFrameRate * 0.8) + (0.2 * (1 / (frameTime / 1000))))
+    const rawFrameRate = (1000 / (now - lastTime)) + 0.075
+    frameRateSamples[frameRateSampleIndex++] = rawFrameRate
+    if (frameRateSampleIndex >= frameRateSamples.length) frameRateSampleIndex = 0
+    const rawAvgFrameRate = frameRateSamples.reduce(frameRateReducer, 0) / frameRateSamples.length
+    // rawFrameRate = Math.max(1, (rawFrameRate * 0.8) + (0.2 * (1 / (frameTime / 1000))))
+    if (rawAvgFrameRate < 45 && !autoSetGraphicsMode) {
+      autoSetGraphicsMode = true
+      $settings.fancyGraphics = false
+    }
     frameRate.set(rawFrameRate)
+    avgFrameRate.set(rawAvgFrameRate)
     lastTime = now
 
     /* LOOP */
@@ -212,10 +231,9 @@
   }
 
   onMount(() => {
-    gl = canvas.getContext('webgl')
-    nativeAntialias = gl.getContextAttributes().antialias
+    gl = canvas.getContext('webgl', {antialias: false})
+    $nativeAntialias = gl.getContextAttributes().antialias
     resizeCanvas()
-    console.log('antialiasing?', nativeAntialias)
 
     gl.clearColor(0.0, 0.0, 0.0, 0.0)
     gl.clear(gl.COLOR_BUFFER_BIT)
@@ -280,6 +298,6 @@
 
 <canvas
   class="tx-scene"
-  class:sim-antialias={!nativeAntialias}
+  class:sim-antialias={simulateAntialiasing}
   bind:this={canvas}
 ></canvas>

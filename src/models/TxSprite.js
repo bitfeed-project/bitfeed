@@ -1,5 +1,3 @@
-import { timeOffset } from '../utils/time.js'
-
 const hoverTransitionTime = 300
 
 function interpolate (startState, endState, startTime, duration, now) {
@@ -31,8 +29,8 @@ function interpolateAttributeStart(attribute, now, label, binaryAttribute) {
 
 export default class TxSprite {
 
-  constructor({ now = Date.now(), layer, position, palette, color, alpha }, vertexArray) {
-    const offsetTime = now - timeOffset
+  constructor({ now = performance.now(), layer, position, palette, color, alpha }, vertexArray) {
+    const offsetTime = now
     this.layer = layer
     this.vertexArray = vertexArray
     this.vertexData = Array(VI.length).fill(0)
@@ -57,10 +55,10 @@ export default class TxSprite {
     this.compile()
   }
 
-  update ({ now = Date.now(), layer, position, palette, color, alpha, duration, minDuration, adjust }, internal) {
+  update ({ now = performance.now(), layer, position, palette, color, alpha, duration, minDuration, adjust }, internal) {
     // if (!internal && (palette || color || alpha)) this.clearHover()
     if (!internal && (palette != null || color != null || alpha != null)) this.clearHover()
-    const offsetTime = now - timeOffset
+    const offsetTime = now
     const v = duration > 0 ? (1 / duration) : 0
 
     this.updateMap.x = position ? position.x : null
@@ -188,7 +186,7 @@ export default class TxSprite {
           p: { ...this.attributes.p },
           c: { ...this.attributes.c },
           a: { ...this.attributes.a },
-          at: Date.now()
+          at: performance.now()
         }
         this.update({
           palette: 3.5,
