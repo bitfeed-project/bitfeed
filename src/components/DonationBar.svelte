@@ -2,15 +2,21 @@
 import { onMount } from 'svelte'
 import Icon from '../components/Icon.svelte'
 import config from '../config.js'
-import { fly } from 'svelte/transition'
+import { fly, fade } from 'svelte/transition'
 // import { linear } from 'svelte/easing'
 import coffeeIcon from '../assets/icon/cib-buy-me-a-coffee.svg'
 import clipboardIcon from '../assets/icon/cil-clipboard.svg'
+import qrIcon from '../assets/icon/cil-qr-code.svg'
+import closeIcon from '../assets/icon/cil-x-circle.svg'
+import openIcon from '../assets/icon/cil-arrow-circle-bottom.svg'
+import boltIcon from '../assets/icon/cil-bolt-filled.svg'
 
 let copied = false
 let addressElement
 
 let showCopyButton = true
+let expanded = false
+let qrHidden = true
 
 onMount(() => {
   showCopyButton = (navigator && navigator.clipboard && navigator.clipboard.writeText) || !!addressElement
@@ -38,6 +44,18 @@ async function copyAddress () {
   }
 }
 
+function showQR () {
+  qrHidden = false
+}
+
+function hideQR () {
+  qrHidden = true
+}
+
+function toggleExpanded (){
+  expanded = !expanded
+}
+
 </script>
 
 <style type="text/scss">
@@ -50,6 +68,20 @@ async function copyAddress () {
     max-width: calc(100vw - 8.25rem);
     margin: auto;
     transition: width 300ms, max-width 300ms;
+
+    .open-close-button {
+      position: absolute;
+      font-size: 1.2rem;
+      bottom: -0.5em;
+      right: 1rem;
+      transform: rotate(0deg);
+      background: var(--palette-c);
+      border-radius: 50%;
+      color: var(--palette-x);
+      cursor: pointer;
+
+      transition: transform 600ms;
+    }
 
     .donation-content {
       padding: 5px 5px;
@@ -86,12 +118,8 @@ async function copyAddress () {
           text-overflow: ellipsis;
         }
 
-        .copy-button {
+        .copy-button, .qr-button {
           position: relative;
-          background: none;
-          border: none;
-          padding: 0;
-          margin: 0;
           font-size: 1.5rem;
           cursor: pointer;
 
@@ -116,18 +144,27 @@ async function copyAddress () {
         .donation-info {
           font-size: 0.8em;
         }
+      }
 
-        .address-qr {
-          display: none;
-          position: absolute;
-          top: 100%;
-          left: 0;
-          right: 0;
-          margin: auto;
-          max-width: 100vw;
-          max-height: calc(100vh - 120px);
+      .lightning-button {
+        background: var(--bold-a);
+        color: white;
+
+        .lightning-icon {
+          color: white;
         }
       }
+    }
+
+    .address-qr {
+      display: block;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      margin: auto;
+      max-width: 100vw;
+      max-height: calc(100vh - 120px);
     }
 
     @media (min-width: 611px) {
@@ -139,13 +176,15 @@ async function copyAddress () {
       right: 0;
     }
 
-    &:hover {
+    &.expanded {
       max-width: 100vw;
+
+      .open-close-button {
+        transform: rotate(180deg);
+      }
 
       .donation-content {
         .main-content {
-          flex-wrap: wrap;
-
           .address-and-copy {
             .address {
               word-break: break-all;
@@ -155,20 +194,15 @@ async function copyAddress () {
           }
         }
 
-        .address-qr {
-          display: block;
-          max-width: 100%;
-        }
-
         .expandable-content {
-          max-height: 100px;
+          max-height: 200px;
         }
       }
     }
   }
 </style>
 
-<div class="donation-bar" transition:fly={{ y: -10 }}>
+<div class="donation-bar" transition:fly={{ y: -10 }} class:expanded>
   <div class="donation-content">
     <div class="main-content">
       <span class="coffee-icon">
@@ -184,13 +218,33 @@ async function copyAddress () {
             {/if}
           </button>
         {/if}
+        <div class="qr-button" title="Show QR" on:pointerover={showQR} on:pointerenter={showQR} on:pointerleave={hideQR} on:pointerout={hideQR} on:pointercancel={hideQR}>
+          <Icon icon={qrIcon} color="var(--palette-x)" />
+        </div>
       </div>
     </div>
     <div class="expandable-content">
       <p class="donation-info">
-        Thank you! Donations help to keep this site running. Transactions to the donation address appear highlighted in green.
+        Enjoying Bitfeed? Donations help to keep this site running. On-chain transactions to the above donation address appear highlighted in green.
       </p>
-      <img src="/img/qr.png" alt="" class="address-qr">
+      <!-- <p class="donation-info">
+        Prefer Lightning?
+      </p>
+      <p class="donation-info">
+        <input type="number" class="lightning-amount" step="0.00000001" value="0.00005" placeholder="Enter a donation amount...">
+        <button class="lightning-button"><Icon icon={boltIcon} color="white" inline />Generate an invoice!</button>
+      </p> -->
     </div>
+    <div class="lightning-form">
+    </div>
+    <!-- {#if showLightningQR}
+      <img src="/img/qr.png" alt="" class="address-qr" transition:fade={{ duration: 300 }} >
+    {/if} -->
+  </div>
+  {#if !qrHidden}
+    <img src="/img/qr.png" alt="" class="address-qr" transition:fade={{ duration: 300 }} >
+  {/if}
+  <div class="open-close-button" on:click={toggleExpanded}>
+    <Icon icon={openIcon} color="var(--palette-x)" />
   </div>
 </div>

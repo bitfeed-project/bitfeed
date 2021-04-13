@@ -15,7 +15,8 @@ export let color = "white"
   &.inline {
     display: inline;
     :global(svg) {
-      margin-bottom: -4%;
+      margin-bottom: 0;
+      transform: translateY(16%);
     }
   }
 }

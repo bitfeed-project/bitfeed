@@ -77,7 +77,7 @@
 
   .block-info {
     position: absolute;
-    bottom: calc(100% + 0.5rem);
+    bottom: calc(100% + 0.25rem);
     left: 50%;
     min-width: 100%;
     transform: translateX(-50%);
