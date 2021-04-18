@@ -231,7 +231,7 @@
   }
 
   onMount(() => {
-    gl = canvas.getContext('webgl', {antialias: false})
+    gl = canvas.getContext('webgl')
     $nativeAntialias = gl.getContextAttributes().antialias
     resizeCanvas()
 

@@ -45,8 +45,8 @@ function onClose () {
   <section class="about">
     <h2>Welcome to Bitfeed!</h2>
     <p>
-      On a typical day, the Bitcoin network confirms around <i>300,000 transactions</i> by mining an average of <i class="nobreak">144 blocks</i>.
-      Bitfeed is an attempt to visualise this flow of information.
+      On a typical day, the Bitcoin network confirms around 300,000 transactions by mining an average of <span class="nobreak">144 blocks</span>.
+      Bitfeed attempts to visualise this flow of information.
     </p>
     <p>
       As new transactions are recieved by our nodes, they drop into the mempool to await confirmation.
@@ -54,7 +54,6 @@ function onClose () {
     <p>
       Squares representing transactions in the mempool are sized according to total output value,
       on a logarithmic scale (each additional unit of width represents a 10x increase in value).
-      <!-- Check out the transaction key in the sidebar for more info, by clicking on the 'i' icon. -->
     </p>
     <div class="figure mempool-figure">
       <MempoolLegend />
@@ -63,7 +62,7 @@ function onClose () {
       Tap, click or mouse-over a square for transaction details.
     </p>
     <p>
-      Every <i>10 minutes</i>, on average, Bitcoin miners confirm transactions from the mempool by packaging them into newly discovered blocks.
+      Every 10 minutes, on average, Bitcoin miners confirm transactions from the mempool by packaging them into blocks.
     </p>
     <div class="figure block">
       {#if $settings.darkMode }
@@ -73,8 +72,8 @@ function onClose () {
       {/if}
     </div>
     <p>
-      Bitfeed illustrates this movement from the mempool into each new block,
-      arranging confirmed transactions to show the total number and the distribution of values (again, on a logarithmic scale).
+      Bitfeed illustrates this movement from the mempool into each newly discovered block,
+      arranging confirmed transactions to show the total number and distribution of values.
     </p>
   </section>
 </Overlay>

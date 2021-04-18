@@ -10,6 +10,7 @@ import qrIcon from '../assets/icon/cil-qr-code.svg'
 import closeIcon from '../assets/icon/cil-x-circle.svg'
 import openIcon from '../assets/icon/cil-arrow-circle-bottom.svg'
 import boltIcon from '../assets/icon/cil-bolt-filled.svg'
+import { overlay } from '../stores.js'
 
 let copied = false
 let addressElement
@@ -68,8 +69,14 @@ function toggleQR () {
   window.addEventListener('click', clickaway)
 }
 
-function toggleExpanded (){
+function toggleExpanded () {
   expanded = !expanded
+}
+
+function openLightningOverlay () {
+  console.log('opening lightning overlay')
+  expanded = false
+  $overlay = 'lightning'
 }
 
 </script>
@@ -161,19 +168,17 @@ function toggleExpanded (){
         max-height: 0;
         transition: max-height 300ms;
         overflow: hidden;
-        padding: 0 0.5em;
+        padding: 0 0.5em 0.5em;
+        font-size: 0.8em;
 
-        .donation-info {
-          font-size: 0.8em;
-        }
-      }
-
-      .lightning-button {
-        background: var(--bold-a);
-        color: white;
-
-        .lightning-icon {
+        .lightning-button {
+          background: var(--bold-a);
           color: white;
+          padding: 5px 8px;
+
+          .lightning-icon {
+            color: white;
+          }
         }
       }
     }
@@ -247,21 +252,14 @@ function toggleExpanded (){
     </div>
     <div class="expandable-content">
       <p class="donation-info">
-        Enjoying Bitfeed? Donations help to keep this site running. On-chain transactions to the above donation address appear highlighted in green.
+        Enjoying Bitfeed? Donations keep this site running. On-chain transactions to the above donation address appear highlighted in green.
       </p>
-      <!-- <p class="donation-info">
-        Prefer Lightning?
-      </p>
-      <p class="donation-info">
-        <input type="number" class="lightning-amount" step="0.00000001" value="0.00005" placeholder="Enter a donation amount...">
-        <button class="lightning-button"><Icon icon={boltIcon} color="white" inline />Generate an invoice!</button>
-      </p> -->
+      {#if config.lightningEnabled }
+        <button class="lightning-button" on:click={openLightningOverlay} >
+          <Icon icon={boltIcon} color="white" inline />Prefer Lightning?
+        </button>
+      {/if}
     </div>
-    <div class="lightning-form">
-    </div>
-    <!-- {#if showLightningQR}
-      <img src="/img/qr.png" alt="" class="address-qr" transition:fade={{ duration: 300 }} >
-    {/if} -->
   </div>
   {#if !qrHidden || qrLocked}
     <img src="/img/qr.png" alt="" class="address-qr" transition:fade={{ duration: 300 }} >

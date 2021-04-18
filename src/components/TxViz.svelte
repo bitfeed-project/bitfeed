@@ -9,6 +9,7 @@
   import TxInfo from '../components/TxInfo.svelte'
   import Sidebar from '../components/Sidebar.svelte'
   import AboutOverlay from '../components/AboutOverlay.svelte'
+  import LightningOverlay from '../components/LightningOverlay.svelte'
   import DonationBar from '../components/DonationBar.svelte'
   import { integerFormat } from '../utils/format.js'
   import config from '../config.js'
@@ -402,6 +403,9 @@
   <Sidebar />
 
   <AboutOverlay />
+  {#if config.lightningEnabled }
+    <LightningOverlay />
+  {/if}
 
   {#if config.dev && config.debug && $devSettings.guides }
     <div class="guide-overlay">
