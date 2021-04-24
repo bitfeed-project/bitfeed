@@ -1,4 +1,5 @@
 <script>
+  import analytics from '../utils/analytics.js'
   import { fly } from 'svelte/transition'
   import { linear } from 'svelte/easing'
   import { createEventDispatcher } from 'svelte'
@@ -51,6 +52,7 @@
   }
 
   function hideBlock () {
+    analytics.trackEvent('viz', 'block', 'hide')
     dispatch('hideBlock')
   }
 </script>

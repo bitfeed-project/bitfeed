@@ -1,4 +1,5 @@
 <script>
+import analytics from '../utils/analytics.js'
 import { onMount } from 'svelte'
 import Icon from '../components/Icon.svelte'
 import config from '../config.js'
@@ -45,6 +46,7 @@ async function copyAddress () {
       selection.removeAllRanges()
     }, 2000)
   }
+  analytics.trackEvent('donations', 'on-chain', 'copy-address')
 }
 
 function showQR () {
@@ -58,6 +60,7 @@ function hideQR () {
 function clickaway (event) {
   console.log('clickaway', event)
   if (!qrElement.contains(event.target)) {
+    if (qrLocked) analytics.trackEvent('donations', 'on-chain', 'hide-qr')
     qrLocked = false
     window.removeEventListener('click', clickaway)
   }
@@ -67,15 +70,18 @@ function toggleQR () {
   console.log('toggleQR', qrElement)
   qrLocked = !qrLocked
   window.addEventListener('click', clickaway)
+  analytics.trackEvent('donations', 'on-chain', qrLocked ? 'show-qr' : 'hide-qr')
 }
 
 function toggleExpanded () {
   expanded = !expanded
+  analytics.trackEvent('donations', 'bar', expanded ? 'open' : 'close')
 }
 
 function openLightningOverlay () {
   console.log('opening lightning overlay')
   expanded = false
+  analytics.trackEvent('donations', 'bar', 'close')
   $overlay = 'lightning'
 }
 

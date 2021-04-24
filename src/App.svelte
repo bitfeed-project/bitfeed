@@ -1,5 +1,8 @@
 <script>
 	import TxViz from './components/TxViz.svelte'
+	import analytics from './utils/analytics.js'
+
+	analytics.init()
 </script>
 
 <main>

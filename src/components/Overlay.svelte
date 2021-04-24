@@ -1,4 +1,5 @@
 <script>
+import analytics from '../utils/analytics.js'
 import Icon from '../components/Icon.svelte'
 import closeIcon from '../assets/icon/cil-x-circle.svg'
 import { overlay } from '../stores.js'
@@ -9,7 +10,14 @@ const dispatch = createEventDispatcher()
 export let name = 'none'
 
 let open
-$: open = $overlay === name
+$: {
+  const oldOpen = open
+  open = $overlay === name
+  if (oldOpen !== undefined && open != oldOpen) {
+    console.log('overlay open changed: ', oldOpen, open)
+    analytics.trackEvent('overlay', name, open ? 'open' : 'close')
+  }
+}
 
 function close () {
   $overlay = null

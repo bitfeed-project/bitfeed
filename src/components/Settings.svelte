@@ -1,9 +1,11 @@
 <script>
+import analytics from '../utils/analytics.js'
 import SidebarMenuItem from '../components/SidebarMenuItem.svelte'
 import { settings, nativeAntialias } from '../stores.js'
 
 function toggle(setting) {
   $settings[setting] = !$settings[setting]
+  analytics.trackEvent('settings', setting, $settings[setting] ? 'on' : 'off')
 }
 
 let settingConfig = {

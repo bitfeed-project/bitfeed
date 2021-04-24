@@ -1,5 +1,6 @@
 <script>
 import config from '../config.js'
+import analytics from '../utils/analytics.js'
 
 import SidebarTab from '../components/SidebarTab.svelte'
 import Icon from '../components/Icon.svelte'
@@ -19,8 +20,13 @@ let blockHidden = false
 $: blockHidden = ($currentBlock && !$blockVisible)
 
 function settings (tab) {
-  if ($sidebarToggle === tab) sidebarToggle.set(null)
-  else sidebarToggle.set(tab)
+  if ($sidebarToggle) analytics.trackEvent('sidebar', $sidebarToggle, 'close')
+  if ($sidebarToggle === tab) {
+    sidebarToggle.set(null)
+  } else {
+    analytics.trackEvent('sidebar', tab, 'open')
+    sidebarToggle.set(tab)
+  }
 }
 
 function openAbout () {
@@ -28,6 +34,7 @@ function openAbout () {
 }
 
 function showBlock () {
+  analytics.trackEvent('viz', 'block', 'show')
   $blockVisible = true
 }
 </script>
