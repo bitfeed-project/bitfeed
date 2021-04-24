@@ -252,7 +252,7 @@ function openLightningOverlay () {
     </div>
     <div class="expandable-content">
       <p class="donation-info">
-        Enjoying Bitfeed? Donations keep this site running. On-chain transactions to the above donation address appear highlighted in green.
+        Enjoying Bitfeed? Donations keep this site running. On-chain transactions to the donation address above appear highlighted in green.
       </p>
       {#if config.lightningEnabled }
         <button class="lightning-button" on:click={openLightningOverlay} >
