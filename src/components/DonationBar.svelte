@@ -58,7 +58,6 @@ function hideQR () {
 }
 
 function clickaway (event) {
-  console.log('clickaway', event)
   if (!qrElement.contains(event.target)) {
     if (qrLocked) analytics.trackEvent('donations', 'on-chain', 'hide-qr')
     qrLocked = false
@@ -67,7 +66,6 @@ function clickaway (event) {
 }
 
 function toggleQR () {
-  console.log('toggleQR', qrElement)
   qrLocked = !qrLocked
   window.addEventListener('click', clickaway)
   analytics.trackEvent('donations', 'on-chain', qrLocked ? 'show-qr' : 'hide-qr')
@@ -79,7 +77,6 @@ function toggleExpanded () {
 }
 
 function openLightningOverlay () {
-  console.log('opening lightning overlay')
   expanded = false
   analytics.trackEvent('donations', 'bar', 'close')
   $overlay = 'lightning'

@@ -20,8 +20,6 @@ class TxStream {
     }, 789)
 
     this.init()
-
-    console.log('stream', this)
   }
 
   setConnected (connected) {
@@ -129,7 +127,6 @@ class TxStream {
       try {
         const msg = JSON.parse(event.data)
         if (msg && msg.type === 'count') {
-          console.log('COUNT MSG:', msg)
           window.dispatchEvent(new CustomEvent('bitcoin_mempool_count', { detail: msg.count }))
         } else if (msg && msg.type === 'txn') {
           window.dispatchEvent(new CustomEvent('bitcoin_tx', { detail: msg.txn }))

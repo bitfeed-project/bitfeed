@@ -17,7 +17,7 @@ export default {
   },
 
   trackEvent: function (category, action, name, value) {
-    console.log('tracking event: ', {category, action, name, value})
+    if (config.dev) console.log('tracking event: ', {category, action, name, value})
     if (_paq) {
       _paq.push(['trackEvent', category, action, name, value]);
     }

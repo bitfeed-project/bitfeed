@@ -14,7 +14,6 @@ $: {
   const oldOpen = open
   open = $overlay === name
   if (oldOpen !== undefined && open != oldOpen) {
-    console.log('overlay open changed: ', oldOpen, open)
     analytics.trackEvent('overlay', name, open ? 'open' : 'close')
   }
 }

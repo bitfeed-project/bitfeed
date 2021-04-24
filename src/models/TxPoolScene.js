@@ -117,7 +117,6 @@ export default class TxPoolScene {
 
   scroll (offset, force) {
     if (!this.scrollLock) this.doScroll(offset)
-    else console.log("can't scroll - locked out!")
     // if (!this.scrollRateLimitTimer || force || performance.now() > (this.scrollRateLimitTimer + 1000)) {
     //   this.scrollRateLimitTimer = performance.now()
     //   this.doScroll(offset)
