@@ -25,7 +25,6 @@ const invoiceHexPlaceholder = 'lnbcxxxxxxt8l4pp5umz5kyakc0u8z3w2y568entyyq2gafgc
 let qrSrc = null
 $: {
   if (invoice && invoice.id && invoice.amount && invoice.BOLT11) {
-    startExpiryTimer()
     invoiceAmountLabel = `${Number.parseInt(invoice.amount) / 1000} sats`
     invoiceHexLabel = invoice.BOLT11
     qrSrc = `https://chart.googleapis.com/chart?chs=500x500&chld=L|2&cht=qr&chl=${invoice.BOLT11}`
@@ -43,7 +42,7 @@ $: {
   invoiceExpiryLabel = expiresIn == null ? '' : durationFormat.format(expiresIn * 1000)
 }
 $: {
-  if ($overlay) {
+  if ($overlay === 'lightning') {
     startExpiryTimer()
     stopPollingInvoice()
     pollingEnabled = true
@@ -51,6 +50,7 @@ $: {
   } else {
     stopExpiryTimer()
     stopPollingInvoice()
+    checkResetInvoice()
   }
 }
 function expiryTimer () {
@@ -62,8 +62,9 @@ function stopExpiryTimer () {
   expiryTick = null
 }
 function startExpiryTimer () {
-  stopExpiryTimer()
-  if (invoice && invoice.id) expiryTick = setInterval(expiryTimer, 200)
+  if (!expiryTick && $overlay === 'lightning' && invoice && invoice.id) {
+    expiryTick = setInterval(expiryTimer, 200)
+  }
 }
 
 onMount(() => {
@@ -73,7 +74,7 @@ onMount(() => {
   if (loadedInvoiceJSON) {
     try {
       const loadedInvoice = JSON.parse(loadedInvoiceJSON)
-      if (loadedInvoice && loadedInvoice.id && loadedInvoice.status && loadedInvoice.status === 'Unpaid') {
+      if (loadedInvoice && loadedInvoice.id && loadedInvoice.status && loadedInvoice.status === 'Unpaid' && (loadedInvoice.expiresAt * 1000) > Date.now()) {
         invoice = loadedInvoice
         processInvoice()
       }
@@ -83,6 +84,17 @@ onMount(() => {
   }
 })
 
+function resetInvoice () {
+  invoicePaid = false
+  invoiceExpired = false
+  invoice = null
+  qrSrc = null
+}
+
+function checkResetInvoice () {
+  if (invoice && invoice.status !== 'Unpaid') resetInvoice()
+}
+
 function stopPollingInvoice() {
   pollingEnabled = false
   if (invoicePoll) clearTimeout(invoicePoll)
@@ -91,6 +103,7 @@ function stopPollingInvoice() {
 
 function processInvoice () {
   if (invoice) {
+    startExpiryTimer()
     if (invoice.status === 'Unpaid') {
       invoicePaid = false
       invoiceExpired = false
@@ -111,7 +124,7 @@ function processInvoice () {
 
 async function pollInvoice () {
   if (pollingEnabled && invoice && invoice.status === 'Unpaid') {
-    const response = await fetch(`${config.dev ? 'http://localhost:4000' : ''}/api/lightning/invoice/${invoice.id}`, {
+    const response = await fetch(`${config.dev ? config.devLightningRoot : ''}/api/lightning/invoice/${invoice.id}`, {
       method: 'GET'
     })
     invoice = await response.json()
@@ -122,10 +135,8 @@ async function pollInvoice () {
 async function generateInvoice () {
   if (amount) {
     analytics.trackEvent('donations', 'lightning', 'generate', amount)
-    invoicePaid = false
-    invoiceExpired = false
-    invoice = null
-    const response = await fetch(`${config.dev ? 'http://localhost:4000' : ''}/api/lightning/invoice`, {
+    resetInvoice()
+    const response = await fetch(`${config.dev ? config.devLightningRoot : ''}/api/lightning/invoice`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
