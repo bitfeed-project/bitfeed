@@ -17,7 +17,7 @@ defmodule BitcoinStream.Server do
         keys: :duplicate,
         name: Registry.BitcoinStream
       ),
-      # BitcoinStream.Bridge.child_spec(port: 29000),
+      BitcoinStream.Bridge.child_spec(port: 29000),
       BitcoinStream.Donations.Lightning.child_spec()
     ]
 

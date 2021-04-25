@@ -27,4 +27,4 @@ bitcoin_stream-*.tar
 /tmp
 
 # Logging files
-logs/*
+*.log
