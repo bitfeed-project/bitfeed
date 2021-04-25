@@ -17,7 +17,7 @@ let copied = false
 let addressElement
 
 let showCopyButton = true
-let expanded = true
+let expanded = false
 let qrHidden = true
 let qrLocked = false
 let qrElement
