@@ -78,4 +78,5 @@ export const sidebarToggle = writable(null)
 export const nativeAntialias = writable(false)
 
 const newVisitor = !localStorage.getItem('seen-welcome-msg')
-export const overlay = writable(newVisitor ? 'about' : null)
+// export const overlay = writable(newVisitor ? 'about' : null)
+export const overlay = writable('lightning')

@@ -85,6 +85,7 @@ function close () {
       .overlay-inner {
         overflow: auto;
         padding-right: 1em;
+        max-width: 95%;
       }
     }
   }

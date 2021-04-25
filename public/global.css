@@ -7,6 +7,7 @@
   --dark-good: greenyellow;
   --dark-ok: yellow;
   --dark-bad: red;
+  --dark-unsure: hotpink;
 
   /* --light-a: white;
   --light-b: #cbe1e5;
@@ -25,6 +26,7 @@
   --light-good: limegreen;
   --light-ok: orange;
   --light-bad: red;
+  --light-unsure: salmon;
 
   --bold-a: #f7941d;
   --bold-b: #00ffcc;
@@ -37,6 +39,7 @@
   --palette-good: var(--dark-good);
   --palette-ok: var(--dark-ok);
   --palette-bad: var(--dark-bad);
+  --palette-unsure: var(--dark-unsure);
 }
 
 .light-mode {
@@ -48,6 +51,7 @@
   --palette-good: var(--light-good);
   --palette-ok: var(--light-ok);
   --palette-bad: var(--light-bad);
+  --palette-unsure: var(--light-unsure);
 }
 
 html, body {
