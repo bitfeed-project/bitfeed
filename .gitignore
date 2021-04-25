@@ -25,3 +25,6 @@ bitcoin_stream-*.tar
 
 # Temporary files for e.g. tests
 /tmp
+
+# Logging files
+logs/*

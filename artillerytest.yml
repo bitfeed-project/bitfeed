@@ -1,0 +1,18 @@
+config:
+  target: "wss://bits.monospace.live/ws/txs"
+  phases:
+    - duration: 60
+      arrivalRate: 1
+      rampTo: 40
+      name: "Ramping up the load"
+    - duration: 60
+      arrivalRate: 40
+      rampTo: 40
+      name: "Steady state"
+scenarios:
+  - engine: "ws"
+    flow:
+      - loop:
+        - send: 'hb'  # Subscribe to the public channel
+        - think: 5 # Every connection will remain open for 15s
+        count: 10

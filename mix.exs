@@ -4,7 +4,7 @@ defmodule BitcoinStream.MixProject do
   def project do
     [
       app: :bitcoin_stream,
-      version: "1.1.0",
+      version: "1.3.0",
       elixir: "~> 1.11",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -21,7 +21,7 @@ defmodule BitcoinStream.MixProject do
   def application do
     [
       mod: {BitcoinStream.Server, []},
-      extra_applications: [:logger, :elixometer]
+      extra_applications: [:logger, :elixometer, :corsica]
     ]
   end
 
@@ -39,6 +39,7 @@ defmodule BitcoinStream.MixProject do
       {:hackney, "~> 1.15"},
       {:cowboy, "~> 2.4"},
       {:plug, "~> 1.7"},
+      {:corsica, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
       {:jason, "~> 1.1"},
       {:elixometer, "~> 1.4"}
