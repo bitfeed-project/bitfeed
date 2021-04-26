@@ -58,12 +58,15 @@
   })
 
   function resize () {
-    width = window.innerWidth - 20
-    height = window.innerHeight - 20
-    txController.resize({
-      width,
-      height
-    })
+    if (width !== window.innerWidth - 20 || height !== window.innerHeight - 20) {
+      // don't force resize unless the viewport has actually changed
+      width = window.innerWidth - 20
+      height = window.innerHeight - 20
+      txController.resize({
+        width,
+        height
+      })
+    }
   }
 
   function hideBlock () {
@@ -354,7 +357,7 @@
   }
 </style>
 
-<svelte:window on:resize={resize} on:click={pointerLeave} />
+<svelte:window on:resize={resize} on:load={resize} on:click={pointerLeave} />
 <!-- <svelte:window on:resize={resize} on:click={pointerMove} /> -->
 
 <div class="tx-area" class:light-mode={!$settings.darkMode}>
