@@ -5,7 +5,7 @@ import BitcoinTx from '../models/BitcoinTx.js'
 import BitcoinBlock from '../models/BitcoinBlock.js'
 import TxSprite from '../models/TxSprite.js'
 import { FastVertexArray } from '../utils/memory.js'
-import { txQueueLength, txCount, mempoolCount, mempoolScreenHeight, blockVisible, currentBlock, selectedTx } from '../stores.js'
+import { txQueueLength, txCount, mempoolCount, mempoolScreenHeight, blockVisible, currentBlock, selectedTx, blockAreaSize } from '../stores.js'
 import config from "../config.js"
 
 export default class TxController {
@@ -15,6 +15,8 @@ export default class TxController {
     this.txs = {}
     this.expiredTxs = {}
     this.poolScene = new TxMondrianPoolScene({ width, height, layer: 0.0, controller: this, heightStore: mempoolScreenHeight })
+    this.blockAreaSize = Math.min(window.innerWidth * 0.75, window.innerHeight / 2.5)
+    blockAreaSize.set(this.blockAreaSize)
     this.blockScene = null
     this.clearBlockTimeout = null
     this.txDelay = 0 //config.txDelay
@@ -48,10 +50,11 @@ export default class TxController {
   }
 
   resize ({ width, height }) {
+    this.blockAreaSize = Math.min(window.innerWidth * 0.75, window.innerHeight / 2.5)
+    blockAreaSize.set(this.blockAreaSize)
     this.poolScene.layoutAll({ width, height })
     if (this.blockScene) {
-      const blockSize = Math.min(window.innerWidth * 0.75, window.innerHeight / 2.5)
-      this.blockScene.layoutAll({ width: blockSize, height: blockSize })
+      this.blockScene.layoutAll({ width: this.blockAreaSize, height: this.blockAreaSize })
     }
   }
 
@@ -124,8 +127,7 @@ export default class TxController {
 
     this.clearBlock()
 
-    const blockSize = Math.min(window.innerWidth * 0.75, window.innerHeight / 2.5)
-    this.blockScene = new TxBlockScene({ width: blockSize, height: blockSize, layer: 1.0, blockId: block.id, controller: this })
+    this.blockScene = new TxBlockScene({ width: this.blockAreaSize, height: this.blockAreaSize, layer: 1.0, blockId: block.id, controller: this })
     let poolCount = 0
     let knownCount = 0
     let unknownCount = 0

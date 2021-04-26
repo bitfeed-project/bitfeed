@@ -3,7 +3,7 @@
   import TxController from '../controllers/TxController.js'
   import TxRender from './TxRender.svelte'
   import getTxStream from '../controllers/TxStream.js'
-  import { settings, overlay, serverConnected, serverDelay, txQueueLength, txCount, mempoolCount, mempoolScreenHeight, frameRate, avgFrameRate, blockVisible, currentBlock, selectedTx, devEvents, devSettings } from '../stores.js'
+  import { settings, overlay, serverConnected, serverDelay, txQueueLength, txCount, mempoolCount, mempoolScreenHeight, frameRate, avgFrameRate, blockVisible, currentBlock, selectedTx, blockAreaSize, devEvents, devSettings } from '../stores.js'
   import BitcoinBlock from '../models/BitcoinBlock.js'
   import BlockInfo from '../components/BlockInfo.svelte'
   import TxInfo from '../components/TxInfo.svelte'
@@ -292,8 +292,8 @@
     .block-area-outer {
       position: relative;
       flex: 0;
-      width: 75vw;
-      max-width: 40vh;
+      // width: 75vw;
+      // max-width: 40vh;
       margin: auto;
 
       .block-area {
@@ -368,7 +368,7 @@
 
     <div class="block-area-wrapper">
       <div class="spacer"></div>
-      <div class="block-area-outer">
+      <div class="block-area-outer" style="width: {$blockAreaSize}px; height: {$blockAreaSize}px">
         <div class="block-area">
           <BlockInfo block={$currentBlock} visible={$blockVisible} on:hideBlock={hideBlock} />
         </div>

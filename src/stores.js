@@ -58,6 +58,7 @@ export const avgFrameRate = writable(null)
 export const blockVisible = writable(false)
 export const currentBlock = writable(null)
 export const selectedTx = writable(null)
+export const blockAreaSize = writable(0)
 
 export const settingsOpen = writable(false)
 
