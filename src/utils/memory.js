@@ -80,8 +80,8 @@ export class FastVertexArray {
   compact () {
     // console.log('Compacting FVA')
     // console.log(this.sprites)
-    // New array length is the smallest power of 2 larger than the sprite count
-    const newLength = Math.pow(2, Math.ceil(Math.log2(this.count)))
+    // New array length is the smallest power of 2 larger than the sprite count (but no smaller than 512)
+    const newLength = Math.max(512, Math.pow(2, Math.ceil(Math.log2(this.count))))
     if (this.newLength != this.length) {
       // console.log(`compacting from ${this.length} to ${newLength}`)
       this.length = newLength
