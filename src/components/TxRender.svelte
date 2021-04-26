@@ -66,8 +66,8 @@
     resizeCanvas()
   }
 
-  function bodyReady () {
-    console.log('bodyReady')
+  function windowReady () {
+    console.log('windowReady')
     resizeCanvas()
   }
 
@@ -304,8 +304,7 @@
 }
 </style>
 
-<svelte:window on:resize={resizeCanvas} />
-<svelte:body on:load={bodyReady} />}
+<svelte:window on:resize={resizeCanvas} on:load={windowReady} />
 
 <canvas
   class="tx-scene"
