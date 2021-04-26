@@ -66,8 +66,14 @@
     resizeCanvas()
   }
 
+  function documentReady () {
+    console.log('documentReady')
+    resizeCanvas()
+  }
+
   function resizeCanvas () {
     // var rect = canvas.parentNode.getBoundingClientRect()
+    console.log('resizeCanvas')
     if (canvas) {
       console.log(`resizing: window (${window.innerWidth} x ${window.innerHeight}) | current (${displayWidth} x ${displayHeight}) | canvas (${canvas.width} x ${canvas.height}) | aa ${simulateAntialiasing ? 'sim' : 'nosim'}, ${$nativeAntialias ? 'native' : 'unsupported'}, ${$settings.fancyGraphics ? 'fancy' : 'fast'}`)
       displayWidth = window.innerWidth
@@ -81,6 +87,8 @@
       }
       if (gl) gl.viewport(0, 0, canvas.width, canvas.height)
       console.log(`resized:  window (${window.innerWidth} x ${window.innerHeight}) | current (${displayWidth} x ${displayHeight}) | canvas (${canvas.width} x ${canvas.height})`)
+    } else {
+      console.log('canvas not ready')
     }
   }
 
@@ -297,6 +305,7 @@
 </style>
 
 <svelte:window on:resize={resizeCanvas} />
+<svelte:document on:load={documentReady} />}
 
 <canvas
   class="tx-scene"
