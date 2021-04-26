@@ -89,6 +89,7 @@
       console.log(`resized:  window (${window.innerWidth} x ${window.innerHeight}) | current (${displayWidth} x ${displayHeight}) | canvas (${canvas.width} x ${canvas.height})`)
     } else {
       console.log('canvas not ready')
+      setTimeout(resizeCanvas, 500)
     }
   }
 
@@ -243,7 +244,6 @@
   onMount(() => {
     gl = canvas.getContext('webgl')
     $nativeAntialias = gl.getContextAttributes().antialias
-    resizeCanvas()
 
     gl.clearColor(0.0, 0.0, 0.0, 0.0)
     gl.clear(gl.COLOR_BUFFER_BIT)
