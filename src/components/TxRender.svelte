@@ -10,6 +10,7 @@
 
   let canvas
   let gl
+  let animationFrameRequest
   let simulateAntialiasing = false
   let autoSetGraphicsMode = false
   let displayWidth
@@ -67,15 +68,12 @@
   }
 
   function windowReady () {
-    console.log('windowReady')
     resizeCanvas()
   }
 
   function resizeCanvas () {
     // var rect = canvas.parentNode.getBoundingClientRect()
-    console.log('resizeCanvas')
     if (canvas) {
-      console.log(`resizing: window (${window.innerWidth} x ${window.innerHeight}) | current (${displayWidth} x ${displayHeight}) | canvas (${canvas.width} x ${canvas.height}) | aa ${simulateAntialiasing ? 'sim' : 'nosim'}, ${$nativeAntialias ? 'native' : 'unsupported'}, ${$settings.fancyGraphics ? 'fancy' : 'fast'}`)
       displayWidth = window.innerWidth
       displayHeight = window.innerHeight
       if (simulateAntialiasing) {
@@ -86,9 +84,7 @@
         canvas.height = displayHeight
       }
       if (gl) gl.viewport(0, 0, canvas.width, canvas.height)
-      console.log(`resized:  window (${window.innerWidth} x ${window.innerHeight}) | current (${displayWidth} x ${displayHeight}) | canvas (${canvas.width} x ${canvas.height})`)
     } else {
-      console.log('canvas not ready')
       setTimeout(resizeCanvas, 500)
     }
   }
@@ -197,7 +193,11 @@
 
     /* LOOP */
     if (running) {
-      window.requestAnimationFrame(run)
+      // if (animationFrameRequest) {
+      //   cancelAnimationFrame(animationFrameRequest)
+      //   animationFrameRequest = null
+      // }
+      animationFrameRequest = requestAnimationFrame(run)
     }
   }
 
@@ -241,8 +241,7 @@
     return texture;
   }
 
-  onMount(() => {
-    gl = canvas.getContext('webgl')
+  function initCanvas () {
     $nativeAntialias = gl.getContextAttributes().antialias
 
     gl.clearColor(0.0, 0.0, 0.0, 0.0)
@@ -284,6 +283,27 @@
     })
 
     running = true
+  }
+
+  function handleContextLost(event) {
+    console.log('webgl context lost')
+    event.preventDefault()
+    cancelAnimationFrame(animationFrameRequest)
+    animationFrameRequest = null
+    running = false
+  }
+
+  function handleContextRestored(event) {
+    console.log('webgl context restored')
+    initCanvas()
+    running = true
+  }
+
+  onMount(() => {
+    canvas.addEventListener("webglcontextlost", handleContextLost, false)
+    canvas.addEventListener("webglcontextrestored", handleContextRestored, false)
+    gl = canvas.getContext('webgl')
+    initCanvas()
   })
 </script>
 

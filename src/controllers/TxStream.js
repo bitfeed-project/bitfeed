@@ -51,10 +51,9 @@ class TxStream {
   }
 
   reconnect () {
-    console.log('...reconnecting websocket')
     if (this.reconnectBackoff) clearTimeout(this.reconnectBackoff)
     if (!this.connected) {
-      console.log('......reconnecting')
+      console.log('......trying to reconnect websocket')
       if (this.reconnectBackoff < 4000) this.reconnectBackoff *= 2
       this.reconnectTimeout = setTimeout(() => { this.init() }, this.reconnectBackoff)
     }

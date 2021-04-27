@@ -32,8 +32,6 @@ export default class TxController {
     this.queueLength = 0
 
     this.scheduleQueue(1000)
-
-    console.log('controller: ', this)
   }
 
   getVertexData () {
