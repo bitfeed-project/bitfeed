@@ -166,7 +166,7 @@ function generateColorScale (colorA, colorB) {
   <h3 class="subheading">Age in seconds</h3>
   <div class="color-legend">
     <span class="value left">0</span>
-    <img src={colorScale} alt="" class="color-scale-img">
+    <img src={colorScale} alt="" class="color-scale-img" width="200" height="15">
     <span class="value right">60+</span>
   </div>
 </div>
