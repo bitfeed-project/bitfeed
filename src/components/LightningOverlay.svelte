@@ -156,10 +156,6 @@ async function generateInvoice () {
       text-align: justify;
     }
 
-    i {
-      font-style: italic;
-    }
-
     .lightning-form {
       .sats-input {
         position: relative;
@@ -184,10 +180,6 @@ async function generateInvoice () {
         color: white;
         padding: 5px 8px;
         margin: .5em;
-
-        .lightning-icon {
-          color: white;
-        }
       }
     }
 

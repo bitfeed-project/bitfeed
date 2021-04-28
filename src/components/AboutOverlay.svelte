@@ -14,10 +14,6 @@ function onClose () {
       text-align: justify;
     }
 
-    i {
-      font-style: italic;
-    }
-
     .nobreak {
       white-space: nowrap;
     }

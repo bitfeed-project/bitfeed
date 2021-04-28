@@ -178,10 +178,6 @@ function openLightningOverlay () {
           background: var(--bold-a);
           color: white;
           padding: 5px 8px;
-
-          .lightning-icon {
-            color: white;
-          }
         }
       }
     }
