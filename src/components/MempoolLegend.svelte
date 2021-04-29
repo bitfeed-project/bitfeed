@@ -77,19 +77,10 @@ function generateColorScale (colorA, colorB) {
 
 <style type="text/scss">
   .legend {
-    padding: .5em;
-
     .square {
       display: block;
       padding: 0;
       background: var(--bold-a);
-    }
-
-    h3 {
-      font-size: 1rem;
-      font-weight: normal;
-      margin: 0 0 .5rem;
-      text-align: center;
     }
 
     .size-legend {
@@ -153,7 +144,7 @@ function generateColorScale (colorA, colorB) {
 
 <svelte:window on:resize={resize} />
 
-<div class="legend">
+<div class="legend tab-content">
   <h3 class="subheading">Total Value</h3>
   <div class="size-legend">
     {#each sizeValues as { size, val } }

@@ -41,6 +41,9 @@
   --palette-ok: var(--dark-ok);
   --palette-bad: var(--dark-bad);
   --palette-unsure: var(--dark-unsure);
+
+  --twitter-blue: #1da1f2;
+  --monospace-purple: darkviolet;
 }
 
 .light-mode {

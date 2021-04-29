@@ -75,6 +75,24 @@ $: updateContentHeight(open)
       transform: translateX(-100%);
     }
   }
+
+  .sidebar-content :global(.tab-content) {
+    padding: .5em;
+    font-size: 0.8rem;
+
+    :global(.square) {
+      display: block;
+      padding: 0;
+      background: var(--bold-a);
+    }
+
+    :global(h3) {
+      font-size: 1rem;
+      font-weight: normal;
+      margin: 0 0 .5rem;
+      text-align: center;
+    }
+  }
 </style>
 
 <div class="sidebar-tab" class:open={open} transition:fly={{ x: 30, duration: 1000 }}>

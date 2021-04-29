@@ -65,7 +65,7 @@ export default {
 		sourcemap: true,
 		format: 'iife',
 		name: 'app',
-		file: `public/build/bundle.${hash}.js`
+		file: production ? `public/build/bundle.${hash}.js` : `public/build/bundle.js`
 	},
 	plugins: [
 		replace({
@@ -85,9 +85,9 @@ export default {
 		}),
 		// we'll extract any component CSS out into
 		// a separate file - better for performance
-		css({ output: `bundle.${hash}.css` }),
-		html(htmlOptions),
-		copy({
+		css({ output: production ? `bundle.${hash}.css` : 'bundle.css' }),
+		production && html(htmlOptions),
+		production && copy({
 			targets: [
 				{ src: 'public/*.*', dest: 'public/build' },
 				{ src: 'public/img', dest: 'public/build' }
@@ -107,11 +107,11 @@ export default {
 
 		// In dev mode, call `npm run start` once
 		// the bundle has been generated
-		!production && serve('public/build'),
+		!production && serve('public'),
 
 		// Watch the `public` directory and refresh the
 		// browser on changes when not in production
-		!production && livereload('public/build'),
+		!production && livereload('public'),
 
 		// If we're building for production (npm run build
 		// instead of npm run dev), minify

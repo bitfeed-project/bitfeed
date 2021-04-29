@@ -11,8 +11,10 @@ import DevTools from '../components/DevTools.svelte'
 import codeIcon from '../assets/icon/cil-code.svg'
 import questionIcon from '../assets/icon/help-circle.svg'
 import infoIcon from '../assets/icon/info.svg'
+import atIcon from '../assets/icon/cil-at.svg'
 import gridIcon from '../assets/icon/grid-icon.svg'
 import MempoolLegend from '../components/MempoolLegend.svelte'
+import ContactTab from '../components/ContactTab.svelte'
 
 import { sidebarToggle, overlay, currentBlock, blockVisible } from '../stores.js'
 
@@ -66,6 +68,14 @@ function showBlock () {
     </span>
     <div slot="content">
       <MempoolLegend />
+    </div>
+  </SidebarTab>
+  <SidebarTab open={$sidebarToggle === 'contact'} on:click={() => {settings('contact')}} tooltip="Contact">
+    <span slot="tab">
+      <Icon icon={atIcon} color="var(--bold-a)" />
+    </span>
+    <div slot="content">
+      <ContactTab />
     </div>
   </SidebarTab>
   <SidebarTab on:click={openAbout} tooltip="About">
