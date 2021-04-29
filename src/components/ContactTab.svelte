@@ -80,7 +80,7 @@ import Mononaut from '../components/Mononaut.svelte'
 
 <div class="contact tab-content">
   <div class="avatar-and-intro">
-    <a class="monkey-avatar" target="_blank" href="https://monospace.live">
+    <a class="monkey-avatar" target="_blank" href="https://monospace.live" rel="noopener">
       <Mononaut />
     </a>
     <div class="intro">
@@ -89,7 +89,7 @@ import Mononaut from '../components/Mononaut.svelte'
     </div>
   </div>
   <p style="clear: both">Message me on twitter at
-    <a class="social-link twitter" target="_blank" href="https://twitter.com/mononautical">
+    <a class="social-link twitter" target="_blank" href="https://twitter.com/mononautical" rel="noopener">
       <span class="social-icon">
         <Icon icon={twitterIcon} color="var(--twitter-blue)" />
       </span>
