@@ -9,12 +9,11 @@ import Mononaut from '../components/Mononaut.svelte'
 <style type="text/scss">
   .contact {
     text-align: center;
-    width: 24em;
+    width: 26em;
     max-width: calc(100vw - 50px);
 
     .mononaut {
-      font-family: monospace;
-      font-size: 1.2em;
+      font-family: "Courier", monospace;
     }
 
     .avatar-and-intro {
@@ -43,12 +42,11 @@ import Mononaut from '../components/Mononaut.svelte'
       align-items: center;
       justify-content: flex-start;
       height: 2.0em;
-      font-size: 1.2em;
       font-weight: bold;
       padding: .3em;
       border-radius: 1.0em;
       background: var(--bold-a);
-      font-family: monospace;
+      font-family: "Courier", monospace;
       color: white;
 
       .social-icon {
