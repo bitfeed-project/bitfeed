@@ -40,7 +40,7 @@ export let icon
 }
 </style>
 
-<a class="social-link" target="_blank" href rel="noopener" style="background: {color}">
+<a class="social-link" target="_blank" {href} rel="noopener" style="background: {color}">
   <span class="social-icon">
     <Icon {icon} {color}/>
   </span>
