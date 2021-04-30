@@ -1,5 +1,5 @@
 <script>
-import Icon from '../components/Icon.svelte'
+import SocialLink from '../components/SocialLink.svelte'
 import twitterIcon from '../assets/icon/cib-twitter.svg'
 import atIcon from '../assets/icon/cil-at.svg'
 import Mononaut from '../components/Mononaut.svelte'
@@ -34,45 +34,6 @@ import Mononaut from '../components/Mononaut.svelte'
       flex-shrink: 1;
       flex-grow: 1;
     }
-
-    .social-link {
-      box-sizing: border-box;
-      display: inline-flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: flex-start;
-      height: 2.0em;
-      font-weight: bold;
-      padding: .3em;
-      border-radius: 1.0em;
-      background: var(--bold-a);
-      font-family: "Courier", monospace;
-      color: white;
-
-      .social-icon {
-        width: 1.5em;
-        height: 1.5em;
-        font-size: 0.8em;
-        padding: 0.1em;
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background: white;
-        margin-right: .5em;
-      }
-
-      .handle {
-        margin-right: .5em;
-      }
-
-      &.twitter {
-        background: var(--twitter-blue);
-      }
-      &.email {
-        background: var(--monospace-purple);
-      }
-    }
   }
 </style>
 
@@ -87,19 +48,9 @@ import Mononaut from '../components/Mononaut.svelte'
     </div>
   </div>
   <p style="clear: both">Message me on twitter at
-    <a class="social-link twitter" target="_blank" href="https://twitter.com/mononautical" rel="noopener">
-      <span class="social-icon">
-        <Icon icon={twitterIcon} color="var(--twitter-blue)" />
-      </span>
-      <span class="handle">@mononautical</span>
-    </a>
+    <SocialLink icon={twitterIcon} href="https://twitter.com/mononautical" color="var(--twitter-blue)">@mononautical</SocialLink>
   </p>
   <p>Or email any recipient at
-  <a class="social-link email" target="_blank" href="mailto:bitfeed@monospace.live">
-    <span class="social-icon">
-      <Icon icon={atIcon} color="var(--monospace-purple)" />
-    </span>
-    <span class="handle">monospace.live</span>
-  </a>
+    <SocialLink icon={atIcon} href="mailto:bitfeed@monospace.live" color="var(--monospace-purple)">monospace.live</SocialLink>
   </p>
 </div>
