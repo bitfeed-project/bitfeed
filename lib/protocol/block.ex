@@ -8,7 +8,6 @@ defmodule BitcoinStream.Protocol.Block do
 
 alias BitcoinStream.Protocol.Block
 alias BitcoinStream.Protocol.Transaction, as: BitcoinTx
-alias BitcoinStream.Protocol.Transaction.Summary, as: TxSummary
 
 @derive Jason.Encoder
 defstruct [
@@ -64,27 +63,8 @@ end
 
 defp summarise_txns([next | rest], summarised, total) do
   extended_txn = BitcoinTx.extend(next)
-  summary = summarise_txn(extended_txn)
 
-  summarise_txns(rest, [summary | summarised], total + summary.value)
-end
-
-defp summarise_txn(txn) do
-  total_value = count_value(txn.outputs, 0)
-
-  %TxSummary{
-    version: txn.version,
-    id: txn.id,
-    value: total_value
-  }
-end
-
-defp count_value([], total) do
-  total
-end
-
-defp count_value([next_output | rest], total) do
-  count_value(rest, total + next_output.value)
+  summarise_txns(rest, [extended_txn | summarised], total + extended_txn.value)
 end
 
 def test() do
