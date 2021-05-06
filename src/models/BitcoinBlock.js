@@ -1,3 +1,5 @@
+import BitcoinTx from '../models/BitcoinTx.js'
+
 export default class BitcoinBlock {
   constructor ({ version, id, value, prev_block, merkle_root, timestamp, bits, bytes, txn_count, txns }) {
     this.isBlock = true
@@ -11,5 +13,8 @@ export default class BitcoinBlock {
     this.bytes = bytes // OTW size of this block in bytes
     this.txnCount = txn_count
     this.txns = txns
+    this.coinbase = new BitcoinTx(this.txns[0])
+    this.height = this.coinbase.coinbase.height
+    this.miner_sig = this.coinbase.coinbase.sigAscii
   }
 }

@@ -181,7 +181,7 @@
     <div class="block-info" out:fly="{{ y: -50, duration: 2000, easing: linear }}" in:fly="{{ y: (restoring ? -50 : 50), duration: (restoring ? 500 : 1000), easing: linear, delay: (restoring ? 0 : newBlockDelay) }}">
         <!-- <span class="data-field">Hash: { block.id }</span> -->
         <div class="data-row">
-          <span class="data-field title-field"><b>Latest Block</b></span>
+          <span class="data-field title-field" title="{block.miner_sig}"><b>Latest Block: </b>{ integerFormat.format(block.height) }</span>
           <button class="data-field close-button" on:click={hideBlock}><Icon icon={closeIcon} color="var(--palette-x)" /></button>
         </div>
         <div class="data-row">

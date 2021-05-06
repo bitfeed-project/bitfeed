@@ -28,6 +28,28 @@ export default class BitcoinTx {
       })
     }
 
+    // is a coinbase transaction?
+    if (this.inputs && this.inputs.length === 1 && this.inputs[0].prev_txid === "0000000000000000000000000000000000000000000000000000000000000000") {
+      console.log('found coinbase transaction!')
+      const cbInfo = this.inputs[0].script_sig
+      // number of bytes encoding the block height
+      const height_bytes = parseInt(cbInfo.substring(0,2), 16)
+      // extract the specified number of bytes, reverse the endianness (reverse pairs of hex characters), parse as a hex string
+      console.log(height_bytes)
+      const height = parseInt(cbInfo.substring(2,2 + (height_bytes * 2)).match(/../g).reverse().join(''),16)
+      // save remaining bytes as free data
+      const sig = cbInfo.substring(2 + (height_bytes * 2))
+      const sigAscii = sig.match(/../g).reduce((parsed, hexChar) => {
+        return parsed + String.fromCharCode(parseInt(hexChar, 16))
+      }, "")
+      this.coinbase = {
+        height,
+        sig,
+        sigAscii
+      }
+      console.log(this)
+    }
+
     this.setBlock(block)
     this.view = new TxView(this)
   }
