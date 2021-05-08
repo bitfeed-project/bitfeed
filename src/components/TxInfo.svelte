@@ -49,6 +49,11 @@ function formatBTC (sats) {
       text-overflow: ellipsis;
     }
 
+    .coinbase {
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
     &:hover {
       .hash {
         white-space: pre-wrap;
@@ -64,7 +69,7 @@ function formatBTC (sats) {
   </p>
   {#if tx.inputs && !tx.coinbase }<p class="field inputs">{ tx.inputs.length } inputs</p>
   {:else if tx.coinbase }
-    <p class="field inputs">Coinbase: { tx.coinbase.sigAscii }</p>
+    <p class="field coinbase">Coinbase: { tx.coinbase.sigAscii }</p>
   {/if}
   {#if tx.outputs }<p class="field outputs">{ tx.outputs.length } outputs</p>{/if}
   <p class="field value">
