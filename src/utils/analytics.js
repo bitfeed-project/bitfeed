@@ -1,7 +1,10 @@
 import config from '../config.js'
 
+let analyticsEnabled = false
+
 export default {
   init: function () {
+    analyticsEnabled = true
     var _paq = window._paq = window._paq || [];
     /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
     _paq.push(['trackPageView']);
@@ -17,9 +20,11 @@ export default {
   },
 
   trackEvent: function (category, action, name, value) {
-    if (config.dev) console.log('tracking event: ', {category, action, name, value})
-    if (_paq) {
-      _paq.push(['trackEvent', category, action, name, value]);
+    if (analyticsEnabled) {
+      if (config.dev) console.log('tracking event: ', {category, action, name, value})
+      if (_paq) {
+        _paq.push(['trackEvent', category, action, name, value]);
+      }
     }
   }
 }

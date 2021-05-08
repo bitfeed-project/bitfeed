@@ -67,7 +67,8 @@ export const settings = createCachedDict('settings', {
 	showNetworkStatus: true,
 	showFPS: false,
 	fancyGraphics: true,
-	showDonation: true
+	showDonation: true,
+	noTrack: false
 })
 
 export const devSettings = (config.dev && config.debug) ? createCachedDict('dev-settings', {
