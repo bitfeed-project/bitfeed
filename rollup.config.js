@@ -11,6 +11,7 @@ import replace from '@rollup/plugin-replace';
 import inlineSvg from 'rollup-plugin-inline-svg';
 import html from '@rollup/plugin-html';
 import copy from 'rollup-plugin-copy'
+import babel from '@rollup/plugin-babel';
 import fs from 'fs'
 
 configDotenv();
@@ -82,6 +83,9 @@ export default {
 				dev: !production
 			},
 			preprocess: sveltePreprocess()
+		}),
+		babel({
+			extensions: [ ".js", ".mjs", ".html", ".svelte" ]
 		}),
 		// we'll extract any component CSS out into
 		// a separate file - better for performance
