@@ -41,6 +41,7 @@ function formatBTC (sats) {
 
     .field {
       margin: 0;
+      line-height: 1.4em;
     }
 
     .hash {
