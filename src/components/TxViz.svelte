@@ -402,16 +402,16 @@
   <div class="top-bar">
     <div class="status">
       <div class="row">
+        {#if $settings.showFX && fxLabel }
+          <span class="fx-ticker {fxColor}">{ fxLabel }</span>
+        {/if}
+      </div>
+      <div class="row">
         {#if $settings.showNetworkStatus }
           <div class="status-light {connectionColor}" title={connectionTitle}></div>
         {/if}
         {#if $settings.showFPS }
           <span class="stat-counter {frameRateColor}">{ frameRateLabel }</span>
-        {/if}
-      </div>
-      <div class="row">
-        {#if $settings.showFX && fxLabel }
-          <span class="fx-ticker {fxColor}">{ fxLabel }</span>
         {/if}
       </div>
     </div>
