@@ -1,5 +1,7 @@
 <script>
 import { longBtcFormat } from '../utils/format.js'
+import { exchangeRates, localCurrency } from '../stores.js'
+import { formatCurrency } from '../utils/fx.js'
 
 export let tx
 export let position
@@ -11,6 +13,20 @@ $: clampedX = Math.max(20, Math.min(position.x - 30, window.innerWidth - 300))
 $: clampedY = Math.max(50, Math.min(position.y, window.innerHeight - 30))
 $: {
   above = position.y > (window.innerHeight / 2)
+}
+
+let formattedLocalValue
+
+$: {
+  if (tx && tx.value) {
+    const rate = $exchangeRates[$localCurrency]
+    let local
+    if (rate && rate.last) {
+      formattedLocalValue = formatCurrency($localCurrency, (tx.value/100000000) * rate.last, { compact: true })
+    } else {
+      formattedLocalValue = null
+    }
+  }
 }
 
 function formatBTC (sats) {
@@ -75,5 +91,9 @@ function formatBTC (sats) {
   {#if tx.outputs }<p class="field outputs">{ tx.outputs.length } outputs</p>{/if}
   <p class="field value">
     Total value: { formatBTC(tx.value) }
+    {#if formattedLocalValue != null }
+      ≈ { formattedLocalValue }
+    {/if}
   </p>
+
 </div>

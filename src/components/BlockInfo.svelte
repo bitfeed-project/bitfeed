@@ -6,6 +6,8 @@
   import Icon from '../components/Icon.svelte'
   import closeIcon from '../assets/icon/cil-x-circle.svg'
   import { shortBtcFormat, longBtcFormat, timeFormat, integerFormat } from '../utils/format.js'
+  import { exchangeRates, localCurrency } from '../stores.js'
+  import { formatCurrency } from '../utils/fx.js'
 
 	const dispatch = createEventDispatcher()
 
@@ -15,6 +17,20 @@
   export let visible
   const newBlockDelay = 2000
   let restoring = false
+  let formattedBlockValue = ''
+
+  $: {
+    if (block && block.value) {
+      const rate = $exchangeRates[$localCurrency]
+      let local
+      if (rate && rate.last) {
+        local = formatCurrency($localCurrency, (block.value/100000000) * rate.last, { compact: true })
+      } else {
+        local = null
+      }
+      formattedBlockValue = `${formatBTC(block.value)}${local != null ? (' ≈ ' + local) : ''}`
+    }
+  }
 
   $: {
     if (block && visible) {
@@ -185,8 +201,8 @@
           <button class="data-field close-button" on:click={hideBlock}><Icon icon={closeIcon} color="var(--palette-x)" /></button>
         </div>
         <div class="data-row">
-          <span class="data-field">Mined at { formatTime(block.time) }</span>
-          <span class="data-field">{ formatBTC(block.value) }</span>
+          <span class="data-field">Mined { formatTime(block.time) }</span>
+          <span class="data-field">{ formattedBlockValue }</span>
         </div>
         <div class="data-row">
           <span class="data-field">{ formatBytes(block.bytes) }</span>

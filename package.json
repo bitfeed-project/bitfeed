@@ -1,6 +1,6 @@
 {
   "name": "bitfeed-client",
-  "version": "1.8.1",
+  "version": "1.9.0",
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",
@@ -30,6 +30,7 @@
     "d3-color": "^2.0.0",
     "d3-geo-projection": "^3.0.0",
     "d3-interpolate": "^2.0.1",
+    "locale-currency": "0.0.2",
     "rollup-plugin-inline-svg": "^2.0.0",
     "sirv-cli": "^1.0.0",
     "world-atlas": "^2.0.2"

@@ -12,6 +12,8 @@
   import LightningOverlay from '../components/LightningOverlay.svelte'
   import DonationBar from '../components/DonationBar.svelte'
   import { integerFormat } from '../utils/format.js'
+  import { exchangeRates, localCurrency } from '../stores.js'
+  import { formatCurrency } from '../utils/fx.js'
   import config from '../config.js'
 
   let width = window.innerWidth - 20
@@ -111,6 +113,14 @@
     }
   }
   $: frameRateColor = $avgFrameRate > 40 ? 'good' : ($avgFrameRate > 20 ? 'ok' : 'bad')
+
+  const fxColor = 'good'
+  let fxLabel = ''
+  $: {
+    const rate = $exchangeRates[$localCurrency]
+    if (rate && rate.last)
+    fxLabel = formatCurrency($localCurrency, rate.last)
+  }
 
 	const debounce = v => {
 		clearTimeout(timer);
@@ -264,8 +274,9 @@
         }
       }
 
-      .stat-counter {
+      .stat-counter, .fx-ticker {
         margin-top: 5px;
+        white-space: nowrap;
 
         &.bad {
           color: var(--palette-bad);
@@ -390,12 +401,19 @@
 
   <div class="top-bar">
     <div class="status">
-      {#if $settings.showNetworkStatus }
-        <div class="status-light {connectionColor}" title={connectionTitle}></div>
-      {/if}
-      {#if $settings.showFPS }
-        <span class="stat-counter {frameRateColor}">{ frameRateLabel }</span>
-      {/if}
+      <div class="row">
+        {#if $settings.showNetworkStatus }
+          <div class="status-light {connectionColor}" title={connectionTitle}></div>
+        {/if}
+        {#if $settings.showFPS }
+          <span class="stat-counter {frameRateColor}">{ frameRateLabel }</span>
+        {/if}
+      </div>
+      <div class="row">
+        {#if $settings.showFX && fxLabel }
+          <span class="fx-ticker {fxColor}">{ fxLabel }</span>
+        {/if}
+      </div>
     </div>
     {#if $settings.showDonation }
       <DonationBar />

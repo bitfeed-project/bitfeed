@@ -1,4 +1,7 @@
 import { writable, derived } from 'svelte/store'
+export { exchangeRates } from './utils/pollStore.js'
+import { symbols } from './utils/fx.js'
+import LocaleCurrency from 'locale-currency'
 import config from './config.js'
 
 function createCounter () {
@@ -66,6 +69,7 @@ export const settings = createCachedDict('settings', {
 	darkMode: true,
 	showNetworkStatus: true,
 	showFPS: false,
+	showFX: true,
 	fancyGraphics: true,
 	showDonation: true,
 	noTrack: false
@@ -82,3 +86,8 @@ export const nativeAntialias = writable(false)
 const newVisitor = !localStorage.getItem('seen-welcome-msg')
 // export const overlay = writable(newVisitor ? 'about' : null)
 export const overlay = writable(null)
+
+let currencyCode = LocaleCurrency.getCurrency(navigator.language)
+console.log('LOCALE: ', navigator.language, currencyCode)
+if (!symbols[currencyCode]) currencyCode = 'USD'
+export const localCurrency = writable(currencyCode)

@@ -1,7 +1,7 @@
 <script>
 import analytics from '../utils/analytics.js'
 import SidebarMenuItem from '../components/SidebarMenuItem.svelte'
-import { settings, nativeAntialias } from '../stores.js'
+import { settings, nativeAntialias, exchangeRates, localCurrency } from '../stores.js'
 
 function toggle(setting) {
   $settings[setting] = !$settings[setting]
@@ -29,6 +29,17 @@ $: {
     settingConfig.fancyGraphics = {
       label: 'Fancy Graphics'
     }
+  }
+}
+
+$: {
+  const rate = $exchangeRates[$localCurrency]
+  if (rate && rate.last) {
+    settingConfig.showFX = {
+      label: 'Show ₿ Price'
+    }
+  } else {
+    settingConfig.showFX = false
   }
 }
 
