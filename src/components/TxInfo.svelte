@@ -38,7 +38,7 @@ function formatBTC (sats) {
   .tx-info {
     position: fixed;
     z-index: 50;
-    width: 280px;
+    width: 300px;
     display: block;
     pointer-events: all;
     box-sizing: border-box;
@@ -58,6 +58,10 @@ function formatBTC (sats) {
     .field {
       margin: 0;
       line-height: 1.4em;
+    }
+
+    .local-value {
+      white-space: nowrap;
     }
 
     .hash {
@@ -92,7 +96,7 @@ function formatBTC (sats) {
   <p class="field value">
     Total value: { formatBTC(tx.value) }
     {#if formattedLocalValue != null }
-      ≈ { formattedLocalValue }
+      <span class="local-value">≈ { formattedLocalValue }</span>
     {/if}
   </p>
 
