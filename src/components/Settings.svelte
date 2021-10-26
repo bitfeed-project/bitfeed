@@ -36,7 +36,7 @@ $: {
   const rate = $exchangeRates[$localCurrency]
   if (rate && rate.last) {
     settingConfig.showFX = {
-      label: 'Show ₿ Price'
+      label: '₿ Price'
     }
   } else {
     settingConfig.showFX = false
