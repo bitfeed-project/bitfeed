@@ -10,16 +10,16 @@ function toggle(setting) {
 
 let settingConfig = {
   showNetworkStatus: {
-    label: 'Show Network Status'
+    label: 'Network Status'
   },
   darkMode: {
     label: 'Dark Mode'
   },
   showFPS: {
-    label: 'Show FPS'
+    label: 'FPS'
   },
   showDonation: {
-    label: 'Show Donation Info'
+    label: 'Donation Info'
   }
 }
 $: {

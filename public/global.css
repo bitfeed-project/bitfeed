@@ -23,6 +23,7 @@
   --light-c: #b2feef;
   --light-d: #8debd8;
   --light-e: #6cd7c2;
+  --light-f: #4abea6;
 
   --light-good: limegreen;
   --light-ok: orange;
@@ -36,6 +37,7 @@
   --palette-b: var(--dark-b);
   --palette-c: var(--dark-c);
   --palette-d: var(--dark-d);
+  --palette-e: var(--dark-e);
   --palette-x: var(--light-a);
   --palette-good: var(--dark-good);
   --palette-ok: var(--dark-ok);
@@ -51,6 +53,7 @@
   --palette-b: var(--light-c);
   --palette-c: var(--light-d);
   --palette-d: var(--light-e);
+  --palette-e: var(--light-f);
   --palette-x: var(--dark-a);
   --palette-good: var(--light-good);
   --palette-ok: var(--light-ok);

@@ -1,4 +1,6 @@
 <script>
+import Toggle from '../components/Toggle.svelte'
+
 export let active = false
 export let label = ''
 </script>
@@ -13,21 +15,14 @@ export let label = ''
     cursor: pointer;
     white-space: nowrap;
 
-    &:nth-child(odd) {
-      background: var(--palette-d);
-    }
-
     &:hover {
+      background: var(--palette-d);
       text-shadow: 0 0 1px var(--palette-x);
-    }
-
-    &.active {
-      text-decoration: underline;
-      text-decoration-color: var(--bold-a);
     }
   }
 </style>
 
 <div class="sidebar-menu-item" class:active={active} on:click>
   { label }
+  <Toggle active={active} />
 </div>
