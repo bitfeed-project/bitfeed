@@ -54,7 +54,7 @@ class TxStream {
     if (this.reconnectBackoff) clearTimeout(this.reconnectBackoff)
     if (!this.connected) {
       console.log('......trying to reconnect websocket')
-      if (this.reconnectBackoff < 4000) this.reconnectBackoff *= 2
+      if (this.reconnectBackoff < 8000) this.reconnectBackoff *= 2
       this.reconnectTimeout = setTimeout(() => { this.init() }, this.reconnectBackoff)
     }
   }
@@ -130,7 +130,7 @@ class TxStream {
         } else if (msg && msg.type === 'txn') {
           window.dispatchEvent(new CustomEvent('bitcoin_tx', { detail: msg.txn }))
         } else if (msg && msg.type === 'block') {
-          // console.log('Block recieved: ', msg.block)
+          // console.log('Block received: ', msg.block)
           window.dispatchEvent(new CustomEvent('bitcoin_block', { detail: msg.block }))
         } else {
           // console.log('unknown message from websocket: ', msg)

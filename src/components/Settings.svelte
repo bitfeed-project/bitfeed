@@ -22,7 +22,7 @@ let settingConfig = {
     label: 'Donation Info'
   },
   vbytes: {
-    label: 'Tx Size',
+    label: 'Size by',
     type: 'pill',
     falseLabel: 'value',
     trueLabel: 'vbytes'

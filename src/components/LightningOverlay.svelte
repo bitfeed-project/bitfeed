@@ -332,7 +332,7 @@ async function generateInvoice () {
       <div class="qr-container" class:paid={invoicePaid} class:expired={invoiceExpired}>
         {#if invoicePaid }
           <div class="invoice-icon"><Icon icon={tickIcon} color="white" /></div>
-          <h3 class="invoice-status">Recieved, Thanks!</h3>
+          <h3 class="invoice-status">Received, Thanks!</h3>
         {:else if invoiceExpired}
           <div class="invoice-icon"><Icon icon={timerIcon} color="white" /></div>
           <h3 class="invoice-status">Request Expired</h3>

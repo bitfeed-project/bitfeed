@@ -70,9 +70,12 @@ export default class TxController {
   }
 
   // Dual-strategy queue processing:
-  // - ensure transactions are queued for at least 2s
-  // - while queue is small, use jittered timeouts to smooth arrivals
-  // - when queue length exceeds 100, process iteratively to avoid unbounded growth
+  // - ensure transactions are queued for at least txDelay
+  // - when queue length exceeds 500, process iteratively to avoid unbounded growth
+  // - while queue is small, use jittered timeouts to evenly distribute arrivals
+  //
+  // transactions tend to arrive in groups, so for smoothest
+  // animation the queue should stay short but never empty.
   processQueue () {
     let done
     let delay
@@ -86,7 +89,11 @@ export default class TxController {
         } else {
           const timeSince = performance.now() - this.pendingTxs[0][1]
           if (timeSince > this.txDelay) {
-            if (this.txDelay < this.maxTxDelay) this.txDelay += 10
+            //process the next tx in the queue, if it arrived longer ago than txDelay
+            if (this.txDelay < this.maxTxDelay) {
+              // slowly ramp up from 0 to maxTxDelay on start, so there's no wait for the first txs on page load
+              this.txDelay += 50
+            }
             const tx = this.pendingTxs.shift()[0]
             delete this.pendingMap[tx.id]
             txQueueLength.decrement()
@@ -94,16 +101,23 @@ export default class TxController {
             this.poolScene.insert(this.txs[tx.id])
             mempoolCount.increment()
           } else {
+            // end the loop when the head of the queue arrived more recently than txDelay
             done = true
-            delay = 2001 - timeSince
+            // schedule to continue processing when head of queue matures
+            delay = this.txDelay - timeSince
           }
-          if (!done && this.pendingTxs.length < 100) {
+          if (this.pendingTxs.length < 500) {
+            // or the queue is under 500
             done = true
           }
+          // otherwise keep processing the queue
         }
       } else done = true
     }
-    this.scheduleQueue(delay || (Math.random() * Math.max(1, (250 - this.pendingTxs.length))))
+    // randomly jitter arrival times so that txs enter more naturally
+    // with jittered delay inversely proportional to size of queue
+    let jitter = Math.random() * Math.max(1, (500 - this.pendingTxs.length))
+    this.scheduleQueue(delay || jitter)
   }
 
   scheduleQueue (delay) {

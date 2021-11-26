@@ -88,11 +88,11 @@ function formatBTC (sats) {
   <p class="field hash">
     TxID: { tx.id }
   </p>
-  {#if tx.inputs && !tx.coinbase }<p class="field inputs">{ tx.inputs.length } inputs</p>
+  {#if tx.inputs && !tx.coinbase }<p class="field inputs">{ tx.inputs.length } input{#if tx.inputs.length != 1}s{/if}</p>
   {:else if tx.coinbase }
     <p class="field coinbase">Coinbase: { tx.coinbase.sigAscii }</p>
   {/if}
-  {#if tx.outputs }<p class="field outputs">{ tx.outputs.length } outputs</p>{/if}
+  {#if tx.outputs }<p class="field outputs">{ tx.outputs.length } output{#if tx.outputs.length != 1}s{/if}</p>{/if}
   <p class="field vbytes">{ integerFormat.format(tx.vbytes) } vbytes</p>
   <p class="field value">
     Total value: { formatBTC(tx.value) }
