@@ -47,13 +47,17 @@ export default class TxController {
     else return [this.poolScene]
   }
 
-  resize ({ width, height }) {
-    this.blockAreaSize = Math.min(window.innerWidth * 0.75, window.innerHeight / 2.5)
-    blockAreaSize.set(this.blockAreaSize)
+  redoLayout ({ width, height }) {
     this.poolScene.layoutAll({ width, height })
     if (this.blockScene) {
       this.blockScene.layoutAll({ width: this.blockAreaSize, height: this.blockAreaSize })
     }
+  }
+
+  resize ({ width, height }) {
+    this.blockAreaSize = Math.min(window.innerWidth * 0.75, window.innerHeight / 2.5)
+    blockAreaSize.set(this.blockAreaSize)
+    this.redoLayout({ width, height })
   }
 
   addTx (txData) {
@@ -110,7 +114,7 @@ export default class TxController {
   }
 
   addBlock (blockData) {
-    // prevent duplicate blocks
+    // discard duplicate blocks
     if (!blockData || !blockData.id || this.knownBlocks[blockData.id]) {
       return
     }

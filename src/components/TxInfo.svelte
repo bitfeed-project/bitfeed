@@ -1,5 +1,5 @@
 <script>
-import { longBtcFormat } from '../utils/format.js'
+import { longBtcFormat, integerFormat } from '../utils/format.js'
 import { exchangeRates, localCurrency } from '../stores.js'
 import { formatCurrency } from '../utils/fx.js'
 
@@ -93,6 +93,7 @@ function formatBTC (sats) {
     <p class="field coinbase">Coinbase: { tx.coinbase.sigAscii }</p>
   {/if}
   {#if tx.outputs }<p class="field outputs">{ tx.outputs.length } outputs</p>{/if}
+  <p class="field vbytes">{ integerFormat.format(tx.vbytes) } vbytes</p>
   <p class="field value">
     Total value: { formatBTC(tx.value) }
     {#if formattedLocalValue != null }

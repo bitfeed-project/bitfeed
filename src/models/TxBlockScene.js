@@ -18,8 +18,8 @@ export default class TxBlockScene extends TxMondrianPoolScene {
       const ids = this.getTxList()
       for (let i = 0; i < ids.length; i++) {
         let squareSize = 0
-        if (this.txs[ids[i]]) squareSize = this.txSize(this.txs[ids[i]].value || 1)
-        else if (this.hiddenTxs[ids[i]]) squareSize = this.txSize(this.hiddenTxs[ids[i]].value || 1)
+        if (this.txs[ids[i]]) squareSize = this.txSize(this.txs[ids[i]])
+        else if (this.hiddenTxs[ids[i]]) squareSize = this.txSize(this.hiddenTxs[ids[i]])
         blockWeight += (squareSize * squareSize)
       }
 

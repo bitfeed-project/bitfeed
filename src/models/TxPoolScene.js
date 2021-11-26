@@ -134,7 +134,7 @@ export default class TxPoolScene {
   }
 
   layoutTx (tx, sequence, setOnScreen = true) {
-    const units = this.txSize(tx.value)
+    const units = this.txSize(tx)
     this.place(tx, sequence, units)
     this.saveGridToPixelPosition(tx)
     const top = tx.pixelPosition.y + tx.pixelPosition.r

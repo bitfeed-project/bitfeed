@@ -13,10 +13,11 @@ function toSpriteUpdate(display, duration, delay, start, adjust) {
 }
 
 export default class TxView {
-  constructor ({ id, time, value, vertexArray }) {
+  constructor ({ id, time, value, vbytes, vertexArray }) {
     this.id = id
     this.time = time
     this.value = value
+    this.vbytes = vbytes
     this.initialised = false
     this.vertexArray = vertexArray
   }

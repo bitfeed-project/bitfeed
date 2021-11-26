@@ -1,15 +1,17 @@
 <script>
 import { onMount } from 'svelte'
-import { logTxSize } from '../utils/misc.js'
+import { settings } from '../stores.js'
+import { integerFormat } from '../utils/format.js'
+import { logTxSize, byteTxSize } from '../utils/misc.js'
 import { interpolateHcl } from 'd3-interpolate'
 import { color } from 'd3-color'
 
-const sizeValues = [
-  { val: 1000000, size: null },
-  { val: 10000000, size: null },
-  { val: 100000000, size: null },
-  { val: 1000000000, size: null },
-  { val: 10000000000, size: null }
+const sizes = [
+  { value: 1000000, vbytes: 1*144, size: null },
+  { value: 10000000, vbytes: 4*144, size: null },
+  { value: 100000000, vbytes: 9*144, size: null },
+  { value: 1000000000, vbytes: 16*144, size: null },
+  { value: 10000000000, vbytes: 25*144, size: null }
 ]
 
 let unitWidth
@@ -30,19 +32,30 @@ onMount(() => {
   colorScale = generateColorScale('#f7941d', 'rgb(0%,100%,80%)')
 })
 
-function calcSizeValues (gridSize, unitWidth, unitPadding) {
-  sizeValues.forEach(sizeVal => {
-    sizeVal.size = calcSize(sizeVal.val)
+function calcSizes (gridSize, unitWidth, unitPadding) {
+  sizes.forEach(size => {
+    size.size = calcSize(size)
   })
-  sizeValues = sizeValues
+  sizes = sizes
 }
 
 $: {
-  calcSizeValues(gridSize, unitWidth, unitPadding)
+  calcSizes(gridSize, unitWidth, unitPadding)
+  console.log(sizes)
 }
 
-function calcSize (value) {
-  return 2 * ((logTxSize(value - 1) * gridSize / 2) - unitPadding)
+function calcSize ({ vbytes, value }) {
+  if ($settings.vbytes) {
+    return 2 * ((byteTxSize(vbytes - 1, Infinity, true) * gridSize / 2) - unitPadding)
+  } else {
+    return 2 * ((logTxSize(value - 1) * gridSize / 2) - unitPadding)
+  }
+}
+
+function formatBytes (bytes) {
+  const str = integerFormat.format(bytes) + ' vbytes'
+  const padded = str.padStart(13, ' ')
+  return padded
 }
 
 function formatValue (value) {
@@ -145,14 +158,27 @@ function generateColorScale (colorA, colorB) {
 <svelte:window on:resize={resize} />
 
 <div class="legend tab-content">
-  <h3 class="subheading">Total Value</h3>
+  {#if $settings.vbytes}
+    <h3 class="subheading">Size in vBytes</h3>
+  {:else}
+    <h3 class="subheading">Total Value</h3>
+  {/if}
   <div class="size-legend">
-    {#each sizeValues as { size, val } }
-      <div class="size-row">
-        <span class="square-container"><div class="square" style="width: {size}px; height: {size}px" /></span>
-        <span class="value"><span class="part left">&lt;</span> <span class="part center">&#8383;</span><span class="part right">{ formatValue(val) }</span></span>
-      </div>
-    {/each}
+    {#if $settings.vbytes }
+      {#each sizes as { size, vbytes } }
+        <div class="size-row">
+          <span class="square-container"><div class="square" style="width: {size}px; height: {size}px" /></span>
+          <span class="value"><span class="part left">&lt;</span><span class="part center">&nbsp;</span><span class="part right">{ formatBytes(vbytes) }</span></span>
+        </div>
+      {/each}
+    {:else}
+      {#each sizes as { size, value } }
+        <div class="size-row">
+          <span class="square-container"><div class="square" style="width: {size}px; height: {size}px" /></span>
+          <span class="value"><span class="part left">&lt;</span> <span class="part center">&#8383;</span><span class="part right">{ formatValue(value) }</span></span>
+        </div>
+      {/each}
+    {/if}
   </div>
   <h3 class="subheading">Age in seconds</h3>
   <div class="color-legend">

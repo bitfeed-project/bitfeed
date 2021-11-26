@@ -2,7 +2,7 @@ export default {
   dev: ENVIRONMENT === 'development',
   // devLightningRoot: 'http://localhost:4000',
   devLightningRoot: 'https://bits.monospace.live',
-  debug: true,
+  debug: false,
   layoutHints: false,
   fps: true,
   websocket_path: '/ws/txs',

@@ -20,7 +20,13 @@ let settingConfig = {
   },
   showDonation: {
     label: 'Donation Info'
-  }
+  },
+  vbytes: {
+    label: 'Tx Size',
+    type: 'pill',
+    falseLabel: 'value',
+    trueLabel: 'vbytes'
+  },
 }
 $: {
   if ($nativeAntialias) {
@@ -43,14 +49,15 @@ $: {
   }
 }
 
-function getSettingLabel(setting) {
-  if (settingConfig[setting]) return settingConfig[setting].label
+
+function getSettings(setting) {
+  return settingConfig[setting] || {}
 }
 
 </script>
 
 {#each Object.keys($settings) as setting (setting) }
   {#if settingConfig[setting]}
-    <SidebarMenuItem active={$settings[setting]} on:click={() => { toggle(setting) }} label={getSettingLabel(setting)} />
+    <SidebarMenuItem {...getSettings(setting)} active={$settings[setting]} on:click={() => { toggle(setting) }} />
   {/if}
 {/each}

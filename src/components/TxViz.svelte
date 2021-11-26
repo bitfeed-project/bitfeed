@@ -36,6 +36,10 @@
     }
   }
 
+  $: {
+    changedMode($settings.vbytes)
+  }
+
   onMount(() => {
     txController = new TxController({ width, height })
 
@@ -65,6 +69,15 @@
       width = window.innerWidth - 20
       height = window.innerHeight - 20
       txController.resize({
+        width,
+        height
+      })
+    }
+  }
+
+  function changedMode () {
+    if (txController) {
+      txController.redoLayout({
         width,
         height
       })

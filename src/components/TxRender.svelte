@@ -5,7 +5,7 @@
   import TxSprite from '../models/TxSprite.js'
   import { interpolateHcl } from 'd3-interpolate'
   import { color } from 'd3-color'
-  import { darkMode, frameRate, avgFrameRate, nativeAntialias, settings } from '../stores.js'
+  import { darkMode, frameRate, avgFrameRate, nativeAntialias, settings, devSettings } from '../stores.js'
   import config from '../config.js'
 
   let canvas
@@ -99,7 +99,7 @@
   }
 
   function getDebugTxPointArray () {
-    if (controller) {
+    if (controller && $devSettings.layoutHints) {
       return controller.getDebugVertexData()
       // return new Float32Array(
       //   controller.getScenes().flatMap(scene => scene.getVertexData())

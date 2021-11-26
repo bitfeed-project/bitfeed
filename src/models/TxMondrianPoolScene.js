@@ -1,7 +1,13 @@
 import TxPoolScene from './TxPoolScene.js'
 import TxSprite from './TxSprite.js'
-import { logTxSize } from '../utils/misc.js'
+import { settings } from '../stores.js'
+import { logTxSize, byteTxSize } from '../utils/misc.js'
 import config from '../config.js'
+
+let settingsValue
+settings.subscribe(v => {
+  settingsValue = v
+})
 
 export default class TxMondrianPoolScene extends TxPoolScene {
   constructor ({ width, height, unit, padding, layer, controller, heightStore }) {
@@ -19,8 +25,9 @@ export default class TxMondrianPoolScene extends TxPoolScene {
   }
 
   // calculates and returns the size of the tx in multiples of the grid size
-  txSize (value) {
-    return logTxSize(value, this.blockWidth)
+  txSize (tx={ value: 1, vbytes: 1 }) {
+    if (settingsValue.vbytes) return byteTxSize(tx.vbytes, this.blockWidth)
+    else return logTxSize(tx.value, this.blockWidth)
   }
 
   place (tx, index, size) {

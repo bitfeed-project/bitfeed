@@ -70,13 +70,15 @@ export const settings = createCachedDict('settings', {
 	showNetworkStatus: true,
 	showFPS: false,
 	showFX: true,
+	vbytes: false,
 	fancyGraphics: true,
 	showDonation: true,
 	noTrack: false
 })
 
 export const devSettings = (config.dev && config.debug) ? createCachedDict('dev-settings', {
-	guides: false
+	guides: false,
+	layoutHints: false,
 }) : writable({})
 
 export const sidebarToggle = writable(null)

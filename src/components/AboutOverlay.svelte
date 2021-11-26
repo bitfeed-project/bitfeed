@@ -48,9 +48,10 @@ function onClose () {
       As new transactions are recieved by our nodes, they drop into the mempool to await confirmation.
     </p>
     <p>
-      Squares representing transactions in the mempool are sized according to total output value,
+      In <i>value mode</i>, squares representing transactions in the mempool are sized according to total output value,
       on a logarithmic scale (each additional unit of width represents a 10x increase in value).
     </p>
+    <p>In <i>vbyte mode</i>, the area of each square is proportional to the size of the transaction measured in virtual bytes.</p>
     <div class="figure mempool-figure">
       <MempoolLegend />
     </div>
