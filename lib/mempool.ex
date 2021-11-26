@@ -52,11 +52,8 @@ defmodule BitcoinStream.Mempool do
 
   def sync(pid) do
     port = getPort(pid);
-    cookie_path = System.get_env("BITCOIN_RPC_COOKIE");
     IO.puts("Syncing mempool with bitcoin node on port #{port}");
-    IO.puts("loading bitcoin rpc cookie at #{cookie_path}")
-    with  {:ok, cookie} <- File.read(cookie_path),
-          [ user, pw ] <- String.split(cookie, ":"),
+    with  { user, pw } <- rpc_creds(),
           {:ok, rpc_request} <- Jason.encode(%{method: "getmempoolinfo", params: [], request_id: 0}),
           {:ok, 200, _headers, body_ref} <- :hackney.request(:post, "http://localhost:#{port}", [{"content-type", "application/json"}], rpc_request, [basic_auth: { user, pw }]),
           {:ok, body} <- :hackney.body(body_ref),
@@ -72,6 +69,35 @@ defmodule BitcoinStream.Mempool do
       err ->
         IO.puts("Pool sync failed: (unknown reason)");
         IO.inspect(err);
+        :error
+    end
+  end
+
+  defp rpc_creds() do
+    cookie_path = System.get_env("BITCOIN_RPC_COOKIE")
+    rpc_user = System.get_env("BITCOIN_RPC_USER")
+    rpc_pw = System.get_env("BITCOIN_RPC_PW")
+    cond do
+      (rpc_user != nil && rpc_pw != nil)
+        -> { rpc_user, rpc_pw }
+      (cookie_path != nil)
+        ->
+          IO.puts("loading bitcoin rpc cookie at #{cookie_path}");
+          with {:ok, cookie} <- File.read(cookie_path),
+               [ user, pw ] <- String.split(cookie, ":") do
+            { user, pw }
+          else
+            {:error, reason} ->
+              IO.puts("Failed to load bitcoin rpc cookie");
+              IO.inspect(reason)
+              :error
+            err ->
+              IO.puts("Failed to load bitcoin rpc cookie: (unknown reason)");
+              IO.inspect(err);
+              :error
+          end
+      true ->
+        IO.puts("Missing bitcoin rpc credentials");
         :error
     end
   end
