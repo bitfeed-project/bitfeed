@@ -82,7 +82,7 @@ defmodule BitcoinStream.Bridge do
   end
 
   defp client_tx_loop(socket) do
-    IO.puts("client tx loop");
+    # IO.puts("client tx loop");
     with  {:ok, message} <- :chumak.recv_multipart(socket),
           [_topic, payload, _size] <- message,
           {:ok, txn} <- BitcoinTx.decode(payload) do

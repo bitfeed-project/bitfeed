@@ -14,6 +14,7 @@ defmodule BitcoinStream.Protocol.Transaction do
   @derive Jason.Encoder
   defstruct [
     :version,
+    :vbytes,
     :inputs,
     :outputs,
     :value,
@@ -32,6 +33,7 @@ defmodule BitcoinStream.Protocol.Transaction do
 
     {:ok, %__MODULE__{
       version: raw_tx.version,
+      vbytes: raw_tx.vbytes,
       inputs: raw_tx.inputs,
       outputs: raw_tx.outputs,
       value: total_value,
@@ -53,6 +55,7 @@ defmodule BitcoinStream.Protocol.Transaction do
 
     %__MODULE__{
       version: txn.version,
+      vbytes: txn.vbytes,
       inputs: txn.inputs,
       outputs: txn.outputs,
       value: total_value,

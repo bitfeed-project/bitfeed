@@ -1,5 +1,5 @@
 config:
-  target: "wss://bits.monospace.live/ws/txs"
+  target: "wss://localhost:4000/ws/txs"
   phases:
     - duration: 60
       arrivalRate: 1

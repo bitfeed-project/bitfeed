@@ -52,11 +52,13 @@ defmodule BitcoinStream.Mempool do
 
   def sync(pid) do
     port = getPort(pid);
-    user = System.get_env("BITCOIN_RPC_USER");
-    pass = System.get_env("BITCOIN_RPC_PASS");
+    cookie_path = System.get_env("BITCOIN_RPC_COOKIE");
     IO.puts("Syncing mempool with bitcoin node on port #{port}");
-    with  {:ok, rpc_request} <- Jason.encode(%{method: "getmempoolinfo", params: [], request_id: 0}),
-          {:ok, 200, _headers, body_ref} <- :hackney.request(:post, "http://localhost:#{port}", [{"content-type", "application/json"}], rpc_request, [basic_auth: {user, pass}]),
+    IO.puts("loading bitcoin rpc cookie at #{cookie_path}")
+    with  {:ok, cookie} <- File.read(cookie_path),
+          [ user, pw ] <- String.split(cookie, ":"),
+          {:ok, rpc_request} <- Jason.encode(%{method: "getmempoolinfo", params: [], request_id: 0}),
+          {:ok, 200, _headers, body_ref} <- :hackney.request(:post, "http://localhost:#{port}", [{"content-type", "application/json"}], rpc_request, [basic_auth: { user, pw }]),
           {:ok, body} <- :hackney.body(body_ref),
           {:ok, %{"result" => info}} <- Jason.decode(body),
           %{"size" => pool_size} <- info do
@@ -67,8 +69,9 @@ defmodule BitcoinStream.Mempool do
         IO.puts("Pool sync failed");
         IO.inspect(reason)
         :error
-      _ ->
+      err ->
         IO.puts("Pool sync failed: (unknown reason)");
+        IO.inspect(err);
         :error
     end
   end
