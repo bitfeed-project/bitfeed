@@ -18,19 +18,20 @@ defmodule BitcoinStream.SocketHandler do
   end
 
   def load_block() do
-    with  {:ok, block_data} <- File.read("block.dat"),
-          {:ok, block} <- BitcoinBlock.decode(block_data),
-          {:ok, payload} <- Jason.encode(%{type: "block", block: block})
-          do
-      {:ok, payload}
-    else
-      {:error, reason} ->
-        IO.puts("Block decoding failed: #{reason}");
-        :error
-      _ ->
-        IO.puts("Block decoding failed: (unknown reason)");
-        :error
-    end
+    {:ok, "null"}
+    # with  {:ok, block_data} <- File.read("block.dat"),
+    #       {:ok, block} <- BitcoinBlock.decode(block_data),
+    #       {:ok, payload} <- Jason.encode(%{type: "block", block: block})
+    #       do
+    #   {:ok, payload}
+    # else
+    #   {:error, reason} ->
+    #     IO.puts("Block decoding failed: #{reason}");
+    #     :error
+    #   _ ->
+    #     IO.puts("Block decoding failed: (unknown reason)");
+    #     :error
+    # end
   end
 
   def get_mempool_count_msg() do
