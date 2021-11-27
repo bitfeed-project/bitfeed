@@ -54,6 +54,7 @@ export const devEvents = writable({
 
 export const txQueueLength = createCounter()
 export const txCount = createCounter()
+export const lastBlockId = writable(null)
 export const mempoolCount = createCounter()
 export const mempoolScreenHeight = writable(0)
 export const frameRate = writable(null)

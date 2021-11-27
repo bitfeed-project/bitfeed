@@ -1,10 +1,15 @@
-import { serverConnected, serverDelay } from '../stores.js'
+import { serverConnected, serverDelay, lastBlockId } from '../stores.js'
 import config from '../config.js'
+
+let mempoolTimer
+let lastBlockSeen
+lastBlockId.subscribe(val => { lastBlockSeen = val })
+
 
 class TxStream {
   constructor () {
     this.websocketUri = config.localSocket ? `ws://localhost:4000${config.websocket_path}` : (config.dev ? `wss://bits.monospace.live${config.websocket_path}` : `wss://${window.location.host}${config.websocket_path}`)
-    this.reconnectBackoff = 128
+    this.reconnectBackoff = 250
     this.websocket = null
     this.setConnected(false)
     this.setDelay(0)
@@ -54,7 +59,7 @@ class TxStream {
     if (this.reconnectBackoff) clearTimeout(this.reconnectBackoff)
     if (!this.connected) {
       console.log('......trying to reconnect websocket')
-      if (this.reconnectBackoff < 8000) this.reconnectBackoff *= 2
+      if (this.reconnectBackoff < 8000) this.reconnectBackoff *= (Math.random()+1)
       this.reconnectTimeout = setTimeout(() => { this.init() }, this.reconnectBackoff)
     }
   }
@@ -84,11 +89,14 @@ class TxStream {
   }
 
   sendBlockRequest () {
-    this.websocket.send('block')
+    console.log('Checking for missed blocks...')
+    this.websocket.send(JSON.stringify({method: 'get_block', last: lastBlockSeen }))
   }
 
   sendMempoolRequest () {
     this.websocket.send('count')
+    if (mempoolTimer) clearTimeout(mempoolTimer)
+    mempoolTimer = setTimeout(() => { this.sendMempoolRequest() }, 60000)
   }
 
   disconnect () {
@@ -130,8 +138,7 @@ class TxStream {
         } else if (msg && msg.type === 'txn') {
           window.dispatchEvent(new CustomEvent('bitcoin_tx', { detail: msg.txn }))
         } else if (msg && msg.type === 'block') {
-          // console.log('Block received: ', msg.block)
-          window.dispatchEvent(new CustomEvent('bitcoin_block', { detail: msg.block }))
+          if (msg.block && msg.block.id) window.dispatchEvent(new CustomEvent('bitcoin_block', { detail: msg.block }))
         } else {
           // console.log('unknown message from websocket: ', msg)
         }

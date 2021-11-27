@@ -12,7 +12,7 @@
   import LightningOverlay from '../components/LightningOverlay.svelte'
   import DonationBar from '../components/DonationBar.svelte'
   import { integerFormat } from '../utils/format.js'
-  import { exchangeRates, localCurrency } from '../stores.js'
+  import { exchangeRates, localCurrency, lastBlockId } from '../stores.js'
   import { formatCurrency } from '../utils/fx.js'
   import config from '../config.js'
 
@@ -48,7 +48,10 @@
         txController.addTx(tx)
       })
       txStream.subscribe('block', block => {
-        txController.addBlock(block)
+        if (block) {
+          const added = txController.addBlock(block)
+          if (added && added.id) $lastBlockId = added.id
+        }
         txStream.sendMempoolRequest()
       })
       txStream.subscribe('mempool_count', count => {
