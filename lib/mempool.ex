@@ -74,9 +74,10 @@ defmodule BitcoinStream.Mempool do
   end
 
   defp rpc_creds() do
-    cookie_path = System.get_env("BITCOIN_RPC_COOKIE")
-    rpc_user = System.get_env("BITCOIN_RPC_USER")
-    rpc_pw = System.get_env("BITCOIN_RPC_PW")
+    cookie_path = System.get_env("BITCOIN_RPC_COOKIE");
+    rpc_user = System.get_env("BITCOIN_RPC_USER");
+    rpc_pw = System.get_env("BITCOIN_RPC_PW");
+    IO.puts(rpc_user);
     cond do
       (rpc_user != nil && rpc_pw != nil)
         -> { rpc_user, rpc_pw }

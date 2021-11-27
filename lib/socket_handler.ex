@@ -42,7 +42,7 @@ defmodule BitcoinStream.SocketHandler do
 
   @timed(key: "timed.function")
   def websocket_handle({:text, msg}, state) do
-    IO.puts("message received: #{msg} | #{inspect self()}");
+    # IO.puts("message received: #{msg} | #{inspect self()}");
     case msg do
       "hb" -> {:reply, {:text, msg}, state};
 
