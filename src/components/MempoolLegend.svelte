@@ -7,11 +7,11 @@ import { interpolateHcl } from 'd3-interpolate'
 import { color } from 'd3-color'
 
 const sizes = [
-  { value: 1000000, vbytes: 1*144, size: null },
-  { value: 10000000, vbytes: 4*144, size: null },
-  { value: 100000000, vbytes: 9*144, size: null },
-  { value: 1000000000, vbytes: 16*144, size: null },
-  { value: 10000000000, vbytes: 25*144, size: null }
+  { value: 1000000, vbytes: 1*256, size: null },
+  { value: 10000000, vbytes: 4*256, size: null },
+  { value: 100000000, vbytes: 9*256, size: null },
+  { value: 1000000000, vbytes: 16*256, size: null },
+  { value: 10000000000, vbytes: 25*256, size: null }
 ]
 
 let unitWidth

@@ -6,6 +6,6 @@ export function logTxSize (value, max) {
 
 export function byteTxSize (vbytes, max, log) {
   if (!vbytes) vbytes = 1
-  let scale = Math.max(1,Math.ceil(Math.sqrt(vbytes/144)))
+  let scale = Math.max(1,Math.ceil(Math.sqrt(vbytes/256)))
   return Math.min(max || Infinity,Math.max(1, scale)) // bound between 1 and the max displayable size (just in case!)
 }

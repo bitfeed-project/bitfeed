@@ -36,8 +36,14 @@
     }
   }
 
+  let modeLoaded = false
+  let currentMode
   $: {
-    changedMode($settings.vbytes)
+    if ($settings && currentMode != $settings.vbytes) {
+      if (!modeLoaded) modeLoaded = true
+      else changedMode($settings.vbytes)
+      currentMode = $settings.vbytes
+    }
   }
 
   onMount(() => {
