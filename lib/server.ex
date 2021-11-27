@@ -3,6 +3,7 @@ defmodule BitcoinStream.Server do
 
   def start(_type, _args) do
     children = [
+      { BitcoinStream.BlockData, [name: :block_data] },
       { BitcoinStream.Mempool, [port: 9959, name: :mempool] },
       BitcoinStream.Metrics.Probe,
       Plug.Cowboy.child_spec(

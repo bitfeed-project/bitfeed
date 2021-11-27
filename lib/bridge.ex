@@ -43,7 +43,7 @@ defmodule BitcoinStream.Bridge do
   end
 
   @doc """
-    Send a demo message from the client
+    Send a message from the client
   """
   def client_send(socket, message) do
     :ok = :chumak.send(socket, message);
@@ -53,15 +53,15 @@ defmodule BitcoinStream.Bridge do
 
   def sendTxn(txn) do
     # IO.puts("Forwarding transaction to websocket clients")
-    Registry.dispatch(Registry.BitcoinStream, "txs", fn(entries) ->
-      for {pid, _} <- entries do
-        # IO.puts("Forwarding to pid #{inspect pid}")
-        case Jason.encode(%{type: "txn", txn: txn}) do
-          {:ok, payload} -> Process.send(pid, payload, []);
-          {:error, reason} -> IO.puts("Error json encoding transaction: #{reason}");
-        end
-      end
-    end)
+    case Jason.encode(%{type: "txn", txn: txn}) do
+      {:ok, payload} ->
+        Registry.dispatch(Registry.BitcoinStream, "txs", fn(entries) ->
+          for {pid, _} <- entries do
+            Process.send(pid, payload, [])
+          end
+        end)
+      {:error, reason} -> IO.puts("Error json encoding transaction: #{reason}");
+    end
   end
 
   def incrementMempool() do
@@ -69,16 +69,16 @@ defmodule BitcoinStream.Bridge do
   end
 
   def sendBlock(block) do
-    IO.puts("Forwarding block to websocket clients")
-    Registry.dispatch(Registry.BitcoinStream, "txs", fn(entries) ->
-      for {pid, _} <- entries do
-        IO.puts("Forwarding to pid #{inspect pid}")
-        case Jason.encode(%{type: "block", block: block}) do
-          {:ok, payload} -> Process.send(pid, payload, []);
-          {:error, reason} -> IO.puts("Error json encoding block: #{reason}");
-        end
-      end
-    end)
+    case Jason.encode(%{type: "block", block: block}) do
+      {:ok, payload} ->
+        Registry.dispatch(Registry.BitcoinStream, "txs", fn(entries) ->
+          for {pid, _} <- entries do
+            IO.puts("Forwarding to pid #{inspect pid}")
+            Process.send(pid, payload, []);
+          end
+        end)
+      {:error, reason} -> IO.puts("Error json encoding block: #{reason}");
+    end
   end
 
   defp client_tx_loop(socket) do
@@ -102,6 +102,7 @@ defmodule BitcoinStream.Bridge do
           [_topic, payload, _size] <- message,
           :ok <- File.write("block.dat", payload, [:binary]),
           {:ok, block} <- BitcoinBlock.decode(payload) do
+      GenServer.cast(:block_data, {:block, block})
       sendBlock(block);
       Mempool.sync(:mempool);
       IO.puts("new block")
