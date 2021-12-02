@@ -35,7 +35,7 @@ defmodule BitcoinStream.MixProject do
       {:chumak, github: "zeromq/chumak"},
       # {:bitcoinex, "~> 0.1.0"},
       # {:bitcoinex, git: "git@github.com:mononaut/bitcoinex.git", tag: "master"},
-      {:bitcoinex, path: "../bitcoinex", override: true},
+      {:bitcoinex, path: "./bitcoinex", override: true},
       {:hackney, "~> 1.15"},
       {:cowboy, "~> 2.4"},
       {:plug, "~> 1.7"},
