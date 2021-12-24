@@ -10,6 +10,7 @@ import timerIcon from '../assets/icon/cil-av-timer.svg'
 import { fade } from 'svelte/transition'
 import { durationFormat } from '../utils/format.js'
 import { overlay } from '../stores.js'
+import QRCode from 'qrcode'
 
 let amount = 5000
 let invoice = null
@@ -27,12 +28,20 @@ $: {
   if (invoice && invoice.id && invoice.amount && invoice.BOLT11) {
     invoiceAmountLabel = `${Number.parseInt(invoice.amount) / 1000} sats`
     invoiceHexLabel = invoice.BOLT11
-    qrSrc = `https://chart.googleapis.com/chart?chs=500x500&chld=L|2&cht=qr&chl=${invoice.BOLT11}`
+    setQR(invoice.BOLT11)
   } else {
     stopExpiryTimer()
     invoiceAmountLabel = `${amount || 5000} sats`
     invoiceHexLabel = invoiceHexPlaceholder
     qrSrc = null
+  }
+}
+
+async function setQR(invoice) {
+  try {
+    qrSrc = await QRCode.toDataURL(invoice.toUpperCase())
+  } catch (err) {
+    console.log('error generating QR code: ', err)
   }
 }
 
@@ -54,7 +63,7 @@ $: {
   }
 }
 function expiryTimer () {
-  if (invoice && invoice.expiresAt) expiresIn = Math.round(((invoice.expiresAt * 1000) - Date.now()) / 1000)
+  if (invoice && invoice.expiresAt) expiresIn = Math.round(((invoice.expiresAt * 1000) - 500000 - Date.now()) / 1000)
   else expiresIn = null
 }
 function stopExpiryTimer () {
@@ -104,20 +113,20 @@ function stopPollingInvoice() {
 function processInvoice () {
   if (invoice) {
     startExpiryTimer()
-    if (invoice.status === 'Unpaid') {
-      invoicePaid = false
-      invoiceExpired = false
-      localStorage.setItem('lightning-invoice', JSON.stringify(invoice))
-      invoicePoll = setTimeout(pollInvoice, 2000)
-    } else if (invoice.status === 'Paid') {
+    if (invoice.status === 'Paid') {
       invoicePaid = true
       invoiceExpired = false
       analytics.trackEvent('donations', 'lightning', 'paid', invoice.amount / 1000)
       localStorage.removeItem('lightning-invoice')
-    } else if (invoice.status === 'Expired') {
+    } else if (invoice.status === 'Expired' || (invoice.expiresAt * 1000) - 500000 < Date.now()) {
       invoicePaid = false
       invoiceExpired = true
       localStorage.removeItem('lightning-invoice')
+    } else if (invoice.status === 'Unpaid') {
+      invoicePaid = false
+      invoiceExpired = false
+      localStorage.setItem('lightning-invoice', JSON.stringify(invoice))
+      invoicePoll = setTimeout(pollInvoice, 2000)
     }
   }
 }
@@ -335,7 +344,7 @@ async function generateInvoice () {
           <h3 class="invoice-status">Received, Thanks!</h3>
         {:else if invoiceExpired}
           <div class="invoice-icon"><Icon icon={timerIcon} color="white" /></div>
-          <h3 class="invoice-status">Request Expired</h3>
+          <h3 class="invoice-status">Invoice Expired</h3>
         {:else}
           <div class="invoice-icon"><Icon icon={boltIcon} color="white" /></div>
         {/if}
