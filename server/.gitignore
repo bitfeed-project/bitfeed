@@ -29,3 +29,5 @@ bitcoin_stream-*.tar
 # Logging files
 /log/
 *.log
+
+.envrc
