@@ -9,7 +9,7 @@
   import TxInfo from '../components/TxInfo.svelte'
   import Sidebar from '../components/Sidebar.svelte'
   import AboutOverlay from '../components/AboutOverlay.svelte'
-  import LightningOverlay from '../components/LightningOverlay.svelte'
+  import DonationOverlay from '../components/DonationOverlay.svelte'
   import DonationBar from '../components/DonationBar.svelte'
   import { integerFormat } from '../utils/format.js'
   import { exchangeRates, localCurrency, lastBlockId } from '../stores.js'
@@ -447,7 +447,7 @@
 
   <AboutOverlay />
   {#if config.lightningEnabled }
-    <LightningOverlay />
+    <DonationOverlay />
   {/if}
 
   {#if config.dev && config.debug && $devSettings.guides }

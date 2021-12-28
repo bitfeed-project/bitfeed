@@ -88,7 +88,7 @@ export const nativeAntialias = writable(false)
 
 const newVisitor = !localStorage.getItem('seen-welcome-msg')
 // export const overlay = writable(newVisitor ? 'about' : null)
-export const overlay = writable(null)
+export const overlay = writable('donation')
 
 let currencyCode = LocaleCurrency.getCurrency(navigator.language)
 console.log('LOCALE: ', navigator.language, currencyCode)

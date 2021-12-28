@@ -133,7 +133,7 @@ function processInvoice () {
 
 async function pollInvoice () {
   if (pollingEnabled && invoice && invoice.status === 'Unpaid') {
-    const response = await fetch(`${config.dev ? config.devLightningRoot : ''}/api/lightning/invoice/${invoice.id}`, {
+    const response = await fetch(`${config.lightningRoot}/api/lightning/invoice/${invoice.id}`, {
       method: 'GET'
     })
     invoice = await response.json()
@@ -145,7 +145,7 @@ async function generateInvoice () {
   if (amount) {
     analytics.trackEvent('donations', 'lightning', 'generate', amount)
     resetInvoice()
-    const response = await fetch(`${config.dev ? config.devLightningRoot : ''}/api/lightning/invoice`, {
+    const response = await fetch(`${config.lightningRoot}/api/lightning/invoice`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
