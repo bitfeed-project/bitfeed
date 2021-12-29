@@ -134,3 +134,13 @@ button:disabled {
 button:focus {
   border-color: #666;
 }
+
+@keyframes spin {
+  from {transform:rotate(0deg);}
+  to {transform:rotate(360deg);}
+}
+
+.animate-spin {
+  animation: 1s linear 0s infinite running spin;
+  display: inline-block;
+}

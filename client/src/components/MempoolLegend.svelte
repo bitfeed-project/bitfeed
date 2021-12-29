@@ -41,7 +41,6 @@ function calcSizes (gridSize, unitWidth, unitPadding) {
 
 $: {
   calcSizes(gridSize, unitWidth, unitPadding)
-  console.log(sizes)
 }
 
 function calcSize ({ vbytes, value }) {

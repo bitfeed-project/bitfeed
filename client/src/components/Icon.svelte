@@ -1,7 +1,7 @@
 <script>
 export let icon
 export let inline = false
-export let color = "white"
+export let color = "inherit"
 </script>
 
 <style type="text/scss">
