@@ -32,6 +32,8 @@
 
   --bold-a: #f7941d;
   --bold-b: #00ffcc;
+  --bold-c: greenyellow;
+  --grey: #AAAAAA;
 
   --palette-a: var(--dark-a);
   --palette-b: var(--dark-b);

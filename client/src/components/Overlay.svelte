@@ -103,7 +103,7 @@ function close () {
 <div class="overlay-wrapper" >
   <div class="overlay-background" on:click={close} transition:fade={{ duration: 500 }} />
   <div class="overlay-outer" class:full-height={fullHeight} transition:fly={{ duration: 500, y: 50 }}>
-    <div class="overlay-inner">
+    <div class="overlay-inner" id="{name}Overlay">
       <slot />
     </div>
     <button class="close-button" on:click={close} >

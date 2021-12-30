@@ -3,6 +3,7 @@ import Icon from '../Icon.svelte'
 
 export let active
 export let title
+export let optional
 export let description
 export let min // in BTC
 
@@ -18,7 +19,7 @@ function formatAmount (btc) {
     { description }
   </p>
   <p class="min">
-    {#if min}
+    {#if min && !optional}
       ≥ { formatAmount(min) }
     {:else}
       &nbsp;
@@ -33,7 +34,9 @@ function formatAmount (btc) {
     align-items: stretch;
     cursor: pointer;
     margin: 20px;
-    width: 200px;
+    min-width: 12em;
+    width: 12em;
+    max-width: 15em;
     flex-grow: 1;
     flex-shrink: 1;
     background: var(--palette-d);
