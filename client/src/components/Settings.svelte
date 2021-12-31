@@ -18,8 +18,8 @@ let settingConfig = {
   showFPS: {
     label: 'FPS'
   },
-  showDonation: {
-    label: 'Donation Info'
+  showMessages: {
+    label: 'Message Bar'
   },
   vbytes: {
     label: 'Size by',

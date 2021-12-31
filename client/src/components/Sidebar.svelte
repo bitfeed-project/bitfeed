@@ -13,6 +13,7 @@ import questionIcon from '../assets/icon/help-circle.svg'
 import infoIcon from '../assets/icon/info.svg'
 import atIcon from '../assets/icon/cil-at.svg'
 import gridIcon from '../assets/icon/grid-icon.svg'
+import peopleIcon from '../assets/icon/cil-people.svg'
 import MempoolLegend from '../components/MempoolLegend.svelte'
 import ContactTab from '../components/ContactTab.svelte'
 
@@ -33,6 +34,10 @@ function settings (tab) {
 
 function openAbout () {
   $overlay = 'about'
+}
+
+function openSupporters () {
+  $overlay = 'supporters'
 }
 
 function showBlock () {
@@ -81,6 +86,11 @@ function showBlock () {
   <SidebarTab on:click={openAbout} tooltip="About">
     <span slot="tab">
       <Icon icon={questionIcon} color="var(--bold-a)" />
+    </span>
+  </SidebarTab>
+  <SidebarTab on:click={openSupporters} tooltip="Supporters">
+    <span slot="tab">
+      <Icon icon={peopleIcon} color="var(--bold-a)" />
     </span>
   </SidebarTab>
   {#if config.dev && config.debug}

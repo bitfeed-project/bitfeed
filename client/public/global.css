@@ -83,16 +83,16 @@ body {
 }
 
 a {
-  color: rgb(0,100,200);
+  color: var(--palette-x);
   text-decoration: none;
 }
 
 a:hover {
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 a:visited {
-  color: rgb(0,80,160);
+  color: inherit;
 }
 
 label {
@@ -135,6 +135,23 @@ button:disabled {
 
 button:focus {
   border-color: #666;
+}
+
+button.action-button {
+  background: var(--bold-a);
+  color: white;
+  padding: 0.5em 2em;
+  margin: 1em 2em 0.5em;
+  font-size: 1.1em;
+  font-weight: 600;
+  box-shadow: inset 0px 0px 5px var(--dark-b);
+  text-shadow: 0px 0px 5px var(--dark-b);
+}
+button.action-button:hover {
+  box-shadow: inset 0px 0px 2px var(--dark-b);
+}
+button.action-button:active {
+  box-shadow: none;
 }
 
 @keyframes spin {

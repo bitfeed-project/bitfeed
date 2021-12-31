@@ -10,7 +10,8 @@
   import Sidebar from '../components/Sidebar.svelte'
   import AboutOverlay from '../components/AboutOverlay.svelte'
   import DonationOverlay from '../components/DonationOverlay.svelte'
-  import DonationBar from '../components/DonationBar.svelte'
+  import SupportersOverlay from '../components/SupportersOverlay.svelte'
+  import Alerts from '../components/alert/Alerts.svelte'
   import { integerFormat } from '../utils/format.js'
   import { exchangeRates, localCurrency, lastBlockId } from '../stores.js'
   import { formatCurrency } from '../utils/fx.js'
@@ -69,7 +70,7 @@
     $devEvents.addManyCallback = fakeTxs
     $devEvents.addBlockCallback = fakeBlock
 
-    if (!$settings.showDonation) $settings.showDonation = true
+    if (!$settings.showMessages) $settings.showMessages = true
   })
 
   function resize () {
@@ -437,17 +438,18 @@
         {/if}
       </div>
     </div>
-    {#if $settings.showDonation }
-      <DonationBar />
-    {/if}
     <div class="spacer" />
+    {#if $settings.showMessages }
+      <Alerts />
+    {/if}
   </div>
 
   <Sidebar />
 
   <AboutOverlay />
-  {#if config.lightningEnabled }
+  {#if config.donationsEnabled }
     <DonationOverlay />
+    <SupportersOverlay />
   {/if}
 
   {#if config.dev && config.debug && $devSettings.guides }

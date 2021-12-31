@@ -1,5 +1,5 @@
 import { writable, derived } from 'svelte/store'
-export { exchangeRates } from './utils/pollStore.js'
+import { makePollStore } from './utils/pollStore.js'
 import { symbols } from './utils/fx.js'
 import LocaleCurrency from 'locale-currency'
 import config from './config.js'
@@ -42,6 +42,16 @@ function createCachedDict (namespace, defaultValues) {
 	}
 }
 
+// refresh exchange rates every minute
+export const exchangeRates = makePollStore('rates', 'https://blockchain.info/ticker', 60000, {})
+// refresh messages from donation server every hour
+// export const alerts = makePollStore('alerts', `${config.donationRoot}/api/sponsorship/msgs.json`, 3600000, [])
+export const alerts = makePollStore('alerts', `${config.donationRoot}/api/sponsorship/msgs.json`, 10000, [])
+// refresh sponsor data every hour
+export const heroes = makePollStore('heroes', `${config.donationRoot}/api/sponsorship/heroes.json`, 3600000, null)
+export const sponsors = makePollStore('sponsors', `${config.donationRoot}/api/sponsorship/sponsors.json`, 3600000, null)
+export const tiers = makePollStore('tiers', `${config.donationRoot}/api/sponsorship/tiers.json`, 3600000, null)
+
 export const darkMode = writable(true)
 export const serverConnected = writable(false)
 export const serverDelay = writable(1000)
@@ -73,7 +83,7 @@ export const settings = createCachedDict('settings', {
 	showFX: true,
 	vbytes: false,
 	fancyGraphics: true,
-	showDonation: true,
+	showMessages: true,
 	noTrack: false
 })
 
@@ -88,7 +98,7 @@ export const nativeAntialias = writable(false)
 
 const newVisitor = !localStorage.getItem('seen-welcome-msg')
 // export const overlay = writable(newVisitor ? 'about' : null)
-export const overlay = writable('donation')
+export const overlay = writable(null)
 
 let currencyCode = LocaleCurrency.getCurrency(navigator.language)
 console.log('LOCALE: ', navigator.language, currencyCode)

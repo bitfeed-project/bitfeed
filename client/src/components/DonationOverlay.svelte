@@ -17,7 +17,7 @@ import clipboardIcon from '../assets/icon/cil-clipboard.svg'
 import twitterIcon from '../assets/icon/cib-twitter.svg'
 import { fade, fly } from 'svelte/transition'
 import { durationFormat } from '../utils/format.js'
-import { overlay } from '../stores.js'
+import { overlay, tiers } from '../stores.js'
 import QRCode from 'qrcode'
 
 let tab = 'form' // form | invoice | success
@@ -50,12 +50,11 @@ const invoiceHexPlaceholder = 'lnbcxxxxxxt8l4pp5umz5kyakc0u8z3w2y568entyyq2gafgc
 let qrSrc = null
 let invoicePayments = []
 
-let tierThresholds
-let tiers = []
+let tierThresholds = []
 
 $: {
-  if (tierThresholds) {
-    tiers = [
+  if ($tiers) {
+    tierThresholds = [
       {
         title: 'Supporter',
         description: "Help to keep the lights on with a small donation",
@@ -64,26 +63,26 @@ $: {
         optional: true,
         min: 0.00005000,
         minSats: 5000,
-        max: tierThresholds.hero.min,
-        maxSats: btcToSats(tierThresholds.hero.min),
+        max: $tiers.hero.min,
+        maxSats: btcToSats($tiers.hero.min),
       },
       {
         title: 'Community Hero',
-        description: "Add your Twitter profile to our Heroes Hall of Fame",
+        description: "Add your Twitter profile to our Supporters page",
         emoji: '🦸',
         color: 'var(--bold-c)',
-        min: tierThresholds.hero.min,
-        minSats: btcToSats(tierThresholds.hero.min),
-        max: tierThresholds.sponsor.min,
-        maxSats: btcToSats(tierThresholds.sponsor.min),
+        min: $tiers.hero.min,
+        minSats: btcToSats($tiers.hero.min),
+        max: $tiers.sponsor.min,
+        maxSats: btcToSats($tiers.sponsor.min),
       },
       {
         title: 'Enterprise Sponsor',
         description: "Display your logo on Bitfeed, with a link to your website",
         emoji: '🕴️',
         color: 'var(--bold-a)',
-        min: tierThresholds.sponsor.min,
-        minSats: btcToSats(tierThresholds.sponsor.min),
+        min: $tiers.sponsor.min,
+        minSats: btcToSats($tiers.sponsor.min),
         max: Infinity,
         maxSats: Infinity,
       }
@@ -207,18 +206,7 @@ onMount(() => {
       console.log('error loading/parsing invoice')
     }
   }
-  loadTiers()
 })
-
-async function loadTiers () {
-  try {
-    const r = await fetch(`${config.donationRoot}/api/sponsorship/tiers.json`)
-    tierThresholds = await r.json()
-  } catch (e) {
-    console.log('failed to load sponsorship tiers')
-    console.log(e)
-  }
-}
 
 function resetInvoice () {
   invoicePaid = false
@@ -426,7 +414,7 @@ async function copyInvoice () {
 }
 </script>
 
-<Overlay name="donation" fullHeight>
+<Overlay name="donation" fullSize>
   <section class="donation-modal">
     <div class="tab-nav">
       <button class="to left" class:disabled={!canTabLeft} on:click={tabLeft}>&larr;</button>
@@ -447,7 +435,7 @@ async function copyInvoice () {
         </p>
 
         <div class="support-tiers">
-          {#each tiers as tier}
+          {#each tierThresholds as tier}
             <TierCard {...tier} active={btc >= tier.min && btc < tier.max} on:click={() => { setAmount(tier.min || 0.00005000, true) }} />
           {/each}
         </div>
@@ -456,7 +444,7 @@ async function copyInvoice () {
 
         <div class="choose-amount">
           <div class="amount-slider">
-            <SatoshiSlider value={sats} max={btcToSats(1)} thresholds={tiers} logScale on:input={(e) => { setAmount(e.detail)}} />
+            <SatoshiSlider value={sats} max={btcToSats(1)} thresholds={tierThresholds} logScale on:input={(e) => { setAmount(e.detail)}} />
           </div>
           <div class="amount-input">
             {#if unit === 'sats'}
@@ -470,8 +458,8 @@ async function copyInvoice () {
           </div>
         </div>
 
-        {#if tierThresholds && btc >= tierThresholds.hero.min}
-          {#if btc >= tierThresholds.sponsor.min}
+        {#if $tiers && btc >= $tiers.hero.min}
+          {#if btc >= $tiers.sponsor.min}
             <p class="credit-info">
               Enter your email or twitter handle so we can reach you to say thanks and confirm sponsorship details! Or leave these fields blank to donate anonymously.
             </p>
@@ -491,7 +479,7 @@ async function copyInvoice () {
                 <input id="twitterHandle" type="text" bind:value={twitter}>
               </div>
             </div>
-            {#if btc >= tierThresholds.sponsor.min}
+            {#if btc >= $tiers.sponsor.min}
               <div class="field">
                 <label for="twitterHandle">Email</label>
                 <div class="text-input email-input">
@@ -750,14 +738,6 @@ async function copyInvoice () {
           }
         }
       }
-    }
-
-    .action-button {
-      background: var(--bold-a);
-      color: white;
-      padding: 0.5em 2em;
-      margin: 1em 2em 0.5em;
-      font-size: 1.1em;
     }
 
     .invoice-area {
