@@ -13,7 +13,7 @@
   import SupportersOverlay from '../components/SupportersOverlay.svelte'
   import Alerts from '../components/alert/Alerts.svelte'
   import { integerFormat } from '../utils/format.js'
-  import { exchangeRates, localCurrency, lastBlockId } from '../stores.js'
+  import { exchangeRates, localCurrency, lastBlockId, showSupporters } from '../stores.js'
   import { formatCurrency } from '../utils/fx.js'
   import config from '../config.js'
 
@@ -449,7 +449,9 @@
   <AboutOverlay />
   {#if config.donationsEnabled }
     <DonationOverlay />
-    <SupportersOverlay />
+    {#if $showSupporters}
+      <SupportersOverlay />
+    {/if}
   {/if}
 
   {#if config.dev && config.debug && $devSettings.guides }

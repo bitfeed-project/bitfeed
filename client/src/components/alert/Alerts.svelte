@@ -1,6 +1,6 @@
 <script>
 import { onMount } from 'svelte'
-import { alerts, heroes, sponsors, overlay, sidebarToggle } from '../../stores.js'
+import { alerts, heroes, sponsors, overlay, sidebarToggle, showSupporters } from '../../stores.js'
 import config from '../../config.js'
 import ByMononaut from './ByMononaut.svelte'
 import HeroMsg from './Hero.svelte'
@@ -14,6 +14,15 @@ const components = {
   // "be-a-hero": BeAHero,
   "thank-you-hero": HeroMsg,
   msg: GenericAlert
+}
+let ready
+$: {
+  ready = {
+    mononaut: true,
+    "sponsored-by": SponsoredMsg,
+    "thank-you-hero": $showSupporters ? HeroMsg : null,
+    msg: GenericAlert
+  }
 }
 
 const actions = {
@@ -40,7 +49,7 @@ $: {
 }
 
 function processAlert (alert) {
-  if (alert && alert.type && components[alert.type]) {
+  if (alert && alert.type && components[alert.type] && ready[alert.type]) {
     if (!sequences[alert.key]) sequences[alert.key] = 0
     return {
       ...alert,

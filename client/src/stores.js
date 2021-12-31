@@ -52,6 +52,13 @@ export const heroes = makePollStore('heroes', `${config.donationRoot}/api/sponso
 export const sponsors = makePollStore('sponsors', `${config.donationRoot}/api/sponsorship/sponsors.json`, 3600000, null)
 export const tiers = makePollStore('tiers', `${config.donationRoot}/api/sponsorship/tiers.json`, 3600000, null)
 
+export const showSupporters = derived([heroes, sponsors], ([$heroes,$sponsors]) => {
+	return (
+		$heroes && Object.values($heroes).length &&
+		$sponsors && $sponsors.length
+	)
+})
+
 export const darkMode = writable(true)
 export const serverConnected = writable(false)
 export const serverDelay = writable(1000)
