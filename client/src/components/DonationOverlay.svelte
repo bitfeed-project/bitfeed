@@ -493,7 +493,7 @@ async function copyInvoice () {
 
         <button class="action-button" on:click={generateInvoice} >
           {#if waitingForInvoice }
-            <span class="animate-spin"><Icon icon={spinnerIcon} /></span> loading
+            <span class="animate-spin spinner"><Icon icon={spinnerIcon} /></span> loading
           {:else if invoice && invoice.id }
             Request a new invoice
           {:else}
@@ -738,6 +738,10 @@ async function copyInvoice () {
           }
         }
       }
+    }
+
+    .spinner :global(svg) {
+      transform: scaleX(-1);
     }
 
     .invoice-area {

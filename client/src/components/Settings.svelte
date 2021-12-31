@@ -1,7 +1,8 @@
 <script>
+import config from '../config.js'
 import analytics from '../utils/analytics.js'
 import SidebarMenuItem from '../components/SidebarMenuItem.svelte'
-import { settings, nativeAntialias, exchangeRates, localCurrency } from '../stores.js'
+import { settings, nativeAntialias, exchangeRates, localCurrency, haveMessages } from '../stores.js'
 
 function toggle(setting) {
   $settings[setting] = !$settings[setting]
@@ -14,12 +15,6 @@ let settingConfig = {
   },
   darkMode: {
     label: 'Dark Mode'
-  },
-  showFPS: {
-    label: 'FPS'
-  },
-  showMessages: {
-    label: 'Message Bar'
   },
   vbytes: {
     label: 'Size by',
@@ -34,6 +29,11 @@ $: {
   } else {
     settingConfig.fancyGraphics = {
       label: 'Fancy Graphics'
+    }
+  }
+  if (config.messagesEnabled && $haveMessages) {
+    settingConfig.showMessages = {
+      label: 'Message Bar'
     }
   }
 }

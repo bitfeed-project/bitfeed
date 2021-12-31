@@ -13,7 +13,7 @@
   import SupportersOverlay from '../components/SupportersOverlay.svelte'
   import Alerts from '../components/alert/Alerts.svelte'
   import { integerFormat } from '../utils/format.js'
-  import { exchangeRates, localCurrency, lastBlockId, showSupporters } from '../stores.js'
+  import { exchangeRates, localCurrency, lastBlockId, haveSupporters } from '../stores.js'
   import { formatCurrency } from '../utils/fx.js'
   import config from '../config.js'
 
@@ -129,13 +129,6 @@
 
   $: connectionColor = ($serverConnected && $serverDelay < 5000) ? ($serverDelay < 500 ? 'good' : 'ok') : 'bad'
   $: connectionTitle = ($serverConnected && $serverDelay < 5000) ? ($serverDelay < 500 ? 'Streaming live transactions' : 'Unstable connection') : 'Disconnected'
-  $: {
-    if (lastFrameUpdate + 250 < performance.now()) {
-      frameRateLabel = Number($frameRate).toFixed(1) + ' FPS'
-      lastFrameUpdate = performance.now()
-    }
-  }
-  $: frameRateColor = $avgFrameRate > 40 ? 'good' : ($avgFrameRate > 20 ? 'ok' : 'bad')
 
   const fxColor = 'good'
   let fxLabel = ''
@@ -433,13 +426,10 @@
         {#if $settings.showNetworkStatus }
           <div class="status-light {connectionColor}" title={connectionTitle}></div>
         {/if}
-        {#if $settings.showFPS }
-          <span class="stat-counter {frameRateColor}">{ frameRateLabel }</span>
-        {/if}
       </div>
     </div>
     <div class="spacer" />
-    {#if $settings.showMessages }
+    {#if config.messagesEnabled && $settings.showMessages }
       <Alerts />
     {/if}
   </div>
@@ -449,7 +439,7 @@
   <AboutOverlay />
   {#if config.donationsEnabled }
     <DonationOverlay />
-    {#if $showSupporters}
+    {#if $haveSupporters}
       <SupportersOverlay />
     {/if}
   {/if}

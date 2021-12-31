@@ -9,7 +9,7 @@ export function makePollStore (name, url, frequency, initialValue={}, responseHa
   }
 
   const fetcher = () => {
-    fetch(`${url}?t=${Date.now()}`).then(response => { responseHandler(response, set) }).catch(err => {
+    fetch(`${url}?t=${Date.now()}`).then(response => { responseHandler(response, set) }).catch(error => {
       console.log(`error polling data for ${name}: `, error)
       if (timer) clearTimeout(timer)
       timer = setTimeout(fetcher, 5000)

@@ -1,6 +1,6 @@
 <script>
 import { onMount } from 'svelte'
-import { alerts, heroes, sponsors, overlay, sidebarToggle, showSupporters } from '../../stores.js'
+import { alerts, heroes, sponsors, overlay, sidebarToggle, haveSupporters } from '../../stores.js'
 import config from '../../config.js'
 import ByMononaut from './ByMononaut.svelte'
 import HeroMsg from './Hero.svelte'
@@ -20,7 +20,7 @@ $: {
   ready = {
     mononaut: true,
     "sponsored-by": SponsoredMsg,
-    "thank-you-hero": $showSupporters ? HeroMsg : null,
+    "thank-you-hero": $haveSupporters ? HeroMsg : null,
     msg: GenericAlert
   }
 }

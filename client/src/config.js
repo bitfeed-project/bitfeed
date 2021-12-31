@@ -1,13 +1,13 @@
 export default {
   dev: ENVIRONMENT === 'development',
-  donationRoot: 'http://localhost:3001',
+  donationRoot: 'https://donate.monospace.live',
   debug: false,
   layoutHints: false,
-  fps: true,
   websocket_path: '/ws/txs',
   localSocket: false,
   nofeed: false,
   txDelay: 10000,
   donationsEnabled: true,
+  messagesEnabled: true,
   alertDuration: 20000,
 }
