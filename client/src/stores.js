@@ -61,8 +61,7 @@ export const haveMessages = derived([alerts], ([$alerts]) => {
 })
 export const haveSupporters = derived([heroes, sponsors], ([$heroes,$sponsors]) => {
 	return (
-		$heroes && Object.values($heroes).length &&
-		$sponsors && $sponsors.length
+		$heroes && Object.values($heroes).length
 	)
 })
 

@@ -211,13 +211,17 @@ onMount(() => {
 function resetInvoice () {
   invoicePaid = false
   invoiceExpired = false
+  invoiceProcessing = false
   invoice = null
-  setTab('form')
+  lightningInvoice = null
+  chainInvoice = null
+  selectedMethod = null
   qrSrc = null
+  setTab('form')
 }
 
 function checkResetInvoice () {
-  if (invoice && (invoice.status === 'New' || invoice.status === 'Processing')) resetInvoice()
+  if (!invoice || !(invoice.status === 'New' || invoice.status === 'Processing')) resetInvoice()
 }
 
 function stopPollingInvoice() {
