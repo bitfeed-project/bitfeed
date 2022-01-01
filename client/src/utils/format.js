@@ -33,7 +33,7 @@ export const durationFormat = {
     const seconds = milliseconds / 1000
     const absSeconds = Math.abs(seconds)
     if (absSeconds < 1) return 'now'
-    else if (absSeconds < 60) return relativeTimeFormat.format(seconds, 'seconds')
-    else return relativeTimeFormat.format(Math.round(seconds / 60), 'minutes')
+    else if (absSeconds < 60) return relativeTimeFormat.format(seconds, absSeconds == 1 ? 'second' : 'seconds')
+    else return relativeTimeFormat.format(Math.round(seconds / 60), Math.abs(Math.round(seconds / 60)) == 1 ? 'minute' : 'minutes')
   }
 }

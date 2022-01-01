@@ -9,10 +9,11 @@
   import TxInfo from '../components/TxInfo.svelte'
   import Sidebar from '../components/Sidebar.svelte'
   import AboutOverlay from '../components/AboutOverlay.svelte'
-  import LightningOverlay from '../components/LightningOverlay.svelte'
-  import DonationBar from '../components/DonationBar.svelte'
+  import DonationOverlay from '../components/DonationOverlay.svelte'
+  import SupportersOverlay from '../components/SupportersOverlay.svelte'
+  import Alerts from '../components/alert/Alerts.svelte'
   import { integerFormat } from '../utils/format.js'
-  import { exchangeRates, localCurrency, lastBlockId } from '../stores.js'
+  import { exchangeRates, localCurrency, lastBlockId, haveSupporters } from '../stores.js'
   import { formatCurrency } from '../utils/fx.js'
   import config from '../config.js'
 
@@ -69,7 +70,7 @@
     $devEvents.addManyCallback = fakeTxs
     $devEvents.addBlockCallback = fakeBlock
 
-    if (!$settings.showDonation) $settings.showDonation = true
+    if (!$settings.showMessages) $settings.showMessages = true
   })
 
   function resize () {
@@ -128,13 +129,6 @@
 
   $: connectionColor = ($serverConnected && $serverDelay < 5000) ? ($serverDelay < 500 ? 'good' : 'ok') : 'bad'
   $: connectionTitle = ($serverConnected && $serverDelay < 5000) ? ($serverDelay < 500 ? 'Streaming live transactions' : 'Unstable connection') : 'Disconnected'
-  $: {
-    if (lastFrameUpdate + 250 < performance.now()) {
-      frameRateLabel = Number($frameRate).toFixed(1) + ' FPS'
-      lastFrameUpdate = performance.now()
-    }
-  }
-  $: frameRateColor = $avgFrameRate > 40 ? 'good' : ($avgFrameRate > 20 ? 'ok' : 'bad')
 
   const fxColor = 'good'
   let fxLabel = ''
@@ -432,22 +426,22 @@
         {#if $settings.showNetworkStatus }
           <div class="status-light {connectionColor}" title={connectionTitle}></div>
         {/if}
-        {#if $settings.showFPS }
-          <span class="stat-counter {frameRateColor}">{ frameRateLabel }</span>
-        {/if}
       </div>
     </div>
-    {#if $settings.showDonation }
-      <DonationBar />
-    {/if}
     <div class="spacer" />
+    {#if config.messagesEnabled && $settings.showMessages }
+      <Alerts />
+    {/if}
   </div>
 
   <Sidebar />
 
   <AboutOverlay />
-  {#if config.lightningEnabled }
-    <LightningOverlay />
+  {#if config.donationsEnabled }
+    <DonationOverlay />
+    {#if $haveSupporters}
+      <SupportersOverlay />
+    {/if}
   {/if}
 
   {#if config.dev && config.debug && $devSettings.guides }

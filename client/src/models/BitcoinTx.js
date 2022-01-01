@@ -20,14 +20,15 @@ export default class BitcoinTx {
 
     this.time = time
 
-    if (config.donationHash && this.outputs) {
-      this.outputs.forEach(output => {
-        if (output.script_pub_key.includes(config.donationHash)) {
-          console.log('donation!', this)
-          this.highlight = true
-        }
-      })
-    }
+    // Highlight transactions to the static donation address
+    // if (config.donationHash && this.outputs) {
+    //   this.outputs.forEach(output => {
+    //     if (output.script_pub_key.includes(config.donationHash)) {
+    //       console.log('donation!', this)
+    //       this.highlight = true
+    //     }
+    //   })
+    // }
 
     // is a coinbase transaction?
     if (this.inputs && this.inputs.length === 1 && this.inputs[0].prev_txid === "0000000000000000000000000000000000000000000000000000000000000000") {

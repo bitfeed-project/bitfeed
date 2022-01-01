@@ -1,5 +1,5 @@
 import { writable, derived } from 'svelte/store'
-export { exchangeRates } from './utils/pollStore.js'
+import { makePollStore } from './utils/pollStore.js'
 import { symbols } from './utils/fx.js'
 import LocaleCurrency from 'locale-currency'
 import config from './config.js'
@@ -42,6 +42,29 @@ function createCachedDict (namespace, defaultValues) {
 	}
 }
 
+// refresh exchange rates every minute
+export const exchangeRates = makePollStore('rates', 'https://blockchain.info/ticker', 60000, {})
+// refresh messages from donation server every hour
+// export const alerts = makePollStore('alerts', `${config.donationRoot}/api/sponsorship/msgs.json`, 3600000, [])
+
+export const alerts =  config.messagesEnabled ? makePollStore('alerts', `${config.donationRoot}/api/sponsorship/msgs.json`, 10000, []) : writable(null)
+
+// refresh sponsor data every hour
+export const heroes = makePollStore('heroes', `${config.donationRoot}/api/sponsorship/heroes.json`, 3600000, null)
+export const sponsors = makePollStore('sponsors', `${config.donationRoot}/api/sponsorship/sponsors.json`, 3600000, null)
+export const tiers = config.donationsEnabled ? makePollStore('tiers', `${config.donationRoot}/api/sponsorship/tiers.json`, 3600000, null) : writable(null)
+
+export const haveMessages = derived([alerts], ([$alerts]) => {
+	return (
+		$alerts && $alerts.length
+	)
+})
+export const haveSupporters = derived([heroes, sponsors], ([$heroes,$sponsors]) => {
+	return (
+		$heroes && Object.values($heroes).length
+	)
+})
+
 export const darkMode = writable(true)
 export const serverConnected = writable(false)
 export const serverDelay = writable(1000)
@@ -69,11 +92,10 @@ export const settingsOpen = writable(false)
 export const settings = createCachedDict('settings', {
 	darkMode: true,
 	showNetworkStatus: true,
-	showFPS: false,
 	showFX: true,
 	vbytes: false,
 	fancyGraphics: true,
-	showDonation: true,
+	showMessages: true,
 	noTrack: false
 })
 

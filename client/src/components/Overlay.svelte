@@ -8,6 +8,7 @@ import { fade, fly } from 'svelte/transition'
 const dispatch = createEventDispatcher()
 
 export let name = 'none'
+export let fullSize = false
 
 let open
 $: {
@@ -87,15 +88,24 @@ function close () {
         padding-right: 1em;
         max-width: 95%;
       }
+
+      &.full-size {
+        height: 100%;
+        width: 100%;
+        .overlay-inner {
+          height: 100%;
+          width: 100%;
+        }
+      }
     }
   }
 </style>
 
 {#if open}
-<div class="overlay-wrapper">
+<div class="overlay-wrapper" >
   <div class="overlay-background" on:click={close} transition:fade={{ duration: 500 }} />
-  <div class="overlay-outer" transition:fly={{ duration: 500, y: 50 }}>
-    <div class="overlay-inner">
+  <div class="overlay-outer" class:full-size={fullSize} transition:fly={{ duration: 500, y: 50 }}>
+    <div class="overlay-inner" id="{name}Overlay">
       <slot />
     </div>
     <button class="close-button" on:click={close} >

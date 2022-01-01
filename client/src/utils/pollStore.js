@@ -1,19 +1,22 @@
 import { writable } from 'svelte/store'
 
-function makeRatePollStore () {
-  let timer
-  const { subscribe, set, update } = writable({})
+export function makePollStore (name, url, frequency, initialValue={}, responseHandler) {
+  let interval, timer
+  const { subscribe, set, update } = writable(initialValue)
+  if (!responseHandler) responseHandler = async (response, set) => {
+    const data = await response.json()
+    if (data) set(data)
+  }
 
   const fetcher = () => {
-    fetch(`https://blockchain.info/ticker?t=${Date.now()}`).then(async response => {
-      const rates = await response.json()
-      set(rates)
-    }).catch(err => {
-      console.log('error fetching exchange rates: ', err)
+    fetch(`${url}?t=${Date.now()}`).then(response => { responseHandler(response, set) }).catch(error => {
+      console.log(`error polling data for ${name}: `, error)
+      if (timer) clearTimeout(timer)
+      timer = setTimeout(fetcher, 5000)
     })
   }
   fetcher()
-  timer = setInterval(fetcher, 60000)
+  interval = setInterval(fetcher, frequency || 60000)
 
   return {
     subscribe,
@@ -21,5 +24,3 @@ function makeRatePollStore () {
     update
   }
 }
-
-export const exchangeRates = makeRatePollStore()
