@@ -10,6 +10,7 @@ defmodule BitcoinStream.Bridge do
   alias BitcoinStream.Protocol.Block, as: BitcoinBlock
   alias BitcoinStream.Protocol.Transaction, as: BitcoinTx
   alias BitcoinStream.Mempool, as: Mempool
+  alias BitcoinStream.RPC, as: RPC
 
   def child_spec(host: host, tx_port: tx_port, block_port: block_port) do
     %{
@@ -20,10 +21,8 @@ defmodule BitcoinStream.Bridge do
 
   def start_link(host, tx_port, block_port) do
     IO.puts("Starting Bitcoin bridge on #{host} ports #{tx_port}, #{block_port}")
-    connect_to_server(host, tx_port);
-    connect_to_server(host, block_port);
-    txsub(host, tx_port);
-    blocksub(host, block_port);
+    Task.start(fn -> connect_tx(host, tx_port) end);
+    Task.start(fn -> connect_block(host, block_port) end);
     GenServer.start_link(__MODULE__, %{})
   end
 
@@ -31,28 +30,61 @@ defmodule BitcoinStream.Bridge do
     {:ok, arg}
   end
 
-  @doc """
-    Create zmq client
-  """
-  def start_client(host, port) do
-    IO.puts("Starting client on #{host} port #{port}");
-    {:ok, socket} = :chumak.socket(:pair);
-    IO.puts("Client socket paired");
-    {:ok, pid} = :chumak.connect(socket, :tcp, String.to_charlist(host), port);
-    IO.puts("Client socket connected");
-    {socket, pid}
+  defp connect_tx(host, port) do
+    # check rpc online & synced
+    IO.puts("Waiting for node to come online and fully sync before connecting to tx socket");
+    wait_for_ibd();
+    IO.puts("Node is fully synced, connecting to tx socket");
+
+    # connect to socket
+    {:ok, socket} = :chumak.socket(:sub);
+    IO.puts("Connected tx zmq socket on #{host} port #{port}");
+    :chumak.subscribe(socket, 'rawtx')
+    IO.puts("Subscribed to rawtx events")
+    case :chumak.connect(socket, :tcp, String.to_charlist(host), port) do
+      {:ok, pid} -> IO.puts("Binding ok to tx socket pid #{inspect pid}");
+      {:error, reason} -> IO.puts("Binding tx socket failed: #{reason}");
+      _ -> IO.puts("???");
+    end
+
+    # start tx loop
+    tx_loop(socket)
   end
 
-  @doc """
-    Send a message from the client
-  """
-  def client_send(socket, message) do
-    :ok = :chumak.send(socket, message);
-    {:ok, response} = :chumak.recv(socket);
-    response
+  defp connect_block(host, port) do
+    # check rpc online & synced
+    IO.puts("Waiting for node to come online and fully sync before connecting to block socket");
+    wait_for_ibd();
+    IO.puts("Node is fully synced, connecting to block socket");
+
+    # sync mempool
+    Mempool.sync(:mempool);
+
+    # connect to socket
+    {:ok, socket} = :chumak.socket(:sub);
+    IO.puts("Connected block zmq socket on #{host} port #{port}");
+    :chumak.subscribe(socket, 'rawblock')
+    IO.puts("Subscribed to rawblock events")
+    case :chumak.connect(socket, :tcp, String.to_charlist(host), port) do
+      {:ok, pid} -> IO.puts("Binding ok to block socket pid #{inspect pid}");
+      {:error, reason} -> IO.puts("Binding block socket failed: #{reason}");
+      _ -> IO.puts("???");
+    end
+
+    # start block loop
+    block_loop(socket)
   end
 
-  def sendTxn(txn) do
+  defp wait_for_ibd() do
+    case RPC.get_node_status(:rpc) do
+      {:ok, %{"initialblockdownload" => false}} -> true
+      _ ->
+        Process.sleep(5000);
+        wait_for_ibd()
+    end
+  end
+
+  defp sendTxn(txn) do
     # IO.puts("Forwarding transaction to websocket clients")
     case Jason.encode(%{type: "txn", txn: txn}) do
       {:ok, payload} ->
@@ -65,11 +97,11 @@ defmodule BitcoinStream.Bridge do
     end
   end
 
-  def incrementMempool() do
+  defp incrementMempool() do
     Mempool.increment(:mempool)
   end
 
-  def sendBlock(block) do
+  defp sendBlock(block) do
     case Jason.encode(%{type: "block", block: block}) do
       {:ok, payload} ->
         Registry.dispatch(Registry.BitcoinStream, "txs", fn(entries) ->
@@ -82,7 +114,7 @@ defmodule BitcoinStream.Bridge do
     end
   end
 
-  defp client_tx_loop(socket) do
+  defp tx_loop(socket) do
     # IO.puts("client tx loop");
     with  {:ok, message} <- :chumak.recv_multipart(socket),
           [_topic, payload, _size] <- message,
@@ -94,10 +126,10 @@ defmodule BitcoinStream.Bridge do
       _ -> IO.puts("Bitcoin node transaction feed bridge error (unknown reason)");
     end
 
-    client_tx_loop(socket)
+    tx_loop(socket)
   end
 
-  defp client_block_loop(socket) do
+  defp block_loop(socket) do
     IO.puts("client block loop");
     with  {:ok, message} <- :chumak.recv_multipart(socket),
           [_topic, payload, _size] <- message,
@@ -112,42 +144,7 @@ defmodule BitcoinStream.Bridge do
       _ -> IO.puts("Bitcoin node block feed bridge error (unknown reason)");
     end
 
-    client_block_loop(socket)
+    block_loop(socket)
   end
 
-  @doc """
-    Set up demo zmq client
-  """
-  def connect_to_server(host, port) do
-    IO.puts("Starting on #{host}:#{port}");
-    {client_socket, _client_pid} = start_client(host, port);
-    IO.puts("Started client");
-    client_socket
-  end
-
-  def txsub(host, port) do
-    IO.puts("Subscribing to rawtx events")
-    {:ok, socket} = :chumak.socket(:sub)
-    :chumak.subscribe(socket, 'rawtx')
-    case :chumak.connect(socket, :tcp, String.to_charlist(host), port) do
-      {:ok, pid} -> IO.puts("Binding ok to pid #{inspect pid}");
-      {:error, reason} -> IO.puts("Binding failed: #{reason}");
-      _ -> IO.puts("unhandled response");
-    end
-
-    Task.start(fn -> client_tx_loop(socket) end);
-  end
-
-  def blocksub(host, port) do
-    IO.puts("Subscribing to rawblock events")
-    {:ok, socket} = :chumak.socket(:sub)
-    :chumak.subscribe(socket, 'rawblock')
-    case :chumak.connect(socket, :tcp, String.to_charlist(host), port) do
-      {:ok, pid} -> IO.puts("Binding ok to pid #{inspect pid}");
-      {:error, reason} -> IO.puts("Binding failed: #{reason}");
-      _ -> IO.puts("unhandled response");
-    end
-
-    Task.start(fn -> client_block_loop(socket) end);
-  end
 end

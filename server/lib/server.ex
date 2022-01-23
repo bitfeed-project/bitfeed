@@ -10,6 +10,7 @@ defmodule BitcoinStream.Server do
 
     children = [
       { BitcoinStream.BlockData, [name: :block_data] },
+      { BitcoinStream.RPC, [host: btc_host, port: rpc_port, name: :rpc] },
       { BitcoinStream.Mempool, [name: :mempool] },
       BitcoinStream.Metrics.Probe,
       Plug.Cowboy.child_spec(
