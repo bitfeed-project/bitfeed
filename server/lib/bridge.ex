@@ -11,18 +11,19 @@ defmodule BitcoinStream.Bridge do
   alias BitcoinStream.Protocol.Transaction, as: BitcoinTx
   alias BitcoinStream.Mempool, as: Mempool
 
-  def child_spec(port: port) do
+  def child_spec(host: host, tx_port: tx_port, block_port: block_port) do
     %{
       id: BitcoinStream.Bridge,
-      start: {BitcoinStream.Bridge, :start_link, [port]}
+      start: {BitcoinStream.Bridge, :start_link, [host, tx_port, block_port]}
     }
   end
 
-  def start_link(port) do
-    IO.puts("Starting Bitcoin bridge on port #{port}")
-    connect_to_server(port);
-    txsub(port);
-    blocksub(port);
+  def start_link(host, tx_port, block_port) do
+    IO.puts("Starting Bitcoin bridge on #{host} ports #{tx_port}, #{block_port}")
+    connect_to_server(host, tx_port);
+    connect_to_server(host, block_port);
+    txsub(host, tx_port);
+    blocksub(host, block_port);
     GenServer.start_link(__MODULE__, %{})
   end
 
@@ -33,11 +34,11 @@ defmodule BitcoinStream.Bridge do
   @doc """
     Create zmq client
   """
-  def start_client(port) do
-    IO.puts("Starting client on port #{port}");
+  def start_client(host, port) do
+    IO.puts("Starting client on #{host} port #{port}");
     {:ok, socket} = :chumak.socket(:pair);
     IO.puts("Client socket paired");
-    {:ok, pid} = :chumak.connect(socket, :tcp, 'localhost', port);
+    {:ok, pid} = :chumak.connect(socket, :tcp, String.to_charlist(host), port);
     IO.puts("Client socket connected");
     {socket, pid}
   end
@@ -100,7 +101,7 @@ defmodule BitcoinStream.Bridge do
     IO.puts("client block loop");
     with  {:ok, message} <- :chumak.recv_multipart(socket),
           [_topic, payload, _size] <- message,
-          :ok <- File.write("block.dat", payload, [:binary]),
+          :ok <- File.write("data/block.dat", payload, [:binary]),
           {:ok, block} <- BitcoinBlock.decode(payload) do
       GenServer.cast(:block_data, {:block, block})
       sendBlock(block);
@@ -117,18 +118,18 @@ defmodule BitcoinStream.Bridge do
   @doc """
     Set up demo zmq client
   """
-  def connect_to_server(port) do
-    IO.puts("Starting on #{port}");
-    {client_socket, _client_pid} = start_client(port);
+  def connect_to_server(host, port) do
+    IO.puts("Starting on #{host}:#{port}");
+    {client_socket, _client_pid} = start_client(host, port);
     IO.puts("Started client");
     client_socket
   end
 
-  def txsub(port) do
+  def txsub(host, port) do
     IO.puts("Subscribing to rawtx events")
     {:ok, socket} = :chumak.socket(:sub)
     :chumak.subscribe(socket, 'rawtx')
-    case :chumak.connect(socket, :tcp, 'localhost', port) do
+    case :chumak.connect(socket, :tcp, String.to_charlist(host), port) do
       {:ok, pid} -> IO.puts("Binding ok to pid #{inspect pid}");
       {:error, reason} -> IO.puts("Binding failed: #{reason}");
       _ -> IO.puts("unhandled response");
@@ -137,11 +138,11 @@ defmodule BitcoinStream.Bridge do
     Task.start(fn -> client_tx_loop(socket) end);
   end
 
-  def blocksub(port) do
+  def blocksub(host, port) do
     IO.puts("Subscribing to rawblock events")
     {:ok, socket} = :chumak.socket(:sub)
     :chumak.subscribe(socket, 'rawblock')
-    case :chumak.connect(socket, :tcp, 'localhost', port) do
+    case :chumak.connect(socket, :tcp, String.to_charlist(host), port) do
       {:ok, pid} -> IO.puts("Binding ok to pid #{inspect pid}");
       {:error, reason} -> IO.puts("Binding failed: #{reason}");
       _ -> IO.puts("unhandled response");

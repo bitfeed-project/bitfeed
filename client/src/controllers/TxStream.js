@@ -8,7 +8,8 @@ lastBlockId.subscribe(val => { lastBlockSeen = val })
 
 class TxStream {
   constructor () {
-    this.websocketUri = config.localSocket ? `ws://localhost:4000${config.websocket_path}` : (config.dev ? `wss://bits.monospace.live${config.websocket_path}` : `wss://${window.location.host}${config.websocket_path}`)
+    this.websocketUri = `${config.secureSocket ? 'wss://' : 'ws://'}${config.backend ? config.backend : window.location.host }${config.backendPort ? ':' + config.backendPort : ''}/ws/txs`
+    console.log('connecting to ', this.websocketUri)
     this.reconnectBackoff = 250
     this.websocket = null
     this.setConnected(false)

@@ -2,7 +2,7 @@ defmodule BitcoinStream.BlockData do
   @moduledoc """
   Block data module.
 
-  Serves a copy of the latest block
+  Serves a cached copy of the latest block
   """
   use GenServer
 
@@ -12,7 +12,7 @@ defmodule BitcoinStream.BlockData do
     IO.puts("Starting block data link")
     # load block.dat
 
-    with {:ok, block_data} <- File.read("block.dat"),
+    with {:ok, block_data} <- File.read("data/block.dat"),
          {:ok, block} <- BitcoinBlock.decode(block_data),
          {:ok, payload} <- Jason.encode(%{type: "block", block: block}) do
       GenServer.start_link(__MODULE__, {block, payload}, opts)

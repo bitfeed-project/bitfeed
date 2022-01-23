@@ -68,7 +68,7 @@ defp summarise_txns([next | rest], summarised, total) do
 end
 
 def test() do
-  raw_block = File.read!("block.dat")
+  raw_block = File.read!("data/block.dat")
   {:ok, block} = Block.decode(raw_block)
 
   block

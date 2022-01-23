@@ -8,18 +8,23 @@ defmodule BitcoinStream.Mempool do
 
   @doc """
   Start a new mempool tracker,
-  connecting to a bitcoin node at RPC `port` for ground truth data
+  connecting to a bitcoin node at RPC `host:port` for ground truth data
   """
   def start_link(opts) do
     {port, opts} = Keyword.pop(opts, :port);
-    IO.puts("Starting mempool agent on port #{port}");
-    case Agent.start_link(fn -> %{count: 0, port: port} end, opts) do
+    {host, opts} = Keyword.pop(opts, :host);
+    IO.puts("Starting mempool agent on #{host} port #{port}");
+    case Agent.start_link(fn -> %{count: 0, host: host, port: port} end, opts) do
       {:ok, pid} ->
         sync(pid);
         {:ok, pid}
 
       result -> result
     end
+  end
+
+  def getHost(pid) do
+    Agent.get(pid, &Map.get(&1, :host))
   end
 
   def getPort(pid) do
@@ -51,11 +56,12 @@ defmodule BitcoinStream.Mempool do
   end
 
   def sync(pid) do
+    host = getHost(pid);
     port = getPort(pid);
-    IO.puts("Syncing mempool with bitcoin node on port #{port}");
+    IO.puts("Syncing mempool with bitcoin node on #{host} port #{port}");
     with  { user, pw } <- rpc_creds(),
           {:ok, rpc_request} <- Jason.encode(%{method: "getmempoolinfo", params: [], request_id: 0}),
-          {:ok, 200, _headers, body_ref} <- :hackney.request(:post, "http://localhost:#{port}", [{"content-type", "application/json"}], rpc_request, [basic_auth: { user, pw }]),
+          {:ok, 200, _headers, body_ref} <- :hackney.request(:post, "http://#{host}:#{port}", [{"content-type", "application/json"}], rpc_request, [basic_auth: { user, pw }]),
           {:ok, body} <- :hackney.body(body_ref),
           {:ok, %{"result" => info}} <- Jason.decode(body),
           %{"size" => pool_size} <- info do
