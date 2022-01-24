@@ -16,7 +16,7 @@ import fs from 'fs'
 
 configDotenv();
 
-const hash = String(require("child_process").execSync("git rev-parse --short HEAD")).trim();
+const hash = process.env.npm_package_version;
 const htmlOptions = {
 	template: async ({ attributes, files, meta, publicPath, title }) => {
 		const rawTemplate = fs.readFileSync('./template/index.html', { encoding: 'utf8', flag: 'r'})

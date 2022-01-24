@@ -1,6 +1,7 @@
 <script>
 	import TxViz from './components/TxViz.svelte'
 	import analytics from './utils/analytics.js'
+	import config from './config.js'
 	import { settings } from './stores.js'
 
 	if (URL) {
@@ -10,7 +11,7 @@
 		}
 	}
 
-	if (!$settings.noTrack) analytics.init()
+	if (!$settings.noTrack && config.public) analytics.init()
 </script>
 
 <main>

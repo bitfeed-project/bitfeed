@@ -1,8 +1,6 @@
 defmodule BitcoinStream.Router do
   use Plug.Router
 
-  alias BitcoinStream.Donations.Lightning, as: Lightning
-
   plug Corsica, origins: "*", allow_headers: :all
   plug Plug.Static,
     at: "/",
