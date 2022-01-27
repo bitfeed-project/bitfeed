@@ -84,7 +84,6 @@ class TxStream {
       this.websocket.send('hb')
       this.heartbeatTimeout = setTimeout(() => {
         this.setDelay(performance.now() - this.lastBeat)
-        this.disconnect()
       }, 5000)
     }
   }

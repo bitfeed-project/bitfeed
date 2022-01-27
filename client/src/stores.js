@@ -47,7 +47,7 @@ export const exchangeRates = makePollStore('rates', 'https://blockchain.info/tic
 // refresh messages from donation server every hour
 // export const alerts = makePollStore('alerts', `${config.donationRoot}/api/sponsorship/msgs.json`, 3600000, [])
 
-export const alerts =  config.messagesEnabled ? makePollStore('alerts', `${config.donationRoot}/api/sponsorship/msgs.json`, 10000, []) : writable(null)
+export const alerts =  config.messagesEnabled ? makePollStore('alerts', `${config.donationRoot}/api/sponsorship/msgs.json`, 60000, []) : writable(null)
 
 // refresh sponsor data every hour
 export const heroes = makePollStore('heroes', `${config.donationRoot}/api/sponsorship/heroes.json`, 3600000, null)

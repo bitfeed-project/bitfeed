@@ -6,7 +6,7 @@ export default {
   public: (window.injected.TARGET === "public"),
   backend: window.injected.OVERRIDE_BACKEND_HOST,
   backendPort: window.injected.OVERRIDE_BACKEND_PORT,
-  secureSocket: (window.isSecureContext && !window.location.host.startsWith('localhost')),
+  secureSocket: (window.location.protocol === 'https:'),
   nofeed: false,
   txDelay: 10000,
   donationsEnabled: true,
