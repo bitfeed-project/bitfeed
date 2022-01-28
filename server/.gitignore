@@ -27,7 +27,8 @@ bitcoin_stream-*.tar
 /tmp
 
 # Logging files
-/log/
+/log/*
+!log/.gitkeep
 *.log
 
 .envrc
