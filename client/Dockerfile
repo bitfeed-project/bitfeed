@@ -1,8 +1,8 @@
-FROM node:17-buster-slim as build
+FROM amd64/node:17-buster-slim as build
 
 WORKDIR /app
 
-COPY package.json .
+COPY package.json package-lock.json .
 
 RUN npm install
 
@@ -14,7 +14,7 @@ COPY public ./public
 
 RUN npm run build
 
-FROM nginx:1.17.8@sha256:380eb808e2a3b0dd954f92c1cae2f845e6558a15037efefcabc5b4e03d666d03
+FROM nginx:1.21.6
 
 EXPOSE 80
 

@@ -9,8 +9,7 @@ WORKDIR $APP_HOME
 
 EXPOSE 4000
 
-COPY mix.exs .
-COPY mix.lock .
+COPY mix.exs mix.lock .
 COPY bitcoinex ./bitcoinex
 
 RUN mix do deps.get
