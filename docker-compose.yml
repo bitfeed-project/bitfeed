@@ -1,0 +1,29 @@
+version: "2.1"
+
+services:
+  web:
+    image: bitfeed/client
+    restart: on-failure
+    stop_grace_period: 1m
+    depends_on:
+      - "api"
+    environment:
+      TARGET: "docker"
+      BACKEND_HOST: "api"
+      BACKEND_PORT: "5000"
+    ports:
+      - "3000:80"
+
+  api:
+    image: bitfeed/server
+    user: "1000:1000"
+    restart: on-failure
+    stop_grace_period: 1m
+    environment:
+      PORT: "5000"
+      BITCOIN_HOST: "172.17.0.1"
+      BITCOIN_ZMQ_RAWBLOCK_PORT: "29000"
+      BITCOIN_ZMQ_RAWTX_PORT: "29001"
+      BITCOIN_RPC_PORT: "8332"
+      BITCOIN_RPC_USER: "bitcoin"
+      BITCOIN_RPC_PASS: "correcthorsebatterystaple"

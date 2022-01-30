@@ -1,37 +1,29 @@
-# Bitfeed
+## Building and Running the Bitfeed Front End Client
 
-This repo hosts the code behind Bitfeed (bits.monospace.live), which is a live visualization of Bitcoin network activity, focusing on the journey from unconfirmed transactions to confirmed blocks.
+#### Prerequisites
+ - [Node](https://nodejs.dev/download/)
+ - NPM
+ - Nginx (production deployment only)
+ - [API server](https://github.com/bitfeed-project/bitfeed/blob/master/server)
 
-## Installing
+#### Configuration
 
-Install on a local machine or hardware node to run a personal copy of the visualization.
+`client/src/config.js` exposes a number of configuration options, mostly useful for local development.
 
-### Prerequisites
+When developing the front end, you can point at the hosted backend API server instead of running your own full node and server instance by setting `backend` to `"bits.monospace.live"` and `backendPort` to `null`.
 
-The Bitfeed server relies on a local instance of Bitcoin Core, compiled with ZeroMQ enabled. Fee-related data requires an unpruned node with txindex=1. 
+#### Installation
 
-## Contributing
-
-Install the dependencies...
-
-```bash
+```shell
 npm install
 ```
 
-...then start [Rollup](https://rollupjs.org):
-
-```bash
+#### Running in development
+```shell
 npm run dev
 ```
 
-Navigate to [localhost:5000](http://localhost:5000). You should see your app running. Edit a component file in `src`, save it, and reload the page to see your changes.
-
-
-
-#### Building and running in production mode
-
-To create an optimised version of the app:
-
-```bash
+#### Building for production
+```shell
 npm run build
 ```
