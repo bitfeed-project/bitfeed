@@ -119,6 +119,7 @@ function beforeExit () {
   class="sidebar-tab"
   class:open={open}
   class:active={entered}
+  transition:fly={{ x: 30, duration: 1000 }}
 >
   <button class="tab-button" on:click title={tooltip}>
     <slot name="tab">

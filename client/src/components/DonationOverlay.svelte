@@ -265,7 +265,7 @@ function updateInvoice (state) {
 
     invoicePayments = []
 
-    if (invoice.paymentMethods) {
+    if (invoice && invoice.paymentMethods) {
       chainInvoice = null
       lightningInvoice = null
       invoice.paymentMethods.forEach(method => {
