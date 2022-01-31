@@ -49,54 +49,22 @@ function showBlock () {
     top: 20%;
     left: 100%;
     display: flex;
-    flex-direction: column;
+    flex-direction: column-reverse;
     justify-content: flex-start;
     align-items: flex-start;
   }
 </style>
 
 <div class="sidebar">
-  <SidebarTab open={$sidebarToggle === 'settings'} on:click={() => {settings('settings')}} tooltip="Settings">
-    <span slot="tab" title="Settings">
-      <Icon icon={cogIcon} color="var(--bold-a)" />
-    </span>
-    <div slot="content">
-      <Settings />
-    </div>
-  </SidebarTab>
-  <SidebarTab open={$sidebarToggle === 'legend'} on:click={() => {settings('legend')}} tooltip="Key">
-    <span slot="tab">
-      <Icon icon={infoIcon} color="var(--bold-a)" />
-    </span>
-    <div slot="content">
-      <MempoolLegend />
-    </div>
-  </SidebarTab>
-  <SidebarTab open={$sidebarToggle === 'contact'} on:click={() => {settings('contact')}} tooltip="Contact">
-    <span slot="tab">
-      <Icon icon={atIcon} color="var(--bold-a)" />
-    </span>
-    <div slot="content">
-      <ContactTab />
-    </div>
-  </SidebarTab>
-  <SidebarTab on:click={() => openOverlay('about')} tooltip="About">
-    <span slot="tab">
-      <Icon icon={questionIcon} color="var(--bold-a)" />
-    </span>
-  </SidebarTab>
-  {#if $haveSupporters }
-    <SidebarTab on:click={() => openOverlay('supporters')} tooltip="Supporters">
+  <!-- displayed in reverse order, to preserve proper z-index layering -->
+  {#if blockHidden }
+    <SidebarTab  on:click={() => showBlock()} tooltip="Show Latest Block">
       <span slot="tab">
-        <Icon icon={peopleIcon} color="var(--bold-a)" />
+        <Icon icon={gridIcon} color="var(--bold-a)" />
       </span>
-    </SidebarTab>
-  {/if}
-  {#if config.donationsEnabled }
-    <SidebarTab on:click={() => openOverlay('donation')} tooltip="Donate">
-      <span slot="tab">
-        <Icon icon={giftIcon} color="var(--bold-a)" />
-      </span>
+      <div slot="content">
+        <MempoolLegend />
+      </div>
     </SidebarTab>
   {/if}
   {#if config.dev && config.debug}
@@ -109,14 +77,47 @@ function showBlock () {
       </div>
     </SidebarTab>
   {/if}
-  {#if blockHidden }
-    <SidebarTab  on:click={() => showBlock()} tooltip="Show Latest Block">
+  {#if config.donationsEnabled }
+    <SidebarTab on:click={() => openOverlay('donation')} tooltip="Donate">
       <span slot="tab">
-        <Icon icon={gridIcon} color="var(--bold-a)" />
+        <Icon icon={giftIcon} color="var(--bold-a)" />
       </span>
-      <div slot="content">
-        <MempoolLegend />
-      </div>
     </SidebarTab>
   {/if}
+  {#if $haveSupporters }
+    <SidebarTab on:click={() => openOverlay('supporters')} tooltip="Supporters">
+      <span slot="tab">
+        <Icon icon={peopleIcon} color="var(--bold-a)" />
+      </span>
+    </SidebarTab>
+  {/if}
+  <SidebarTab on:click={() => openOverlay('about')} tooltip="About">
+    <span slot="tab">
+      <Icon icon={questionIcon} color="var(--bold-a)" />
+    </span>
+  </SidebarTab>
+  <SidebarTab open={$sidebarToggle === 'contact'} on:click={() => {settings('contact')}} tooltip="Contact">
+    <span slot="tab">
+      <Icon icon={atIcon} color="var(--bold-a)" />
+    </span>
+    <div slot="content">
+      <ContactTab />
+    </div>
+  </SidebarTab>
+  <SidebarTab open={$sidebarToggle === 'legend'} on:click={() => {settings('legend')}} tooltip="Key">
+    <span slot="tab">
+      <Icon icon={infoIcon} color="var(--bold-a)" />
+    </span>
+    <div slot="content">
+      <MempoolLegend />
+    </div>
+  </SidebarTab>
+  <SidebarTab open={$sidebarToggle === 'settings'} on:click={() => {settings('settings')}} tooltip="Settings">
+    <span slot="tab" title="Settings">
+      <Icon icon={cogIcon} color="var(--bold-a)" />
+    </span>
+    <div slot="content">
+      <Settings />
+    </div>
+  </SidebarTab>
 </div>

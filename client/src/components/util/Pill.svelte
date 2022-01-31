@@ -33,6 +33,7 @@ export let rightDisabled = false
     flex-grow: 1;
     padding: .5em 1em;
     background: var(--palette-e);
+    text-align: center;
 
     &:first-child {
       border-top-left-radius: .5em;
