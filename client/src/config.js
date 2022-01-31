@@ -1,5 +1,5 @@
 function getInjectedEnv (key, fallback) {
-  if (window.injected && window.injected[key] != null) {
+  if (window.injected && window.injected[key] != null && window.injected[key] != "") {
     return window.injected[key]
   }
   return fallback

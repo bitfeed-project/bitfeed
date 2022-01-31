@@ -1,12 +1,32 @@
 <script>
-import Toggle from '../components/Toggle.svelte'
-import Pill from '../components/Pill.svelte'
+import Toggle from './util/Toggle.svelte'
+import Pill from './util/Pill.svelte'
+import Select from 'svelte-select'
+import { createEventDispatcher } from 'svelte'
+const dispatch = createEventDispatcher()
 
-export let active = false
+export let value = false
 export let type = 'toggle'
 export let label = ''
 export let falseLabel
 export let trueLabel
+export let options
+let selectedOption
+
+$: {
+  if (options && value) {
+    selectedOption = options.find(option => option.value === value)
+  }
+}
+
+function filterSelectItems (label, filterText, option) {
+  return [label, ...option.tags].join(' | ').toLowerCase().includes(filterText.toLowerCase())
+}
+
+function onSelect (e) {
+  selectedOption = e.detail
+  dispatch('input', selectedOption.value )
+}
 </script>
 
 <style type="text/scss">
@@ -31,15 +51,33 @@ export let trueLabel
     .label {
       margin-right: 0.5em;
     }
+
+    .select {
+      width: 240px;
+      flex-shrink: 0;
+      color: var(--palette-a);
+      --inputColor: var(--palette-a);
+      --itemColor: var(--palette-a);
+      --itemHoverColor: var(--palette-a);
+      --borderFocusColor: var(--palette-good);
+
+      :global(.selectContainer) {
+        border-width: 3px;
+      }
+    }
   }
 </style>
 
-<div class="sidebar-menu-item" class:active={active} on:click>
+<div class="sidebar-menu-item" class:active={value} on:click>
   {#if type === 'pill'}
     <span class="label">{ label }</span>
-    <Pill active={active} left={falseLabel} right={trueLabel} />
+    <Pill active={value} left={falseLabel} right={trueLabel} />
+  {:else if type === 'dropdown'}
+    <div class="select">
+      <Select items={ options } value={selectedOption} isSearchable={true} isClearable={false} itemFilter={filterSelectItems} placeholder={label} on:select={onSelect} showIndicator={true} />
+    </div>
   {:else}
     <span class="label">{ label }</span>
-    <Toggle active={active} />
+    <Toggle active={value} />
   {/if}
 </div>

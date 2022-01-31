@@ -1,6 +1,6 @@
 <script>
 import { longBtcFormat, integerFormat } from '../utils/format.js'
-import { exchangeRates, localCurrency } from '../stores.js'
+import { exchangeRates, settings } from '../stores.js'
 import { formatCurrency } from '../utils/fx.js'
 
 export let tx
@@ -19,10 +19,10 @@ let formattedLocalValue
 
 $: {
   if (tx && tx.value) {
-    const rate = $exchangeRates[$localCurrency]
+    const rate = $exchangeRates[$settings.currency]
     let local
     if (rate && rate.last) {
-      formattedLocalValue = formatCurrency($localCurrency, (tx.value/100000000) * rate.last, { compact: true })
+      formattedLocalValue = formatCurrency($settings.currency, (tx.value/100000000) * rate.last, { compact: true })
     } else {
       formattedLocalValue = null
     }

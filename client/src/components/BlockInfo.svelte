@@ -6,7 +6,7 @@
   import Icon from '../components/Icon.svelte'
   import closeIcon from '../assets/icon/cil-x-circle.svg'
   import { shortBtcFormat, longBtcFormat, timeFormat, integerFormat } from '../utils/format.js'
-  import { exchangeRates, localCurrency } from '../stores.js'
+  import { exchangeRates, settings } from '../stores.js'
   import { formatCurrency } from '../utils/fx.js'
 
 	const dispatch = createEventDispatcher()
@@ -21,10 +21,10 @@
 
   $: {
     if (block && block.value) {
-      const rate = $exchangeRates[$localCurrency]
+      const rate = $exchangeRates[$settings.currency]
       let local
       if (rate && rate.last) {
-        local = formatCurrency($localCurrency, (block.value/100000000) * rate.last, { compact: true })
+        local = formatCurrency($settings.currency, (block.value/100000000) * rate.last, { compact: true })
       } else {
         local = null
       }

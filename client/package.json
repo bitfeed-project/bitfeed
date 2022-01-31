@@ -1,6 +1,6 @@
 {
   "name": "bitfeed-client",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",
@@ -30,6 +30,7 @@
     "sass": "^1.49.0",
     "sirv-cli": "^1.0.14",
     "svelte": "^3.44.3",
-    "svelte-preprocess": "^4.10.1"
+    "svelte-preprocess": "^4.10.1",
+    "svelte-select": "^4.4.7"
   }
 }

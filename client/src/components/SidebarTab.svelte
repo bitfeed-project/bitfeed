@@ -4,6 +4,7 @@ import { fly } from 'svelte/transition'
 
 export let open = false
 export let tooltip = null
+let entered = false
 
 let contentElement
 let contentSlotElement
@@ -19,6 +20,19 @@ async function updateContentHeight (isOpen) {
 }
 
 $: updateContentHeight(open)
+
+$: {
+  if (open) setTimeout(afterEnter, 400)
+  else beforeExit()
+}
+
+function afterEnter () {
+  entered = true
+}
+
+function beforeExit () {
+  entered = false
+}
 
 </script>
 
@@ -73,6 +87,12 @@ $: updateContentHeight(open)
 
     &.open {
       transform: translateX(-100%);
+
+      &.active {
+        .sidebar-content {
+          overflow: visible;
+        }
+      }
     }
   }
 
@@ -95,7 +115,11 @@ $: updateContentHeight(open)
   }
 </style>
 
-<div class="sidebar-tab" class:open={open} transition:fly={{ x: 30, duration: 1000 }}>
+<div
+  class="sidebar-tab"
+  class:open={open}
+  class:active={entered}
+>
   <button class="tab-button" on:click title={tooltip}>
     <slot name="tab">
       ??

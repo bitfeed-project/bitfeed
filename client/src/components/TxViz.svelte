@@ -13,7 +13,7 @@
   import SupportersOverlay from '../components/SupportersOverlay.svelte'
   import Alerts from '../components/alert/Alerts.svelte'
   import { integerFormat } from '../utils/format.js'
-  import { exchangeRates, localCurrency, lastBlockId, haveSupporters } from '../stores.js'
+  import { exchangeRates, lastBlockId, haveSupporters, sidebarToggle } from '../stores.js'
   import { formatCurrency } from '../utils/fx.js'
   import config from '../config.js'
 
@@ -133,9 +133,9 @@
   const fxColor = 'good'
   let fxLabel = ''
   $: {
-    const rate = $exchangeRates[$localCurrency]
+    const rate = $exchangeRates[$settings.currency]
     if (rate && rate.last)
-    fxLabel = formatCurrency($localCurrency, rate.last)
+    fxLabel = formatCurrency($settings.currency, rate.last)
   }
 
 	const debounce = v => {
@@ -293,6 +293,7 @@
       .stat-counter, .fx-ticker {
         margin-top: 5px;
         white-space: nowrap;
+        cursor: pointer;
 
         &.bad {
           color: var(--palette-bad);
@@ -419,7 +420,7 @@
     <div class="status">
       <div class="row">
         {#if $settings.showFX && fxLabel }
-          <span class="fx-ticker {fxColor}">{ fxLabel }</span>
+          <span class="fx-ticker {fxColor}" on:click={() => { $sidebarToggle = 'settings'}}>{ fxLabel }</span>
         {/if}
       </div>
       <div class="row">
