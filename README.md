@@ -9,7 +9,7 @@ This repo hosts the code behind [Bitfeed](https://bits.monospace.live), a live v
 #### Options
 
 - One-click home node integrations
-  - [Umbrel](https://getumbrel.com) (coming soon)
+  - [Umbrel](https://getumbrel.com)
   - [Citadel](https://runcitadel.space/)
 - [Docker](https://github.com/bitfeed-project/bitfeed/blob/master/DOCKER.md)
 - [Build from source](#installing-and-building-bitfeed)
