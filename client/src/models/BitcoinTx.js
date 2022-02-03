@@ -1,6 +1,15 @@
 import TxView from './TxView.js'
 import config from '../config.js'
 
+const highlightColor = {
+  h: 0.03,
+  l: 0.35
+}
+const hoverColor = {
+  h: 0.4,
+  l: 0.42
+}
+
 export default class BitcoinTx {
   constructor ({ version, id, value, vbytes, inputs, outputs, time, block }, vertexArray) {
     this.version = version
@@ -19,6 +28,7 @@ export default class BitcoinTx {
     }
 
     this.time = time
+    this.highlight = false
 
     // Highlight transactions to the static donation address
     // if (config.donationHash && this.outputs) {
@@ -70,11 +80,31 @@ export default class BitcoinTx {
     this.state = this.block ? 'block' : 'pool'
   }
 
-  hoverOn () {
-    if (this.view) this.view.setHover(true)
+  hoverOn (color = hoverColor) {
+    if (this.view) this.view.setHover(true, color)
   }
 
   hoverOff () {
     if (this.view) this.view.setHover(false)
+  }
+
+  highlightOn (color = highlightColor) {
+    if (this.view) this.view.setHighlight(true, color)
+    this.highlight = true
+  }
+
+  highlightOff () {
+    if (this.view) this.view.setHighlight(false)
+    this.highlight = false
+  }
+
+  applyHighlighting (criteria, color = highlightColor) {
+    this.highlight = false
+    criteria.forEach(criterion => {
+      if (criterion.id === this.id) {
+        this.highlight = true
+      }
+    })
+    this.view.setHighlight(this.highlight, color)
   }
 }

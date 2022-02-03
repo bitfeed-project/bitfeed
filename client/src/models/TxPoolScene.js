@@ -322,4 +322,13 @@ export default class TxPoolScene {
   selectAt (position) {
     return null
   }
+
+  applyHighlighting (criteria) {
+    Object.values(this.txs).forEach(tx => {
+      tx.applyHighlighting(criteria)
+    })
+    Object.values(this.hiddenTxs).forEach(tx => {
+      tx.applyHighlighting(criteria)
+    })
+  }
 }
