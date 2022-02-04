@@ -89,6 +89,7 @@ class TxStream {
   }
 
   sendBlockRequest () {
+    if (config.noBlockFeed) return
     console.log('Checking for missed blocks...')
     this.websocket.send(JSON.stringify({method: 'get_block', last: lastBlockSeen }))
   }

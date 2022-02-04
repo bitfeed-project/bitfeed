@@ -70,7 +70,10 @@ export default {
 	},
 	plugins: [
 		replace({
-			'ENVIRONMENT': JSON.stringify(process.env.ENV)
+			'ENVIRONMENT': JSON.stringify(process.env.ENV),
+			'INJECTED_TARGET': JSON.stringify(process.env.TARGET),
+			'INJECTED_HOST': JSON.stringify(process.env.OVERRIDE_BACKEND_HOST),
+			'INJECTED_PORT': JSON.stringify(process.env.OVERRIDE_BACKEND_PORT)
 		}),
 		inlineSvg({
 			removeTags: false,
