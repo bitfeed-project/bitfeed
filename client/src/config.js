@@ -1,5 +1,11 @@
+// Inject process.env variables
+if (!window.injected) window.injected = {}
+if (!window.injected.TARGET) window.injected.TARGET = INJECTED_TARGET
+if (!window.injected.OVERRIDE_BACKEND_HOST) window.injected.OVERRIDE_BACKEND_HOST = INJECTED_HOST
+if (!window.injected.OVERRIDE_BACKEND_PORT) window.injected.OVERRIDE_BACKEND_PORT = INJECTED_PORT
+
 function getInjectedEnv (key, fallback) {
-  if (window.injected && window.injected[key] != null && window.injected[key] != "") {
+  if (window.injected[key] != null && window.injected[key] != "") {
     return window.injected[key]
   }
   return fallback
@@ -22,7 +28,8 @@ export default {
   // Whether to connect to the backend server over ws:// or wss://
   secureSocket: (window.location.protocol === 'https:'),
   // Disables the transaction feed
-  nofeed: false,
+  noTxFeed: false,
+  noBlockFeed: false,
   // Minimum delay in ms before newly recieved transactions enter the visualization
   txDelay: 10000,
   donationsEnabled: true,

@@ -27,7 +27,7 @@
   let frameRateLabel = ''
 
   let txStream
-  if (!config.nofeed) txStream = getTxStream()
+  if (!config.noTxFeed || !config.noBlockFeed) txStream = getTxStream()
 
   $: {
     if ($blockVisible) {
@@ -50,10 +50,12 @@
   onMount(() => {
     txController = new TxController({ width, height })
 
-    if (!config.nofeed) {
+    if (!config.noTxFeed) {
       txStream.subscribe('tx', tx => {
         txController.addTx(tx)
       })
+    }
+    if (!config.noBlockFeed) {
       txStream.subscribe('block', block => {
         if (block) {
           const added = txController.addBlock(block)
@@ -61,6 +63,8 @@
         }
         txStream.sendMempoolRequest()
       })
+    }
+    if (!config.noTxFeed || !config.noBlockFeed) {
       txStream.subscribe('mempool_count', count => {
         $mempoolCount = count
       })

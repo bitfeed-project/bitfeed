@@ -51,13 +51,11 @@ function createCachedDict (namespace, defaultValues) {
 // refresh exchange rates every minute
 export const exchangeRates = makePollStore('rates', 'https://blockchain.info/ticker', 60000, {})
 // refresh messages from donation server every hour
-// export const alerts = makePollStore('alerts', `${config.donationRoot}/api/sponsorship/msgs.json`, 3600000, [])
-
-export const alerts =  config.messagesEnabled ? makePollStore('alerts', `${config.donationRoot}/api/sponsorship/msgs.json`, 60000, []) : writable(null)
-
-// refresh sponsor data every hour
-export const heroes = makePollStore('heroes', `${config.donationRoot}/api/sponsorship/heroes.json`, 3600000, null)
-export const sponsors = makePollStore('sponsors', `${config.donationRoot}/api/sponsorship/sponsors.json`, 3600000, null)
+export const alerts =  config.messagesEnabled ? makePollStore('alerts', `${config.donationRoot}/api/sponsorship/msgs.json`, 3600000, []) : writable(null)
+// refresh sponsor data every 10 minutes
+export const heroes = makePollStore('heroes', `${config.donationRoot}/api/sponsorship/heroes.json`, 600000, null)
+export const sponsors = makePollStore('sponsors', `${config.donationRoot}/api/sponsorship/sponsors.json`, 600000, null)
+// refresh sponsorship tiers every hour
 export const tiers = config.donationsEnabled ? makePollStore('tiers', `${config.donationRoot}/api/sponsorship/tiers.json`, 3600000, null) : writable(null)
 
 export const haveMessages = derived([alerts], ([$alerts]) => {

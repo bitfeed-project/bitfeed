@@ -46,7 +46,7 @@ $: {
         <h3>Community Heroes</h3>
         <div class="entries">
           {#each displayHeroes as hero}
-            <a class="supporter hero" target="_blank" href="https://twitter.com/{hero.username}">
+            <a class="supporter hero" target="_blank" href="https://twitter.com/{hero.username}" title={hero.name}>
               <img src={hero.img} alt={hero.name}>
               <span class="label">@{ hero.username }</span>
             </a>

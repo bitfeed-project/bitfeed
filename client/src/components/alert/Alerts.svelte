@@ -42,7 +42,7 @@ let rotating = false
 
 let processedAlerts = []
 $: {
-  if ($alerts) {
+  if ($alerts && ready) {
     processedAlerts = $alerts.map(processAlert).filter(alert => alert != null)
     startAlerts()
   }
