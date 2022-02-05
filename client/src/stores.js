@@ -127,3 +127,8 @@ export const overlay = writable(null)
 export const highlight = writable([])
 export const newHighlightQuery = writable(null)
 export const highlightingFull = writable(false)
+
+const aspectRatio = window.innerWidth / window.innerHeight
+let isTinyScreen = (window.innerWidth < 480 && window.innerHeight < 480)
+export const tinyScreen = writable(isTinyScreen)
+export const blocksEnabled = derived([tinyScreen], ([$tinyScreen]) => !$tinyScreen)

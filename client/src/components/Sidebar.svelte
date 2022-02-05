@@ -56,6 +56,10 @@ function showBlock () {
     flex-direction: column-reverse;
     justify-content: flex-start;
     align-items: flex-start;
+
+    @media (max-width: 480px) and (max-height: 480px) {
+      display: none;
+    }
   }
 </style>
 
