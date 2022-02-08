@@ -29,7 +29,7 @@ resize()
 
 onMount(() => {
   resize()
-  colorScale = generateColorScale('#f7941d', 'rgb(0%,100%,80%)')
+  colorScale = generateColorScale('#f7941d', '#00ffc6')
 })
 
 function calcSizes (gridSize, unitWidth, unitPadding) {

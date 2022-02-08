@@ -3,8 +3,7 @@
   import vertShaderSrc from '../shaders/tx.vert'
   import fragShaderSrc from '../shaders/tx.frag'
   import TxSprite from '../models/TxSprite.js'
-  import { interpolateHcl } from 'd3-interpolate'
-  import { color } from 'd3-color'
+  import { color, hcl } from 'd3-color'
   import { darkMode, frameRate, avgFrameRate, nativeAntialias, settings, devSettings } from '../stores.js'
   import config from '../config.js'
 
@@ -34,13 +33,15 @@
   export let running = false
 
   // Shader attributes
-  // each attribute contains [x: startValue, y: endValue, z: startTime, w: rate]
+  // each attribute (except index) contains [x: startValue, y: endValue, z: startTime, w: rate]
   // shader interpolates between start and end values at the given rate, from the given time
   const attribs = {
+    offset: { type: 'FLOAT', count: 2, pointer: null },
     posX: { type: 'FLOAT', count: 4, pointer: null },
     posY: { type: 'FLOAT', count: 4, pointer: null },
-    palettes: { type: 'FLOAT', count: 4, pointer: null },
-    colors: { type: 'FLOAT', count: 4, pointer: null },
+    posR: { type: 'FLOAT', count: 4, pointer: null },
+    hues: { type: 'FLOAT', count: 4, pointer: null },
+    lights: { type: 'FLOAT', count: 4, pointer: null },
     alphas: { type: 'FLOAT', count: 4, pointer: null }
   }
   // Auto-calculate the number of bytes per vertex based on specified attributes
@@ -201,33 +202,35 @@
     }
   }
 
-  // Creates a width x 1 pixel texture representing a colour gradient
-  // and loads it into the webgl context
-  // (used for precomputing a nice interpolation between rgb colours across HCL space)
-  function loadColorTexture(gl, colorA, colorB, width) {
+  function computeColorTextureData(width, height) {
+    return [...Array(Math.floor(height)).keys()].flatMap(row => {
+      return [...Array(width).keys()].flatMap(step => {
+        let rgb = color(hcl((row/height) * 360, 78.225, (step / width) * 150)).rgb()
+        return [
+          rgb.r,
+          rgb.g,
+          rgb.b,
+          255
+        ]
+      })
+    })
+  }
+
+  // Precomputes an 2d color texture projected from HCL space with chroma=78.225
+  // transitions between points in this space are much more aesthetically pleasing than RGB interpolations
+  function loadColorTexture(gl, width, height) {
     const texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, texture);
 
-    const interpolator = interpolateHcl(colorA, colorB)
-
-    const colors = [...Array(width).keys()].flatMap(step => {
-      let rgb = color(interpolator(step / width)).rgb()
-      return [
-        rgb.r,
-        rgb.g,
-        rgb.b,
-        255
-      ]
-    })
+    const colorData = computeColorTextureData(width, height)
 
     const level = 0;
     const internalFormat = gl.RGBA;
-    const height = 1;
     const border = 0;
     const srcFormat = gl.RGBA;
     const srcType = gl.UNSIGNED_BYTE;
     const pixels = new Uint8Array(
-      colors
+      colorData
     )
 
     gl.texImage2D(gl.TEXTURE_2D, level, internalFormat,
@@ -266,7 +269,7 @@
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
-    colorTexture = loadColorTexture(gl, '#f7941d', 'rgb(0%,100%,80%)', 500);
+    colorTexture = loadColorTexture(gl, 512, 512);
 
     const glBuffer = gl.createBuffer()
     gl.bindBuffer(gl.ARRAY_BUFFER, glBuffer)

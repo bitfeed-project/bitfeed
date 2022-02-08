@@ -1,8 +1,8 @@
 import TxMondrianPoolScene from './TxMondrianPoolScene.js'
 
 export default class TxBlockScene extends TxMondrianPoolScene {
-  constructor ({ width, height, unit = 4, padding = 1, layer, blockId, controller }) {
-    super({ width, height, unit, padding, layer, controller })
+  constructor ({ width, height, unit = 4, padding = 1, blockId, controller }) {
+    super({ width, height, unit, padding, controller })
     this.heightLimit = null
     this.expired = false
     this.laidOut = false
@@ -50,17 +50,12 @@ export default class TxBlockScene extends TxMondrianPoolScene {
     if (!tx.view.initialised) {
       tx.view.update({
         display: {
-          layer: this.layer,
           position: {
             x: Math.random() * window.innerWidth,
             y: -(Math.random() * window.innerWidth) - (this.scene.offset.y * 2) - pixelPosition.r,
             r: pixelPosition.r
           },
-          color: tx.highlight ? this.highlightColor : {
-            palette: 0,
-            index: 0,
-            alpha: 1
-          }
+          color: this.defaultColor
         },
         delay: 0,
         state: 'ready'
@@ -72,11 +67,7 @@ export default class TxBlockScene extends TxMondrianPoolScene {
       tx.view.update({
         display: {
           position: tx.screenPosition,
-          color: tx.highlight ? this.highlightColor : {
-            palette: 0,
-            index: 0,
-            alpha: 0
-          }
+          color: this.defaultColor
         },
         duration: 0,
         delay: 0,
@@ -86,11 +77,7 @@ export default class TxBlockScene extends TxMondrianPoolScene {
       tx.view.update({
         display: {
           position: tx.screenPosition,
-          color: tx.highlight ? this.highlightColor : {
-            palette: 0,
-            index: 0,
-            alpha: 1
-          }
+          color: this.defaultColor
         },
         duration: this.laidOut ? 1000 : 2000,
         delay: 0,
@@ -104,17 +91,12 @@ export default class TxBlockScene extends TxMondrianPoolScene {
     if (!tx.view.initialised) {
       tx.view.update({
         display: {
-          layer: this.layer,
           position: {
             x: Math.random() * window.innerWidth,
             y: -(Math.random() * window.innerWidth) - (this.scene.offset.y * 2) - tx.pixelPosition.r,
             r: tx.pixelPosition.r
           },
-          color: tx.highlight ? this.highlightColor : {
-            palette: 0,
-            index: 0,
-            alpha: 1
-          }
+          color: this.defaultColor
         },
         delay: 0,
         state: 'ready'
@@ -122,12 +104,7 @@ export default class TxBlockScene extends TxMondrianPoolScene {
     }
     tx.view.update({
       display: {
-        layer: this.layer,
-        color: tx.highlight ? this.highlightColor : {
-          palette: 0,
-          index: 0,
-          alpha: 1
-        }
+        color: this.defaultColor
       },
       duration: 2000,
       delay: 0

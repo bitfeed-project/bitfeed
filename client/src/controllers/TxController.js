@@ -14,7 +14,7 @@ export default class TxController {
     this.debugVertexArray = new FastVertexArray(1024, TxSprite.dataSize)
     this.txs = {}
     this.expiredTxs = {}
-    this.poolScene = new TxMondrianPoolScene({ width, height, layer: 0.0, controller: this, heightStore: mempoolScreenHeight })
+    this.poolScene = new TxMondrianPoolScene({ width, height, controller: this, heightStore: mempoolScreenHeight })
     this.blockAreaSize = Math.min(window.innerWidth * 0.75, window.innerHeight / 2.5)
     blockAreaSize.set(this.blockAreaSize)
     this.blockScene = null
@@ -143,7 +143,7 @@ export default class TxController {
 
     this.clearBlock()
 
-    this.blockScene = new TxBlockScene({ width: this.blockAreaSize, height: this.blockAreaSize, layer: 1.0, blockId: block.id, controller: this })
+    this.blockScene = new TxBlockScene({ width: this.blockAreaSize, height: this.blockAreaSize, blockId: block.id, controller: this })
     let poolCount = 0
     let knownCount = 0
     let unknownCount = 0

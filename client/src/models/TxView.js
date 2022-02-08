@@ -1,13 +1,15 @@
 import TxSprite from './TxSprite.js'
 
+const hoverTransitionTime = 300
+
 // converts from this class's update format to TxSprite's update format
-// now, id, value, layer, position, size, palette, color, alpha, duration, adjust
+// now, id, value, position, size, color, alpha, duration, adjust
 function toSpriteUpdate(display, duration, delay, start, adjust) {
   return {
     now: (start || performance.now()) + (delay || 0),
     duration: duration,
-    ...display,
-    ...(display.color != null ? { palette: display.color.palette, color: display.color.index, alpha: display.color.alpha } : { color: null }),
+    ...(display.position ? display.position: {}),
+    ...(display.color ? display.color: {}),
     adjust
   }
 }
@@ -31,12 +33,12 @@ export default class TxView {
 
   /*
     display: defines the final appearance of the sprite
-        layer: z index
         position: { x, y }
         size: in pixels
-        color:
-            palette: id of texture to choose color from
-            index: where in the texture to sample
+        color: (in HCL space)
+            h: hue
+            l: lightness
+            alpha: alpha transparency
     duration: of the tweening animation from the previous display state
     delay: for queued transitions, how long to wait after current transition
            completes to start.
@@ -59,7 +61,20 @@ export default class TxView {
   }
 
   setHover (hoverOn) {
-    if (this.sprite) this.sprite.setHover(hoverOn)
+    if (hoverOn) {
+      if (this.sprite) {
+        this.sprite.update({
+          h: 1.0,
+          l: 0.4,
+          duration: hoverTransitionTime,
+          modify: true
+        })
+      }
+    } else {
+      if (this.sprite) {
+        this.sprite.resume(hoverTransitionTime)
+      }
+    }
   }
 
   getPosition () {

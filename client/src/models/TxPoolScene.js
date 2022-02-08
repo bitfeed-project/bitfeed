@@ -1,20 +1,19 @@
 import config from '../config.js'
 
 export default class TxPoolScene {
-  constructor ({ width, height, unit, padding, layer, controller, heightStore }) {
+  constructor ({ width, height, unit, padding, controller, heightStore }) {
     this.maxHeight = 0
     this.heightStore = heightStore
-    this.init({ width, height, unit, padding, layer, controller })
-    this.highlightColor = {
-      palette: 3,
-      index: 0,
+    this.init({ width, height, unit, padding, controller })
+    this.defaultColor = {
+      h: 0.1809005702490606,
+      l: 0.47246995247155193,
       alpha: 1
     }
   }
 
-  init ({ width, height, layer, controller }) {
+  init ({ width, height, controller }) {
     this.controller = controller
-    this.layer = layer
 
     this.inverted = false
 
@@ -156,30 +155,20 @@ export default class TxPoolScene {
     if (!tx.view.initialised) {
       tx.view.update({
         display: {
-          layer: this.layer,
           position: this.pixelsToScreen({
             x: tx.pixelPosition.x,
             y: window.innerHeight + 10,
             r: this.unitWidth / 2
           }),
-          color: tx.highlight ? this.highlightColor : {
-            palette: 0,
-            index: 0,
-            alpha: 1
-          }
+          color: this.defaultColor
         },
         delay: 0,
         state: 'ready'
       })
       tx.view.update({
         display: {
-          layer: this.layer,
           position: this.pixelsToScreen(tx.pixelPosition),
-          color: tx.highlight ? this.highlightColor : {
-            palette: 0,
-            index: 0,
-            alpha: 1
-          }
+          color: this.defaultColor
         },
         duration: 2500,
         delay: 0,
@@ -187,9 +176,9 @@ export default class TxPoolScene {
       })
       tx.view.update({
         display: {
-          color: tx.highlight ? this.highlightColor : {
-            palette: 0,
-            index: 1
+          color: {
+            h: 0.4751474394406347,
+            l: 0.5970385691107944
           }
         },
         duration: 60000,
