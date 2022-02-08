@@ -1,13 +1,17 @@
 <script>
 import SearchIcon from '../assets/icon/cil-search.svg'
+import { matchQuery } from '../utils/search.js'
 import { highlight } from '../stores.js'
 
 let query
 
 $: {
-  $highlight = [{
-    id: query
-  }]
+  if (query) {
+    const matchedQuery = matchQuery(query.trim())
+    if (matchedQuery) {
+      $highlight = [matchedQuery]
+    } else $highlight = []
+  } else $highlight = []
 }
 </script>
 
@@ -28,6 +32,6 @@ $: {
 
 <div class="search tab-content">
   <div class="input-wrapper">
-    <input class="search-input" type="text" bind:value={query} placeholder="Enter a txid...">
+    <input class="search-input" type="text" bind:value={query} placeholder="Enter an address or txid...">
   </div>
 </div>

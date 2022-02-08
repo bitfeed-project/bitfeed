@@ -30,16 +30,6 @@ export default class BitcoinTx {
     this.time = time
     this.highlight = false
 
-    // Highlight transactions to the static donation address
-    // if (config.donationHash && this.outputs) {
-    //   this.outputs.forEach(output => {
-    //     if (output.script_pub_key.includes(config.donationHash)) {
-    //       console.log('donation!', this)
-    //       this.highlight = true
-    //     }
-    //   })
-    // }
-
     // is a coinbase transaction?
     if (this.inputs && this.inputs.length === 1 && this.inputs[0].prev_txid === "0000000000000000000000000000000000000000000000000000000000000000") {
       const cbInfo = this.inputs[0].script_sig
@@ -101,8 +91,14 @@ export default class BitcoinTx {
   applyHighlighting (criteria, color = highlightColor) {
     this.highlight = false
     criteria.forEach(criterion => {
-      if (criterion.id === this.id) {
+      if (criterion.txid === this.id) {
         this.highlight = true
+      } else if (criterion.address && criterion.scriptPubKey) {
+        this.outputs.forEach(output => {
+          if (output.script_pub_key === criterion.scriptPubKey) {
+            this.highlight = true
+          }
+        })
       }
     })
     this.view.setHighlight(this.highlight, color)
