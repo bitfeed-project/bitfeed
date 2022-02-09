@@ -15,10 +15,14 @@ import atIcon from '../assets/icon/cil-at.svg'
 import gridIcon from '../assets/icon/grid-icon.svg'
 import peopleIcon from '../assets/icon/cil-people.svg'
 import giftIcon from '../assets/icon/cil-gift.svg'
+import searchIcon from '../assets/icon/cil-search.svg'
 import MempoolLegend from '../components/MempoolLegend.svelte'
 import ContactTab from '../components/ContactTab.svelte'
+import SearchTab from '../components/SearchTab.svelte'
 
 import { sidebarToggle, overlay, currentBlock, blockVisible, haveSupporters } from '../stores.js'
+
+let searchTabComponent
 
 let blockHidden = false
 $: blockHidden = ($currentBlock && !$blockVisible)
@@ -110,6 +114,14 @@ function showBlock () {
     </span>
     <div slot="content">
       <MempoolLegend />
+    </div>
+  </SidebarTab>
+  <SidebarTab open={$sidebarToggle === 'search'} on:click={() => {settings('search')}} tooltip="Search & Highlight" bind:this={searchTabComponent}>
+    <span slot="tab" title="Search & Highlight">
+      <Icon icon={searchIcon} color="var(--bold-a)" />
+    </span>
+    <div slot="content">
+      <SearchTab tab={searchTabComponent} />
     </div>
   </SidebarTab>
   <SidebarTab open={$sidebarToggle === 'settings'} on:click={() => {settings('settings')}} tooltip="Settings">

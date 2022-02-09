@@ -119,3 +119,7 @@ export const nativeAntialias = writable(false)
 const newVisitor = !localStorage.getItem('seen-welcome-msg')
 // export const overlay = writable(newVisitor ? 'about' : null)
 export const overlay = writable(null)
+
+export const highlight = writable([])
+export const newHighlightQuery = writable(null)
+export const highlightingFull = writable(false)

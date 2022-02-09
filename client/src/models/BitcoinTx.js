@@ -1,6 +1,15 @@
 import TxView from './TxView.js'
 import config from '../config.js'
 
+const highlightColor = {
+  h: 0.03,
+  l: 0.35
+}
+const hoverColor = {
+  h: 0.4,
+  l: 0.42
+}
+
 export default class BitcoinTx {
   constructor ({ version, id, value, vbytes, inputs, outputs, time, block }, vertexArray) {
     this.version = version
@@ -19,16 +28,7 @@ export default class BitcoinTx {
     }
 
     this.time = time
-
-    // Highlight transactions to the static donation address
-    // if (config.donationHash && this.outputs) {
-    //   this.outputs.forEach(output => {
-    //     if (output.script_pub_key.includes(config.donationHash)) {
-    //       console.log('donation!', this)
-    //       this.highlight = true
-    //     }
-    //   })
-    // }
+    this.highlight = false
 
     // is a coinbase transaction?
     if (this.inputs && this.inputs.length === 1 && this.inputs[0].prev_txid === "0000000000000000000000000000000000000000000000000000000000000000") {
@@ -70,11 +70,40 @@ export default class BitcoinTx {
     this.state = this.block ? 'block' : 'pool'
   }
 
-  hoverOn () {
-    if (this.view) this.view.setHover(true)
+  hoverOn (color = hoverColor) {
+    if (this.view) this.view.setHover(true, color)
   }
 
   hoverOff () {
     if (this.view) this.view.setHover(false)
+  }
+
+  highlightOn (color = highlightColor) {
+    if (this.view) this.view.setHighlight(true, color)
+    this.highlight = true
+  }
+
+  highlightOff () {
+    if (this.view) this.view.setHighlight(false)
+    this.highlight = false
+  }
+
+  applyHighlighting (criteria) {
+    let color
+    this.highlight = false
+    criteria.forEach(criterion => {
+      if (criterion.txid === this.id) {
+        this.highlight = true
+        color = criterion.color
+      } else if (criterion.address && criterion.scriptPubKey) {
+        this.outputs.forEach(output => {
+          if (output.script_pub_key === criterion.scriptPubKey) {
+            this.highlight = true
+            color = criterion.color
+          }
+        })
+      }
+    })
+    this.view.setHighlight(this.highlight, color || highlightColor)
   }
 }

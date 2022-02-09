@@ -5,7 +5,7 @@ import BitcoinTx from '../models/BitcoinTx.js'
 import BitcoinBlock from '../models/BitcoinBlock.js'
 import TxSprite from '../models/TxSprite.js'
 import { FastVertexArray } from '../utils/memory.js'
-import { txQueueLength, txCount, mempoolCount, mempoolScreenHeight, blockVisible, currentBlock, selectedTx, blockAreaSize } from '../stores.js'
+import { txQueueLength, txCount, mempoolCount, mempoolScreenHeight, blockVisible, currentBlock, selectedTx, blockAreaSize, highlight } from '../stores.js'
 import config from "../config.js"
 
 export default class TxController {
@@ -30,6 +30,11 @@ export default class TxController {
     this.pendingMap = {}
     this.queueTimeout = null
     this.queueLength = 0
+
+    highlight.subscribe(criteria => {
+      this.highlightCriteria = criteria
+      this.applyHighlighting()
+    })
 
     this.scheduleQueue(1000)
   }
@@ -60,8 +65,16 @@ export default class TxController {
     this.redoLayout({ width, height })
   }
 
+  applyHighlighting () {
+    this.poolScene.applyHighlighting(this.highlightCriteria)
+    if (this.blockScene) {
+      this.blockScene.applyHighlighting(this.highlightCriteria)
+    }
+  }
+
   addTx (txData) {
     const tx = new BitcoinTx(txData, this.vertexArray)
+    tx.applyHighlighting(this.highlightCriteria)
     if (!this.txs[tx.id] && !this.expiredTxs[tx.id]) {
       this.pendingTxs.push([tx, performance.now()])
       this.pendingTxs[tx.id] = tx
@@ -169,6 +182,7 @@ export default class TxController {
           block: block.id
         }, this.vertexArray)
         this.txs[tx.id] = tx
+        this.txs[tx.id].applyHighlighting(this.highlightCriteria)
         this.blockScene.insert(tx, false)
       }
       this.expiredTxs[block.txns[i].id] = true

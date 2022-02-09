@@ -1,6 +1,8 @@
 <script>
+import Icon from './Icon.svelte'
+import BookmarkIcon from '../assets/icon/cil-bookmark.svg'
 import { longBtcFormat, integerFormat } from '../utils/format.js'
-import { exchangeRates, settings } from '../stores.js'
+import { exchangeRates, settings, sidebarToggle, newHighlightQuery, highlightingFull } from '../stores.js'
 import { formatCurrency } from '../utils/fx.js'
 
 export let tx
@@ -31,6 +33,13 @@ $: {
 
 function formatBTC (sats) {
   return `₿ ${longBtcFormat.format(sats/100000000)}`
+}
+
+function highlight () {
+  if (!$highlightingFull && tx && tx.id) {
+    $newHighlightQuery = tx.id
+    $sidebarToggle = 'search'
+  }
 }
 </script>
 
@@ -81,10 +90,32 @@ function formatBTC (sats) {
         word-break: break-all;
       }
     }
+
+    .icon-button {
+      float: right;
+      font-size: 24px;
+      margin: 0;
+      transition: opacity 300ms, color 300ms, background 300ms;
+      background: var(--palette-c);
+      color: var(--bold-a);
+      cursor: pointer;
+      padding: 5px;
+      border-radius: 5px;
+      &:hover {
+        background: var(--palette-e);
+      }
+      &.disabled {
+        color: var(--palette-e);
+        background: none;
+      }
+    }
   }
 </style>
 
 <div class="tx-info" class:above style="left: {clampedX}px; top: {clampedY}px">
+  <div class="icon-button" class:disabled={$highlightingFull} on:click={highlight} title="Add to watchlist">
+    <Icon icon={BookmarkIcon}/>
+  </div>
   <p class="field hash">
     TxID: { tx.id }
   </p>

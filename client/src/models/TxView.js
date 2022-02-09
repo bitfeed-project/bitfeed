@@ -1,6 +1,6 @@
 import TxSprite from './TxSprite.js'
 
-const hoverTransitionTime = 300
+const highlightTransitionTime = 300
 
 // converts from this class's update format to TxSprite's update format
 // now, id, value, position, size, color, alpha, duration, adjust
@@ -22,6 +22,9 @@ export default class TxView {
     this.vbytes = vbytes
     this.initialised = false
     this.vertexArray = vertexArray
+
+    this.hover = false
+    this.highlight = false
   }
 
   destroy () {
@@ -35,9 +38,9 @@ export default class TxView {
     display: defines the final appearance of the sprite
         position: { x, y }
         size: in pixels
-        color: (in HCL space)
-            h: hue
-            l: lightness
+        color:
+            i: x coord in color texture
+            j: y coord in color texture
             alpha: alpha transparency
     duration: of the tweening animation from the previous display state
     delay: for queued transitions, how long to wait after current transition
@@ -53,6 +56,22 @@ export default class TxView {
         toSpriteUpdate(display, duration, delay, start),
         this.vertexArray
       )
+      // apply any pending modifications
+      if (this.hover) {
+        this.sprite.update({
+          ...this.highlightColor,
+          duration: highlightTransitionTime,
+          adjust: false,
+          modify: true
+        })
+      } else if (this.highlight) {
+        this.sprite.update({
+          ...this.highlightColor,
+          duration: highlightTransitionTime,
+          adjust: false,
+          modify: true
+        })
+      }
     } else {
       this.sprite.update(
         toSpriteUpdate(display, duration, delay, start, adjust)
@@ -60,19 +79,53 @@ export default class TxView {
     }
   }
 
-  setHover (hoverOn) {
+  setHover (hoverOn, color) {
     if (hoverOn) {
-      if (this.sprite) {
-        this.sprite.update({
-          h: 1.0,
-          l: 0.4,
-          duration: hoverTransitionTime,
-          modify: true
-        })
+      this.hover = true
+      this.hoverColor = color
+      this.sprite.update({
+        ...this.hoverColor,
+        duration: highlightTransitionTime,
+        adjust: false,
+        modify: true
+      })
+    } else {
+      this.hover = false
+      this.hoverColor = null
+      if (this.highlight) {
+        if (this.sprite) {
+          this.sprite.update({
+            ...this.highlightColor,
+            duration: highlightTransitionTime,
+            adjust: false,
+            modify: true
+          })
+        }
+      } else {
+        if (this.sprite) this.sprite.resume(highlightTransitionTime)
+      }
+    }
+  }
+
+  setHighlight (highlightOn, color) {
+    if (highlightOn) {
+      this.highlight = true
+      this.highlightColor = color
+      if (!this.hover) {
+        if (this.sprite) {
+          this.sprite.update({
+            ...this.highlightColor,
+            duration: highlightTransitionTime,
+            adjust: false,
+            modify: true
+          })
+        }
       }
     } else {
-      if (this.sprite) {
-        this.sprite.resume(hoverTransitionTime)
+      this.highlight = false
+      this.highlightColor = null
+      if (!this.hover) {
+        if (this.sprite) this.sprite.resume(highlightTransitionTime)
       }
     }
   }
