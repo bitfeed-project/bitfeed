@@ -9,7 +9,7 @@ let entered = false
 let contentElement
 let contentSlotElement
 
-async function updateContentHeight (isOpen) {
+export async function updateContentHeight (isOpen) {
   if (contentElement && contentSlotElement) {
     if (isOpen) {
       contentElement.style.height = `${contentSlotElement.clientHeight}px`

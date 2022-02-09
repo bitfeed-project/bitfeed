@@ -88,19 +88,22 @@ export default class BitcoinTx {
     this.highlight = false
   }
 
-  applyHighlighting (criteria, color = highlightColor) {
+  applyHighlighting (criteria) {
+    let color
     this.highlight = false
     criteria.forEach(criterion => {
       if (criterion.txid === this.id) {
         this.highlight = true
+        color = criterion.color
       } else if (criterion.address && criterion.scriptPubKey) {
         this.outputs.forEach(output => {
           if (output.script_pub_key === criterion.scriptPubKey) {
             this.highlight = true
+            color = criterion.color
           }
         })
       }
     })
-    this.view.setHighlight(this.highlight, color)
+    this.view.setHighlight(this.highlight, color || highlightColor)
   }
 }

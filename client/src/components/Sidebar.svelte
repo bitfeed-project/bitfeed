@@ -22,6 +22,8 @@ import SearchTab from '../components/SearchTab.svelte'
 
 import { sidebarToggle, overlay, currentBlock, blockVisible, haveSupporters } from '../stores.js'
 
+let searchTabComponent
+
 let blockHidden = false
 $: blockHidden = ($currentBlock && !$blockVisible)
 
@@ -114,12 +116,12 @@ function showBlock () {
       <MempoolLegend />
     </div>
   </SidebarTab>
-  <SidebarTab open={$sidebarToggle === 'search'} on:click={() => {settings('search')}} tooltip="Search & Highlight">
+  <SidebarTab open={$sidebarToggle === 'search'} on:click={() => {settings('search')}} tooltip="Search & Highlight" bind:this={searchTabComponent}>
     <span slot="tab" title="Search & Highlight">
       <Icon icon={searchIcon} color="var(--bold-a)" />
     </span>
     <div slot="content">
-      <SearchTab />
+      <SearchTab tab={searchTabComponent} />
     </div>
   </SidebarTab>
   <SidebarTab open={$sidebarToggle === 'settings'} on:click={() => {settings('settings')}} tooltip="Settings">

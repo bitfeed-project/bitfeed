@@ -11,25 +11,28 @@ export function matchQuery (query) {
   const asInt = parseInt(q)
   // Remember to update the bounds in
   if (!isNaN(asInt) && asInt >= 0 && `${asInt}` === q) {
-    return {
+    return null /*{
       query: 'blockheight',
-      height: asInt
-    }
+      height: asInt,
+      value: asInt
+    }*/
   }
 
   // Looks like a block hash?
   if (/^0{8}[a-f0-9]{56}$/.test(q)) {
-    return {
+    return null /* {
       query: 'blockhash',
-      hash: q
-    }
+      hash: query,
+      value: query,
+    }*/
   }
 
   // Looks like a transaction id?
   if (/^[a-f0-9]{64}$/.test(q)) {
     return {
       query: 'txid',
-      txid: q
+      txid: q,
+      value: q
     }
   }
 
@@ -47,6 +50,7 @@ export function matchQuery (query) {
         encoding: 'base58',
         addressType,
         address: query,
+        value: query,
         scriptPubKey: addressToSPK(query)
       }
     }
@@ -67,6 +71,7 @@ export function matchQuery (query) {
         encoding: 'bech32',
         addressType,
         address: query,
+        value: query,
         scriptPubKey: addressToSPK(query)
       }
     }
