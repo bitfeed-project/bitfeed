@@ -6,6 +6,7 @@ import ByMononaut from './ByMononaut.svelte'
 import HeroMsg from './Hero.svelte'
 import SponsoredMsg from './Sponsored.svelte'
 import GenericAlert from './GenericAlert.svelte'
+import GenericAlertv2 from './GenericAlertv2.svelte'
 import { fly } from 'svelte/transition'
 
 const components = {
@@ -13,15 +14,17 @@ const components = {
   "sponsored-by": SponsoredMsg,
   // "be-a-hero": BeAHero,
   "thank-you-hero": HeroMsg,
-  msg: GenericAlert
+  msg: GenericAlert,
+  msg2: GenericAlertv2,
 }
 let ready
 $: {
   ready = {
     mononaut: true,
-    "sponsored-by": SponsoredMsg,
+    "sponsored-by": true,
     "thank-you-hero": $haveSupporters ? HeroMsg : null,
-    msg: GenericAlert
+    msg: true,
+    msg2: true,
   }
 }
 
@@ -49,7 +52,7 @@ $: {
 }
 
 function processAlert (alert) {
-  if (alert && alert.type && components[alert.type] && ready[alert.type]) {
+  if (alert && alert.type && components[alert.type] && ready[alert.type] && (!alert.publicOnly || config.public)) {
     if (!sequences[alert.key]) sequences[alert.key] = 0
     return {
       ...alert,

@@ -42,6 +42,7 @@ jobs:
                 docker buildx build \
                 --platform linux/amd64,linux/arm64 \
                 --tag ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME-client:$TAG \
+                --tag ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME-client:master \
                 --output "type=registry" ./client/
 
       - name: Build server images
@@ -49,4 +50,5 @@ jobs:
                 docker buildx build \
                 --platform linux/amd64,linux/arm64 \
                 --tag ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME-server:$TAG \
+                --tag ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME-server:master \
                 --output "type=registry" ./server/

@@ -6,7 +6,6 @@ permissions:
 on:
     push:
         branches:
-            - main
             - master
 
 jobs:
@@ -24,7 +23,7 @@ jobs:
           echo "IMAGE_NAME=${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1 
+        uses: docker/login-action@v1
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
@@ -42,12 +41,12 @@ jobs:
         run: |
                 docker buildx build \
                 --platform linux/amd64,linux/arm64 \
-                --tag ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME-client:$BRANCH \
+                --tag ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME-client:alpha \
                 --output "type=registry" ./client/
 
       - name: Build server images
         run: |
                 docker buildx build \
                 --platform linux/amd64,linux/arm64 \
-                --tag ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME-server:$BRANCH \
+                --tag ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME-server:alpha \
                 --output "type=registry" ./server/
