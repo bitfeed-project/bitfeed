@@ -44,7 +44,7 @@ import Mononaut from '../components/Mononaut.svelte'
     </a>
     <div class="intro">
       <p>Bitfeed is an experiment by <b class="mononaut">mononaut</b>.</p>
-      <p>Questions? Comments? Suggestions? Job offers?</p>
+      <p>Questions? Comments? Suggestions?</p>
     </div>
   </div>
   <p style="clear: both">Message me on twitter at

@@ -3,14 +3,13 @@
 */
 
 export default class TxPackingScene {
-  constructor ({ width, height, layer }) {
-    this.init({ width, height, layer })
+  constructor ({ width, height }) {
+    this.init({ width, height })
   }
 
-  init ({ width, height, layer }) {
+  init ({ width, height }) {
     this.width = width
     this.height = height
-    this.layer = layer
     this.txs = {}
     this.hiddenTxs = {}
     this.scene = {
