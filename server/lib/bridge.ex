@@ -102,7 +102,7 @@ defmodule BitcoinStream.Bridge do
   end
 
   defp sendBlock(block) do
-    case Jason.encode(%{type: "block", block: block}) do
+    case Jason.encode(%{type: "block", block: %{id: block.id}}) do
       {:ok, payload} ->
         Registry.dispatch(Registry.BitcoinStream, "txs", fn(entries) ->
           for {pid, _} <- entries do

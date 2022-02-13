@@ -10,7 +10,7 @@ function chooseImgs () {
   const randomIndex = Math.floor(Math.random() * imgs.length)
   for (let i = 0; i < Math.min(3, imgs.length); i++) {
     const randomImg = imgs[(randomIndex + i) % imgs.length]
-    displayImgs.push(randomImg)
+    if (randomImg && randomImg.img) displayImgs.push(randomImg)
   }
 }
 

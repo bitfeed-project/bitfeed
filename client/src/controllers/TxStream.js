@@ -8,7 +8,9 @@ lastBlockId.subscribe(val => { lastBlockSeen = val })
 
 class TxStream {
   constructor () {
-    this.websocketUri = `${config.secureSocket ? 'wss://' : 'ws://'}${config.backend ? config.backend : window.location.host }${config.backendPort ? ':' + config.backendPort : ''}/ws/txs`
+    this.apiRoot = `${config.backend ? config.backend : window.location.host }${config.backendPort ? ':' + config.backendPort : ''}`
+    this.websocketUri = `${config.secureSocket ? 'wss://' : 'ws://'}${this.apiRoot}/ws/txs`
+    this.apiUri = `${config.secureSocket ? 'https://' : 'http://'}${this.apiRoot}`
     console.log('connecting to ', this.websocketUri)
     this.reconnectBackoff = 250
     this.websocket = null
@@ -91,7 +93,7 @@ class TxStream {
   sendBlockRequest () {
     if (config.noBlockFeed) return
     console.log('Checking for missed blocks...')
-    this.websocket.send(JSON.stringify({method: 'get_block', last: lastBlockSeen }))
+    this.websocket.send("block_id")
   }
 
   sendMempoolRequest () {
@@ -125,6 +127,19 @@ class TxStream {
     this.sendMempoolRequest()
   }
 
+  async fetchBlock (id) {
+    if (id !== lastBlockSeen) {
+      console.log('downloading block', id)
+      const response = await fetch(`${this.apiUri}/block/${id}`, {
+        method: 'GET'
+      })
+      let blockData = await response.json()
+      window.dispatchEvent(new CustomEvent('bitcoin_block', { detail: blockData.block }))
+    } else {
+      console.log('already seen block ', lastBlockSeen)
+    }
+  }
+
   onmessage (event) {
     if (!event) return
     if (event.data === 'hb') {
@@ -136,15 +151,19 @@ class TxStream {
         const msg = JSON.parse(event.data)
         if (msg && msg.type === 'count') {
           window.dispatchEvent(new CustomEvent('bitcoin_mempool_count', { detail: msg.count }))
+        } else if (msg && msg.type === 'block_id') {
+          this.fetchBlock(msg.block_id)
         } else if (msg && msg.type === 'txn') {
           window.dispatchEvent(new CustomEvent('bitcoin_tx', { detail: msg.txn }))
         } else if (msg && msg.type === 'block') {
-          if (msg.block && msg.block.id) window.dispatchEvent(new CustomEvent('bitcoin_block', { detail: msg.block }))
+          if (msg.block && msg.block.id) {
+            this.fetchBlock(msg.block.id)
+          }
         } else {
           // console.log('unknown message from websocket: ', msg)
         }
       } catch (err) {
-        // console.log('unknown message from websocket: ', msg)
+        // console.log('error parsing msg json: ', err)
       }
     }
   }

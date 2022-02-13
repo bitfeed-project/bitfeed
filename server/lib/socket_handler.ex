@@ -18,10 +18,6 @@ defmodule BitcoinStream.SocketHandler do
     {:ok, state}
   end
 
-  # def last_block() do
-  #
-  # end
-
   def get_block(last_seen) do
     IO.puts("getting block with id #{last_seen}")
     last_id = GenServer.call(:block_data, :block_id)
@@ -44,6 +40,11 @@ defmodule BitcoinStream.SocketHandler do
     "{ \"type\": \"count\", \"count\": #{count}}"
   end
 
+  def get_block_id_msg() do
+    last_id = GenServer.call(:block_data, :block_id);
+    "{ \"type\": \"block_id\", \"block_id\": \"#{last_id}\"}"
+  end
+
   @timed(key: "timed.function")
   def websocket_handle({:text, msg}, state) do
     # IO.puts("message received: #{msg} | #{inspect self()}");
@@ -52,11 +53,15 @@ defmodule BitcoinStream.SocketHandler do
 
       "block" ->
         IO.puts('block request');
-        {:reply, {:text, "null"}, state};
+        {:reply, {:text, "null"}, state}
 
       "count" ->
         count = get_mempool_count_msg();
-        {:reply, {:text, count}, state};
+        {:reply, {:text, count}, state}
+
+      "block_id" ->
+        last_id = get_block_id_msg();
+        {:reply, {:text, last_id}, state}
 
       json ->
         IO.puts("attempting to decode msg as json");
