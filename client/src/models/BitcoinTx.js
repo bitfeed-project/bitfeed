@@ -11,7 +11,7 @@ const hoverColor = {
 }
 
 export default class BitcoinTx {
-  constructor ({ version, id, value, vbytes, inputs, outputs, time, block }, vertexArray) {
+  constructor ({ version, id, value, fee, vbytes, inputs, outputs, time, block }, vertexArray) {
     this.version = version
     this.id = id
     this.vertexArray = vertexArray
@@ -21,7 +21,9 @@ export default class BitcoinTx {
     this.inputs = inputs
     this.outputs = outputs
     this.value = value
+    this.fee = fee
     this.vbytes = vbytes
+    this.feerate = fee / vbytes
 
     if (inputs && outputs && value == null) {
       this.value = this.calcValue()
@@ -47,6 +49,8 @@ export default class BitcoinTx {
         sig,
         sigAscii
       }
+      this.fee = null
+      this.feerate = null
     }
 
     this.setBlock(block)

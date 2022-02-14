@@ -47,7 +47,7 @@ defmodule BitcoinStream.Mempool do
 
   def sync(pid) do
     IO.puts("Syncing mempool");
-    with  {:ok, %{"size" => pool_size}} <- RPC.request(:rpc, "getmempoolinfo", []) do
+    with  {:ok, 200, %{"size" => pool_size}} <- RPC.request(:rpc, "getmempoolinfo", []) do
       IO.puts("Synced pool: size = #{pool_size}");
       set(pid, pool_size)
     else

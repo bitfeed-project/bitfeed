@@ -27,15 +27,12 @@ defmodule BitcoinStream.Router do
   end
 
   defp get_block(last_seen) do
-    IO.puts("getting block with id #{last_seen}")
-    last_id = GenServer.call(:block_data, :block_id)
-    IO.puts("last block id: #{last_id}")
+    last_id = GenServer.call(:block_data, :block_id);
     cond do
       (last_seen == last_id) ->
         payload = GenServer.call(:block_data, :json_block);
         {:ok, payload}
-      true ->
-        {:err, "requested old block"}
+      true -> :err
     end
   end
 end

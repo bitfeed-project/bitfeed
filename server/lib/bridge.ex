@@ -48,7 +48,7 @@ defmodule BitcoinStream.Bridge do
     end
 
     # start tx loop
-    tx_loop(socket)
+    tx_loop(socket, 0)
   end
 
   defp connect_block(host, port) do
@@ -72,7 +72,7 @@ defmodule BitcoinStream.Bridge do
     end
 
     # start block loop
-    block_loop(socket)
+    block_loop(socket, 0)
   end
 
   defp wait_for_ibd() do
@@ -114,37 +114,51 @@ defmodule BitcoinStream.Bridge do
     end
   end
 
-  defp tx_loop(socket) do
-    # IO.puts("client tx loop");
-    with  {:ok, message} <- :chumak.recv_multipart(socket),
-          [_topic, payload, _size] <- message,
-          {:ok, txn} <- BitcoinTx.decode(payload) do
-      sendTxn(txn);
-      incrementMempool();
-    else
-      {:error, reason} -> IO.puts("Bitcoin node transaction feed bridge error: #{reason}");
-      _ -> IO.puts("Bitcoin node transaction feed bridge error (unknown reason)");
+  defp sendMempoolCount() do
+    count = Mempool.get(:mempool)
+    case Jason.encode(%{type: "count", count: count}) do
+      {:ok, payload} ->
+        Registry.dispatch(Registry.BitcoinStream, "count", fn(entries) ->
+          for {pid, _} <- entries do
+            Process.send(pid, payload, []);
+          end
+        end)
+      {:error, reason} -> IO.puts("Error json encoding count: #{reason}");
     end
-
-    tx_loop(socket)
   end
 
-  defp block_loop(socket) do
-    IO.puts("client block loop");
+  defp tx_loop(socket, seq) do
     with  {:ok, message} <- :chumak.recv_multipart(socket),
-          [_topic, payload, _size] <- message,
-          :ok <- File.write("data/block.dat", payload, [:binary]),
-          {:ok, block} <- BitcoinBlock.decode(payload) do
-      GenServer.cast(:block_data, {:block, block})
+          [_topic, payload, <<sequence::little-size(32)>>] <- message,
+          true <- (seq  != sequence),
+          {:ok, txn} <- BitcoinTx.decode(payload),
+          inflated_txn <- BitcoinTx.inflate(txn) do
+      sendTxn(inflated_txn);
+      incrementMempool();
+      tx_loop(socket, sequence)
+    else
+      _ -> tx_loop(socket, seq)
+    end
+  end
+
+  defp block_loop(socket, seq) do
+    IO.puts("client block loop");
+    with  {:ok, message} <- :chumak.recv_multipart(socket), # wait for the next zmq message in the queue
+          [_topic, payload, <<sequence::little-size(32)>>] <- message,
+          true <- (seq != sequence), # discard contiguous duplicate messages
+          _ <- IO.puts("received new block"),
+          {:ok, block} <- BitcoinBlock.decode(payload),
+          {:ok, json} <- Jason.encode(block),
+          :ok <- File.write("data/last_block.json", json) do
+      IO.puts("processed block #{block.id}");
+      GenServer.cast(:block_data, {:json, { block.id, json }});
       sendBlock(block);
       Mempool.sync(:mempool);
-      IO.puts("new block")
+      sendMempoolCount();
+      block_loop(socket, sequence)
     else
-      {:error, reason} -> IO.puts("Bitcoin node block feed bridge error: #{reason}");
-      _ -> IO.puts("Bitcoin node block feed bridge error (unknown reason)");
+      _ -> block_loop(socket, seq)
     end
-
-    block_loop(socket)
   end
 
 end

@@ -30,8 +30,8 @@ defmodule BitcoinStream.RPC do
   @impl true
   def handle_call({:request, method, params}, _from, {host, port, status}) do
     case make_request(host, port, method, params) do
-      {:ok, info} ->
-        {:reply, {:ok, info}, {host, port, status}}
+      {:ok, code, info} ->
+        {:reply, {:ok, code, info}, {host, port, status}}
 
       {:error, reason} ->
         {:reply, {:error, reason}, {host, port, status}}
@@ -46,10 +46,10 @@ defmodule BitcoinStream.RPC do
   defp make_request(host, port, method, params) do
     with  { user, pw } <- rpc_creds(),
           {:ok, rpc_request} <- Jason.encode(%{method: method, params: params}),
-          {:ok, 200, _headers, body_ref} <- :hackney.request(:post, "http://#{host}:#{port}", [{"content-type", "application/json"}], rpc_request, [basic_auth: { user, pw }]),
+          {:ok, code, _headers, body_ref} <- :hackney.request(:post, "http://#{host}:#{port}", [{"content-type", "application/json"}], rpc_request, [basic_auth: { user, pw }]),
           {:ok, body} <- :hackney.body(body_ref),
           {:ok, %{"result" => info}} <- Jason.decode(body) do
-      {:ok, info}
+      {:ok, code, info}
     else
       {:ok, code, _} ->
         IO.puts("RPC request #{method} failed with HTTP code #{code}")
@@ -66,7 +66,6 @@ defmodule BitcoinStream.RPC do
   end
 
   def request(pid, method, params) do
-    IO.inspect({pid, method, params});
     GenServer.call(pid, {:request, method, params}, 60000)
   catch
     :exit, reason ->
@@ -79,7 +78,7 @@ defmodule BitcoinStream.RPC do
   end
 
   def check_status({host, port, status}) do
-    with  {:ok, info} <- make_request(host, port, "getblockchaininfo", []) do
+    with  {:ok, 200, info} <- make_request(host, port, "getblockchaininfo", []) do
       {host, port, info}
     else
       {:error, reason} ->

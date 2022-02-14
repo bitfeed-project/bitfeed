@@ -134,7 +134,7 @@ class TxStream {
         method: 'GET'
       })
       let blockData = await response.json()
-      window.dispatchEvent(new CustomEvent('bitcoin_block', { detail: blockData.block }))
+      window.dispatchEvent(new CustomEvent('bitcoin_block', { detail: blockData }))
     } else {
       console.log('already seen block ', lastBlockSeen)
     }

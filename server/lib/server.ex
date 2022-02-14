@@ -9,8 +9,8 @@ defmodule BitcoinStream.Server do
     btc_host = System.get_env("BITCOIN_HOST");
 
     children = [
-      { BitcoinStream.BlockData, [name: :block_data] },
       { BitcoinStream.RPC, [host: btc_host, port: rpc_port, name: :rpc] },
+      { BitcoinStream.BlockData, [name: :block_data] },
       { BitcoinStream.Mempool, [name: :mempool] },
       BitcoinStream.Metrics.Probe,
       Plug.Cowboy.child_spec(

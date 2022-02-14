@@ -1,3 +1,5 @@
+Application.ensure_all_started(BitcoinStream.RPC)
+
 defmodule BitcoinStream.Protocol.Block do
 @moduledoc """
   Summarised bitcoin block.
@@ -20,6 +22,7 @@ defstruct [
   :nonce,
   :txn_count,
   :txns,
+  :fees,
   :value,
   :id
 ]
@@ -29,7 +32,7 @@ def decode(block_binary) do
         hex <- Base.encode16(block_binary, case: :lower),
         {:ok, raw_block} <- Bitcoinex.Block.decode(hex),
         id <- Bitcoinex.Block.block_id(block_binary),
-        {summarised_txns, total_value} <- summarise_txns(raw_block.txns)
+        {summarised_txns, total_value, total_fees} <- summarise_txns(raw_block.txns)
   do
     {:ok, %__MODULE__{
       version: raw_block.version,
@@ -40,6 +43,7 @@ def decode(block_binary) do
       bytes: bytes,
       txn_count: raw_block.txn_count,
       txns: summarised_txns,
+      fees: total_fees,
       value: total_value,
       id: id
     }}
@@ -54,24 +58,19 @@ def decode(block_binary) do
 end
 
 defp summarise_txns(txns) do
-  summarise_txns(txns, [], 0)
+  summarise_txns(txns, [], 0, 0)
 end
 
-defp summarise_txns([], summarised, total) do
-  {Enum.reverse(summarised), total}
+defp summarise_txns([], summarised, total, fees) do
+  {Enum.reverse(summarised), total, fees}
 end
 
-defp summarise_txns([next | rest], summarised, total) do
+defp summarise_txns([next | rest], summarised, total, fees) do
   extended_txn = BitcoinTx.extend(next)
+  inflated_txn = BitcoinTx.inflate(extended_txn)
 
-  summarise_txns(rest, [extended_txn | summarised], total + extended_txn.value)
-end
 
-def test() do
-  raw_block = File.read!("data/block.dat")
-  {:ok, block} = Block.decode(raw_block)
-
-  block
+  summarise_txns(rest, [inflated_txn | summarised], total + inflated_txn.value, fees + inflated_txn.fee)
 end
 
 end

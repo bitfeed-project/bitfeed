@@ -61,7 +61,6 @@
           const added = txController.addBlock(block)
           if (added && added.id) $lastBlockId = added.id
         }
-        txStream.sendMempoolRequest()
       })
     }
     if (!config.noTxFeed || !config.noBlockFeed) {

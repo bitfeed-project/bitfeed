@@ -36,7 +36,6 @@ defmodule BitcoinStream.SocketHandler do
 
   def get_mempool_count_msg() do
     count = Mempool.get(:mempool);
-    IO.puts("Count: #{count}");
     "{ \"type\": \"count\", \"count\": #{count}}"
   end
 
@@ -64,13 +63,9 @@ defmodule BitcoinStream.SocketHandler do
         {:reply, {:text, last_id}, state}
 
       json ->
-        IO.puts("attempting to decode msg as json");
         with {:ok, result} <- Jason.decode(json) do
-          IO.puts("decoded ok");
-          IO.inspect(result);
           case result do
             %{"last" => block_id, "method" => "get_block"} ->
-              IO.puts('block request')
               case get_block(block_id) do
                 {:ok, block_msg} ->
                   {:reply, {:text, block_msg}, state};
