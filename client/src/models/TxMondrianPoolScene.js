@@ -10,8 +10,8 @@ settings.subscribe(v => {
 })
 
 export default class TxMondrianPoolScene extends TxPoolScene {
-  constructor ({ width, height, unit, padding, controller, heightStore }) {
-    super({ width, height, unit, padding, controller, heightStore })
+  constructor ({ width, height, unit, padding, controller, heightStore, colorMode }) {
+    super({ width, height, unit, padding, controller, heightStore, colorMode })
   }
 
   resize ({ width, height, unit, padding }) {

@@ -102,9 +102,13 @@ export const settings = createCachedDict('settings', {
 	currency: localeCurrencyCode,
 	showFX: true,
 	vbytes: false,
+	colorByFee: false,
 	fancyGraphics: true,
 	showMessages: true,
 	noTrack: false
+})
+export const colorMode = derived([settings], ([$settings]) => {
+	return $settings.colorByFee ? "fee" : "age"
 })
 
 export const devSettings = (config.dev && config.debug) ? createCachedDict('dev-settings', {

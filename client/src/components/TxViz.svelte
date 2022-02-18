@@ -12,7 +12,7 @@
   import DonationOverlay from '../components/DonationOverlay.svelte'
   import SupportersOverlay from '../components/SupportersOverlay.svelte'
   import Alerts from '../components/alert/Alerts.svelte'
-  import { integerFormat } from '../utils/format.js'
+  import { numberFormat } from '../utils/format.js'
   import { exchangeRates, lastBlockId, haveSupporters, sidebarToggle } from '../stores.js'
   import { formatCurrency } from '../utils/fx.js'
   import config from '../config.js'
@@ -397,7 +397,7 @@
 
     <div class="mempool-height" style="bottom: calc({$mempoolScreenHeight + 20}px)">
       <div class="height-bar" />
-      <span class="mempool-count">Mempool: { integerFormat.format($mempoolCount) } unconfirmed</span>
+      <span class="mempool-count">Mempool: { numberFormat.format(Math.round($mempoolCount)) } unconfirmed</span>
     </div>
 
     <div class="block-area-wrapper">

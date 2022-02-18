@@ -127,14 +127,14 @@ class TxStream {
     this.sendMempoolRequest()
   }
 
-  async fetchBlock (id) {
+  async fetchBlock (id, calledOnLoad) {
     if (id !== lastBlockSeen) {
       console.log('downloading block', id)
       const response = await fetch(`${this.apiUri}/block/${id}`, {
         method: 'GET'
       })
       let blockData = await response.json()
-      window.dispatchEvent(new CustomEvent('bitcoin_block', { detail: blockData }))
+      window.dispatchEvent(new CustomEvent('bitcoin_block', { detail: { block: blockData, realtime: !calledOnLoad} }))
     } else {
       console.log('already seen block ', lastBlockSeen)
     }

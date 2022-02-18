@@ -10,13 +10,18 @@ export const longBtcFormat = (Intl && Intl.NumberFormat) ? new Intl.NumberFormat
     return Number(number).toFixed(8)
   }
 }
+export const feeRateFormat = (Intl && Intl.NumberFormat) ? new Intl.NumberFormat(undefined, { maximumFractionDigits: 2, maximumSignificantDigits: 2 }) : {
+  format (number) {
+    return Number(number).toPrecision(2).slice(0,3)
+  }
+}
 export const timeFormat = (Intl && Intl.DateTimeFormat) ? new Intl.DateTimeFormat(undefined, { timeStyle: "short"}) : {
   format (date) {
     const d = new Date(date)
     return `${('' + d.getHours()).padStart(2, '0')}:${('' + d.getMinutes()).padStart(2, '0')}`
   }
 }
-export const integerFormat = (Intl && Intl.NumberFormat) ? new Intl.NumberFormat(undefined) : {
+export const numberFormat = (Intl && Intl.NumberFormat) ? new Intl.NumberFormat(undefined) : {
   format (number) {
     return Number(number).toLocaleString()
   }
