@@ -34,7 +34,6 @@ export default class TxController {
       this.applyHighlighting()
     })
     colorMode.subscribe(mode => {
-      console.log('color mode changed: ', mode)
       this.setColorMode(mode)
     })
   }
@@ -99,6 +98,7 @@ export default class TxController {
   }
 
   dropTx (txid) {
+    // don't actually need to do anything, just let the tx expire
   }
 
   addBlock (blockData, realtime=true) {

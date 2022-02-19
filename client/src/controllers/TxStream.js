@@ -127,6 +127,7 @@ class TxStream {
         method: 'GET'
       })
       let blockData = await response.json()
+      console.log('downloaded block', id)
       window.dispatchEvent(new CustomEvent('bitcoin_block', { detail: { block: blockData, realtime: !calledOnLoad} }))
     } else {
       console.log('already seen block ', lastBlockSeen)
@@ -159,7 +160,6 @@ class TxStream {
 
           // notification of tx dropped from mempool
           case 'drop':
-            console.log('Dropping transaction ', msg.txid)
             window.dispatchEvent(new CustomEvent('bitcoin_drop_tx', { detail: msg.txid }))
             break;
 

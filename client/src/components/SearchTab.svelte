@@ -10,16 +10,10 @@ import AddressIcon from '../assets/icon/cil-wallet.svg'
 import TxIcon from '../assets/icon/cil-arrow-circle-right.svg'
 import { matchQuery } from '../utils/search.js'
 import { highlight, newHighlightQuery, highlightingFull } from '../stores.js'
-import { hcl } from 'd3-color'
+import { hlToHex, highlightA, highlightB, highlightC, highlightD, highlightE } from '../utils/color.js'
 
-const highlightColors = [
-  { h: 0.03, l: 0.35 },
-  { h: 0.40, l: 0.35 },
-  { h: 0.65, l: 0.35 },
-  { h: 0.85, l: 0.35 },
-  { h: 0.12, l: 0.35 },
-]
-const highlightHexColors = highlightColors.map(c => hclToHex(c))
+const highlightColors = [highlightA, highlightB, highlightC, highlightD, highlightE]
+const highlightHexColors = highlightColors.map(c => hlToHex(c))
 const usedColors = [false, false, false, false, false]
 
 const queryIcons = {
@@ -36,6 +30,7 @@ export let tab
 let query
 let matchedQuery
 let queryAddress
+let queryColorIndex
 let queryColor
 let queryColorHex
 let watchlist = []
@@ -48,8 +43,9 @@ $: {
   if ($newHighlightQuery) {
     matchedQuery = matchQuery($newHighlightQuery)
     if (matchedQuery) {
-      matchedQuery.color = queryColor
-      matchedQuery.colorHex = queryColorHex
+      matchedQuery.colorIndex = queryColorIndex
+      matchedQuery.color = highlightColors[queryColorIndex]
+      matchedQuery.colorHex = highlightHexColors[queryColorIndex]
       add()
       query = null
     }
@@ -66,8 +62,9 @@ $: {
   if (query) {
     matchedQuery = matchQuery(query.trim())
     if (matchedQuery) {
-      matchedQuery.color = queryColor
-      matchedQuery.colorHex = queryColorHex
+      matchedQuery.colorIndex = queryColorIndex
+      matchedQuery.color = highlightColors[queryColorIndex]
+      matchedQuery.colorHex = highlightHexColors[queryColorIndex]
     }
   } else matchedQuery = null
 }
@@ -81,9 +78,20 @@ function init () {
     try {
       watchlist = JSON.parse(val)
       watchlist.forEach(q => {
-        const i = highlightHexColors.findIndex(c => c === q.colorHex)
-        if (i >= 0) usedColors[i] = q.colorHex
-        else console.log('unknown color')
+        if (q.colorIndex) {
+          usedColors[q.colorIndex] = true
+          q.color = highlightColors[q.colorIndex]
+          q.colorHex = highlightHexColors[q.colorIndex]
+        }
+      })
+      watchlist.forEach(q => {
+        if (!q.colorIndex){
+          const nextIndex = usedColors.findIndex(used => !used)
+          usedColors[nextIndex] = true
+          q.colorIndex = nextIndex
+          q.color = highlightColors[nextIndex]
+          q.colorHex = highlightHexColors[nextIndex]
+        }
       })
     } catch (e) {
       console.log('failed to parse cached highlight queries')
@@ -94,18 +102,14 @@ function init () {
 function setNextColor () {
   const nextIndex = usedColors.findIndex(used => !used)
   if (nextIndex >= 0) {
+    queryColorIndex = nextIndex
     queryColor = highlightColors[nextIndex]
     queryColorHex = highlightHexColors[nextIndex]
-    usedColors[nextIndex] = queryColorHex
+    usedColors[nextIndex] = true
   }
 }
-function clearUsedColor (hex) {
-  const clearIndex = usedColors.findIndex(used => used === hex)
-  usedColors[clearIndex] = false
-}
-
-function hclToHex (color) {
-  return hcl(color.h * 360, 78.225, color.l * 150).hex()
+function clearUsedColor (colorIndex) {
+  usedColors[colorIndex] = false
 }
 
 async function add () {
@@ -127,7 +131,7 @@ async function remove (index) {
   const wasFull = $highlightingFull
   const removed = watchlist.splice(index,1)
   if (removed.length) {
-    clearUsedColor(removed[0].colorHex)
+    clearUsedColor(removed[0].colorIndex)
     watchlist = watchlist
     if (tab) {
       await tick()
@@ -249,7 +253,7 @@ function searchSubmit (e) {
     </div>
   </div>
   <div class="watchlist">
-    {#each watchlist as watched, index (watched.colorHex)}
+    {#each watchlist as watched, index (watched.colorIndex)}
       <div
         class="watched"
 				transition:fade={{ duration: 200 }}
