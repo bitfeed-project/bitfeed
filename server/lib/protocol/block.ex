@@ -8,8 +8,8 @@ defmodule BitcoinStream.Protocol.Block do
   and condensing transactions into only id, value and version
 """
 
-alias BitcoinStream.Protocol.Block
 alias BitcoinStream.Protocol.Transaction, as: BitcoinTx
+alias BitcoinStream.Mempool, as: Mempool
 
 @derive Jason.Encoder
 defstruct [
@@ -58,19 +58,28 @@ def decode(block_binary) do
 end
 
 defp summarise_txns(txns) do
-  summarise_txns(txns, [], 0, 0)
+  # Mempool.is_done returns false while the mempool is still syncing
+  if Mempool.is_done(:mempool) do
+    summarise_txns(txns, [], 0, 0, true)
+  else
+    summarise_txns(txns, [], 0, 0, false)
+  end
 end
 
-defp summarise_txns([], summarised, total, fees) do
+defp summarise_txns([], summarised, total, fees, _do_inflate) do
   {Enum.reverse(summarised), total, fees}
 end
 
-defp summarise_txns([next | rest], summarised, total, fees) do
+defp summarise_txns([next | rest], summarised, total, fees, do_inflate) do
   extended_txn = BitcoinTx.extend(next)
-  inflated_txn = BitcoinTx.inflate(extended_txn)
 
-
-  summarise_txns(rest, [inflated_txn | summarised], total + inflated_txn.value, fees + inflated_txn.fee)
+  # if the mempool is still syncing, inflating txs will take too long, so skip it
+  if do_inflate do
+    inflated_txn = BitcoinTx.inflate(extended_txn)
+    summarise_txns(rest, [inflated_txn | summarised], total + inflated_txn.value, fees + inflated_txn.fee, true)
+  else
+    summarise_txns(rest, [extended_txn | summarised], nil, nil, false)
+  end
 end
 
 end

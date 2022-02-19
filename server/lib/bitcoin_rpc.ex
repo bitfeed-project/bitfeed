@@ -10,14 +10,16 @@ defmodule BitcoinStream.RPC do
     {port, opts} = Keyword.pop(opts, :port);
     {host, opts} = Keyword.pop(opts, :host);
     IO.puts("Starting Bitcoin RPC server on #{host} port #{port}")
-    GenServer.start_link(__MODULE__, {host, port, nil}, opts)
+    GenServer.start_link(__MODULE__, {host, port, nil, nil}, opts)
   end
 
   @impl true
-  def init(state) do
+  def init({host, port, status, _}) do
     # start node monitoring loop
-    send(self(), :check_status)
-    {:ok, state}
+    creds = rpc_creds();
+
+    send(self(), :check_status);
+    {:ok, {host, port, status, creds}}
   end
 
   def handle_info(:check_status, state) do
@@ -28,23 +30,23 @@ defmodule BitcoinStream.RPC do
   end
 
   @impl true
-  def handle_call({:request, method, params}, _from, {host, port, status}) do
-    case make_request(host, port, method, params) do
+  def handle_call({:request, method, params}, _from, {host, port, status, creds}) do
+    case make_request(host, port, creds, method, params) do
       {:ok, code, info} ->
-        {:reply, {:ok, code, info}, {host, port, status}}
+        {:reply, {:ok, code, info}, {host, port, status, creds}}
 
       {:error, reason} ->
-        {:reply, {:error, reason}, {host, port, status}}
+        {:reply, {:error, reason}, {host, port, status, creds}}
     end
   end
 
   @impl true
-  def handle_call({:get_node_status}, _from, {host, port, status}) do
-    {:reply, {:ok, status}, {host, port, status}}
+  def handle_call({:get_node_status}, _from, {host, port, status, creds}) do
+    {:reply, {:ok, status}, {host, port, status, creds}}
   end
 
-  defp make_request(host, port, method, params) do
-    with  { user, pw } <- rpc_creds(),
+  defp make_request(host, port, creds, method, params) do
+    with  { user, pw } <- creds,
           {:ok, rpc_request} <- Jason.encode(%{method: method, params: params}),
           {:ok, code, _headers, body_ref} <- :hackney.request(:post, "http://#{host}:#{port}", [{"content-type", "application/json"}], rpc_request, [basic_auth: { user, pw }]),
           {:ok, body} <- :hackney.body(body_ref),
@@ -77,18 +79,18 @@ defmodule BitcoinStream.RPC do
     GenServer.call(pid, {:get_node_status})
   end
 
-  def check_status({host, port, status}) do
-    with  {:ok, 200, info} <- make_request(host, port, "getblockchaininfo", []) do
-      {host, port, info}
+  def check_status({host, port, status, creds}) do
+    with  {:ok, 200, info} <- make_request(host, port, creds, "getblockchaininfo", []) do
+      {host, port, info, creds}
     else
       {:error, reason} ->
         IO.puts("node status check failed");
         IO.inspect(reason)
-        {host, port, status}
+        {host, port, status, creds}
       err ->
         IO.puts("node status check failed: (unknown reason)");
         IO.inspect(err);
-        {host, port, status}
+        {host, port, status, creds}
     end
   end
 

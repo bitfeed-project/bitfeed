@@ -6,6 +6,8 @@ defmodule BitcoinStream.ExometerReportDash do
   @impl true
   def exometer_init(opts) do
     IO.puts("Initialising dashboard exometer reporter")
+    Registry.BitcoinStream
+    |> Registry.register("metrics", {})
     {:ok, opts}
   end
 

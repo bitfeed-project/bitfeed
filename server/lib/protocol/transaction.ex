@@ -72,7 +72,7 @@ defmodule BitcoinStream.Protocol.Transaction do
   end
 
   def inflate(txn) do
-    {inputs, in_value } = inflate_inputs(txn.inputs);
+    {inputs, in_value } = inflate_inputs(txn.id, txn.inputs);
     %__MODULE__{
       version: txn.version,
       vbytes: txn.vbytes,
@@ -106,7 +106,7 @@ defmodule BitcoinStream.Protocol.Transaction do
           value: 0,
           script_pub_key: nil,
         } }
-      prev_txid ->
+      _prev_txid ->
         with  {:ok, 200, hextx} <- RPC.request(:rpc, "getrawtransaction", [input.prev_txid]),
               rawtx <- Base.decode16!(hextx, case: :lower),
               {:ok, txn } <- decode(rawtx),
@@ -146,8 +146,28 @@ defmodule BitcoinStream.Protocol.Transaction do
         inflate_inputs(rest, [inflated], total)
     end
   end
-  defp inflate_inputs(inputs) do
-    inflate_inputs(inputs, [], 0)
+  def inflate_inputs([], nil) do
+    { nil, 0 }
+  end
+  def inflate_inputs(txid, inputs) do
+    case :ets.lookup(:mempool_cache, txid) do
+      # cache miss, actually inflate
+      [] ->
+        inflate_inputs(inputs, [], 0)
+
+      # cache hit, but processed inputs not available
+      [{_, nil, _}] ->
+        inflate_inputs(inputs, [], 0)
+
+      # cache hit, just return the cached values
+      [{_, input_state, _}] ->
+        input_state
+
+      other ->
+        IO.puts("unexpected cached value: ")
+        IO.inspect(other);
+        inflate_inputs(inputs, [], 0)
+    end
   end
 
 end

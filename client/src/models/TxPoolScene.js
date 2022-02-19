@@ -79,9 +79,9 @@ export default class TxPoolScene {
     })
   }
 
-  insert (tx, autoLayout=true) {
+  insert (tx, insertDelay, autoLayout=true) {
     if (autoLayout) {
-      this.layoutTx(tx, this.scene.count++)
+      this.layoutTx(tx, this.scene.count++, insertDelay)
       this.txs[tx.id] = tx
     } else {
       this.hiddenTxs[tx.id] = tx
@@ -161,7 +161,7 @@ export default class TxPoolScene {
     return 1
   }
 
-  layoutTx (tx, sequence, setOnScreen = true) {
+  layoutTx (tx, sequence, insertDelay, setOnScreen = true) {
     const units = this.txSize(tx)
     this.place(tx, sequence, units)
     this.saveGridToPixelPosition(tx)
@@ -177,10 +177,10 @@ export default class TxPoolScene {
       if (this.heightStore) this.heightStore.set(this.maxHeight)
       this.saveGridToPixelPosition(tx)
     }
-    if (setOnScreen) this.setTxOnScreen(tx)
+    if (setOnScreen) this.setTxOnScreen(tx, insertDelay)
   }
 
-  setTxOnScreen (tx) {
+  setTxOnScreen (tx, insertDelay=0) {
     if (!tx.view.initialised) {
       const txColor = tx.getColor(this.sceneType, this.colorMode)
       tx.view.update({
@@ -204,7 +204,7 @@ export default class TxPoolScene {
           color: txColor.color
         },
         duration: 2500,
-        delay: 0,
+        delay: insertDelay,
         state: 'pool'
       })
       if (txColor.endColor) {
