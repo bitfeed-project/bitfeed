@@ -12,7 +12,7 @@ defmodule BitcoinStream.Router do
     json_decoder: Jason
   plug :dispatch
 
-  match "/block/:hash" do
+  match "/api/block/:hash" do
     case get_block(hash) do
       {:ok, block} ->
         put_resp_header(conn, "cache-control", "public, max-age=604800, immutable")

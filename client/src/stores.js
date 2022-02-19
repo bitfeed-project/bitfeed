@@ -1,5 +1,5 @@
 import { writable, derived } from 'svelte/store'
-import { spring } from 'svelte/motion';
+import { tweened } from 'svelte/motion';
 import { makePollStore } from './utils/pollStore.js'
 import LocaleCurrency from 'locale-currency'
 import { currencies } from './utils/fx.js'
@@ -82,7 +82,7 @@ export const devEvents = writable({
 
 export const txCount = createCounter()
 export const lastBlockId = writable(null)
-export const mempoolCount = spring(0)
+export const mempoolCount = tweened(0)
 export const mempoolScreenHeight = writable(0)
 export const frameRate = writable(null)
 export const avgFrameRate = writable(null)

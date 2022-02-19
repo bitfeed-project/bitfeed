@@ -24,6 +24,7 @@ services:
       BITCOIN_HOST: "172.17.0.1"
       BITCOIN_ZMQ_RAWBLOCK_PORT: "29000"
       BITCOIN_ZMQ_RAWTX_PORT: "29001"
+      BITCOIN_ZMQ_SEQUENCE_PORT: "29002"
       BITCOIN_RPC_PORT: "8332"
       BITCOIN_RPC_USER: "bitcoin"
       BITCOIN_RPC_PASS: "correcthorsebatterystaple"

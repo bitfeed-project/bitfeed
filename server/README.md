@@ -27,6 +27,7 @@ The API server expects the following environment variables to be set:
 | BITCOIN_HOST | Bitcoin node host address |
 | BITCOIN_ZMQ_RAWBLOCK_PORT | Bitcoin node ZMQ port for block events (to match `zmqpubrawblock` in bitcoin.conf) |
 | BITCOIN_ZMQ_RAWTX_PORT | Bitcoin node ZMQ port for transaction events (to match `zmqpubrawtx` in bitcoin.conf) |
+| BITCOIN_ZMQ_SEQUENCE_PORT | Bitcoin node ZMQ port for sequence events (to match `zmqpubsequence` in bitcoin.conf) |
 | BITCOIN_RPC_PORT | Bitcoin node RPC port |
 | either | |
 | BITCOIN_RPC_USER | Bitcoin node RPC user |

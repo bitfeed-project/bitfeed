@@ -14,6 +14,12 @@ Environment=LANG=en_US.UTF-8
 Environment=PORT=<port>
 Environment=BITCOIN_RPC_USER=<rpc user>
 Environment=BITCOIN_RPC_PASS=<rpc password>
+Environment=BITCOIN_HOST=<rpc host>
+Environment=BITCOIN_RPC_PORT=<rpc port>
+Environment=BITCOIN_ZMQ_RAWBLOCK_PORT=<zmq rawblock port>
+Environment=BITCOIN_ZMQ_RAWTX_PORT=<zmq rawtx port>
+Environment=BITCOIN_ZMQ_SEQUENCE_PORT=<zmq sequence port>
+
 
 WorkingDirectory=<installation root>/server
 

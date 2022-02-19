@@ -121,14 +121,19 @@ class TxStream {
   }
 
   async fetchBlock (id, calledOnLoad) {
+    if (!id) return
     if (id !== lastBlockSeen) {
-      console.log('downloading block', id)
-      const response = await fetch(`${this.apiUri}/block/${id}`, {
-        method: 'GET'
-      })
-      let blockData = await response.json()
-      console.log('downloaded block', id)
-      window.dispatchEvent(new CustomEvent('bitcoin_block', { detail: { block: blockData, realtime: !calledOnLoad} }))
+      try {
+        console.log('downloading block', id)
+        const response = await fetch(`${this.apiUri}/api/block/${id}`, {
+          method: 'GET'
+        })
+        let blockData = await response.json()
+        console.log('downloaded block', id)
+        window.dispatchEvent(new CustomEvent('bitcoin_block', { detail: { block: blockData, realtime: !calledOnLoad} }))
+      } catch (err) {
+        console.log("failed to download block ", id)
+      }
     } else {
       console.log('already seen block ', lastBlockSeen)
     }
