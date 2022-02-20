@@ -22,7 +22,7 @@ defmodule BitcoinStream.Mempool do
   connecting to a bitcoin node at RPC `host:port` for ground truth data
   """
   def start_link(opts) do
-    IO.puts("Starting mempool tracker");
+    IO.puts("Starting Mempool Tracker");
     # cache of all transactions in the node mempool, mapped to {inputs, total_input_value}
     :ets.new(:mempool_cache, [:set, :public, :named_table]);
     # cache of transactions ids in the mempool, but not yet synchronized with the :mempool_cache
@@ -31,8 +31,8 @@ defmodule BitcoinStream.Mempool do
     # used to avoid allowing confirmed transactions back into the mempool if rawtx events arrive late
     :ets.new(:block_cache, [:set, :public, :named_table]);
 
-     # state: {count, sequence_number, queue, done}
-    GenServer.start_link(__MODULE__, {0, :infinity, [], false}, opts)
+     # state: {count, sequence_number, queue, done, blocklock}
+    GenServer.start_link(__MODULE__, {0, :infinity, [], false, false}, opts)
   end
 
   @impl true
@@ -41,58 +41,68 @@ defmodule BitcoinStream.Mempool do
   end
 
   @impl true
-  def handle_call(:get_count, _from, {count, seq, queue, done}) do
-    {:reply, count, {count, seq, queue, done}}
+  def handle_call(:get_count, _from, {count, seq, queue, done, blocklock}) do
+    {:reply, count, {count, seq, queue, done, blocklock}}
   end
 
   @impl true
-  def handle_call({:set_count, n}, _from, {_count, seq, queue, done}) do
-    {:reply, :ok, {n, seq, queue, done}}
+  def handle_call({:set_count, n}, _from, {_count, seq, queue, done, blocklock}) do
+    {:reply, :ok, {n, seq, queue, done, blocklock}}
   end
 
   @impl true
-  def handle_call(:increment_count, _from, {count, seq, queue, done}) do
-    {:reply, :ok, {count + 1, seq, queue, done}}
+  def handle_call(:increment_count, _from, {count, seq, queue, done, blocklock}) do
+    {:reply, :ok, {count + 1, seq, queue, done, blocklock}}
   end
 
   @impl true
-  def handle_call(:decrement_count, _from, {count, seq, queue, done}) do
-    {:reply, :ok, {count - 1, seq, queue, done}}
+  def handle_call(:decrement_count, _from, {count, seq, queue, done, blocklock}) do
+    {:reply, :ok, {count - 1, seq, queue, done, blocklock}}
   end
 
   @impl true
-  def handle_call(:get_seq, _from, {count, seq, queue, done}) do
-    {:reply, seq, {count, seq, queue, done}}
+  def handle_call(:get_seq, _from, {count, seq, queue, done, blocklock}) do
+    {:reply, seq, {count, seq, queue, done, blocklock}}
   end
 
   @impl true
-  def handle_call({:set_seq, seq}, _from, {count, _seq, queue, done}) do
-    {:reply, :ok, {count, seq, queue, done}}
+  def handle_call({:set_seq, seq}, _from, {count, _seq, queue, done, blocklock}) do
+    {:reply, :ok, {count, seq, queue, done, blocklock}}
   end
 
   @impl true
-  def handle_call(:get_queue, _from, {count, seq, queue, done}) do
-    {:reply, queue, {count, seq, queue, done}}
+  def handle_call(:get_queue, _from, {count, seq, queue, done, blocklock}) do
+    {:reply, queue, {count, seq, queue, done, blocklock}}
   end
 
   @impl true
-  def handle_call({:set_queue, queue}, _from, {count, seq, _queue, done}) do
-    {:reply, :ok, {count, seq, queue, done}}
+  def handle_call({:set_queue, queue}, _from, {count, seq, _queue, done, blocklock}) do
+    {:reply, :ok, {count, seq, queue, done, blocklock}}
   end
 
   @impl true
-  def handle_call({:enqueue, txid}, _from, {count, seq, queue, done}) do
-    {:reply, :ok, {count, seq, [txid | queue], done}}
+  def handle_call({:enqueue, txid}, _from, {count, seq, queue, done, blocklock}) do
+    {:reply, :ok, {count, seq, [txid | queue], done, blocklock}}
   end
 
   @impl true
-  def handle_call(:is_done, _from, {count, seq, queue, done}) do
-    {:reply, done, {count, seq, queue, done}}
+  def handle_call(:is_done, _from, {count, seq, queue, done, blocklock}) do
+    {:reply, done, {count, seq, queue, done, blocklock}}
   end
 
   @impl true
-  def handle_call(:set_done, _from, {count, seq, queue, _done}) do
-    {:reply, :ok, {count, seq, queue, true}}
+  def handle_call(:set_done, _from, {count, seq, queue, _done, blocklock}) do
+    {:reply, :ok, {count, seq, queue, true, blocklock}}
+  end
+
+  @impl true
+  def handle_call(:is_block_locked, _from, {count, seq, queue, done, blocklock}) do
+    {:reply, blocklock, {count, seq, queue, done, blocklock}}
+  end
+
+  @impl true
+  def handle_call({:set_block_locked, lock}, _from, {count, seq, queue, done, _blocklock}) do
+    {:reply, :ok, {count, seq, queue, done, lock}}
   end
 
   def set(pid, n) do
@@ -137,6 +147,14 @@ defmodule BitcoinStream.Mempool do
 
   defp set_done(pid) do
     GenServer.call(pid, :set_done)
+  end
+
+  def is_block_locked(pid) do
+    GenServer.call(pid, :is_block_locked)
+  end
+
+  def set_block_locked(pid, lock) do
+    GenServer.call(pid, {:set_block_locked, lock})
   end
 
   def get_tx_status(_pid, txid) do
@@ -224,7 +242,7 @@ defmodule BitcoinStream.Mempool do
           [{_txid, _, :drop}] -> false
 
           # data already received, but tx not registered
-          [{_txid, _, txn}] ->
+          [{_txid, _, txn}] when txn != nil ->
             :ets.insert(:mempool_cache, {txid, { txn.inputs, txn.value + txn.fee }, nil});
             :ets.delete(:sync_cache, txid);
             if do_count do
@@ -305,18 +323,7 @@ defmodule BitcoinStream.Mempool do
     sync_queue(pid, tail)
   end
 
-  defp wait_for_ibd() do
-    case RPC.get_node_status(:rpc) do
-      {:ok, %{"initialblockdownload" => false}} -> true
-
-      _ ->
-        RPC.notify_on_ready(:rpc)
-    end
-  end
-
   def sync(pid) do
-    IO.puts("Waiting for node to come online and fully sync before synchronizing mempool");
-    wait_for_ibd();
     IO.puts("Preparing mempool sync");
     with  {:ok, 200, %{"mempool_sequence" => sequence, "txids" => txns}} <- RPC.request(:rpc, "getrawmempool", [false, true]) do
       set_seq(pid, sequence);

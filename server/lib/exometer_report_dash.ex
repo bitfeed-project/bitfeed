@@ -1,3 +1,5 @@
+Application.ensure_all_started(BitcoinStream.Metrics.SocketHandler)
+
 defmodule BitcoinStream.ExometerReportDash do
   @behaviour :exometer_report
 
@@ -5,9 +7,6 @@ defmodule BitcoinStream.ExometerReportDash do
   # Requires :channel and :app_name options
   @impl true
   def exometer_init(opts) do
-    IO.puts("Initialising dashboard exometer reporter")
-    Registry.BitcoinStream
-    |> Registry.register("metrics", {})
     {:ok, opts}
   end
 
@@ -23,15 +22,22 @@ defmodule BitcoinStream.ExometerReportDash do
       timestamp: :os.system_time(:milli_seconds)
     }
 
-    Registry.dispatch(Registry.BitcoinStream, "metrics", fn(entries) ->
-      for {pid, _} <- entries do
-        # IO.puts("Forwarding to pid #{inspect pid}")
-        case Jason.encode(%{type: "metric", metric: metric_payload}) do
-          {:ok, payload} -> Process.send(pid, payload, []);
-          {:error, reason} -> IO.puts("Error json encoding reporter metric: #{reason}");
-        end
+    if Process.whereis(Registry.BitcoinStream) != nil do
+      if (Registry.lookup(Registry.BitcoinStream, "metrics")) == [] do
+        Registry.BitcoinStream
+        |> Registry.register("metrics", {})
       end
-    end)
+
+      Registry.dispatch(Registry.BitcoinStream, "metrics", fn(entries) ->
+        for {pid, _} <- entries do
+          # IO.puts("Forwarding to pid #{inspect pid}")
+          case Jason.encode(%{type: "metric", metric: metric_payload}) do
+            {:ok, payload} -> Process.send(pid, payload, []);
+            {:error, reason} -> IO.puts("Error json encoding reporter metric: #{reason}");
+          end
+        end
+      end)
+    end
 
     {:ok, opts}
   end
