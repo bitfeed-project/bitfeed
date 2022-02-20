@@ -37,20 +37,19 @@ defmodule BitcoinStream.RPC do
     case status do
       # if node is connected and finished with the initial block download
       {:ok, %{"initialblockdownload" => false}} ->
-        IO.puts("Bitcoin Core connected and fully synced");
         # notify all listening processes
         notify_listeners(listeners);
-        Process.send_after(self(), :check_status, 60 * 1000);
+        Process.send_after(self(), :check_status, 300 * 1000);
         {:noreply, {host, port, status, creds, []}}
 
       {:ok, %{"initialblockdownload" => true}} ->
         IO.puts("Bitcoin Core connected, waiting for initial block download");
-        Process.send_after(self(), :check_status, 60 * 1000);
+        Process.send_after(self(), :check_status, 30 * 1000);
         {:noreply, {host, port, status, creds, listeners}}
 
       _ ->
         IO.puts("Waiting to connect to Bitcoin Core");
-        Process.send_after(self(), :check_status, 60 * 1000);
+        Process.send_after(self(), :check_status, 10 * 1000);
         {:noreply, {host, port, status, creds, listeners}}
     end
   end

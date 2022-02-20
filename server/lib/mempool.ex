@@ -305,7 +305,18 @@ defmodule BitcoinStream.Mempool do
     sync_queue(pid, tail)
   end
 
+  defp wait_for_ibd() do
+    case RPC.get_node_status(:rpc) do
+      {:ok, %{"initialblockdownload" => false}} -> true
+
+      _ ->
+        RPC.notify_on_ready(:rpc)
+    end
+  end
+
   def sync(pid) do
+    IO.puts("Waiting for node to come online and fully sync before synchronizing mempool");
+    wait_for_ibd();
     IO.puts("Preparing mempool sync");
     with  {:ok, 200, %{"mempool_sequence" => sequence, "txids" => txns}} <- RPC.request(:rpc, "getrawmempool", [false, true]) do
       set_seq(pid, sequence);
@@ -327,7 +338,7 @@ defmodule BitcoinStream.Mempool do
         IO.puts("Pool sync failed");
         IO.inspect(err);
         #retry after 30 seconds
-        :timer.sleep(30000);
+        :timer.sleep(10000);
         sync(pid)
     end
   end
