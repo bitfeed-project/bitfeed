@@ -10,8 +10,11 @@ defmodule BitcoinStream.Server do
     btc_host = System.get_env("BITCOIN_HOST");
 
     children = [
+      Registry.child_spec(
+        keys: :duplicate,
+        name: Registry.BitcoinStream
+      ),
       { BitcoinStream.RPC, [host: btc_host, port: rpc_port, name: :rpc] },
-      { BitcoinStream.Mempool, [name: :mempool] },
       { BitcoinStream.BlockData, [name: :block_data] },
       BitcoinStream.Metrics.Probe,
       Plug.Cowboy.child_spec(
@@ -22,11 +25,21 @@ defmodule BitcoinStream.Server do
           port: socket_port
         ]
       ),
-      Registry.child_spec(
-        keys: :duplicate,
-        name: Registry.BitcoinStream
-      ),
-      BitcoinStream.Bridge.child_spec(host: btc_host, tx_port: zmq_tx_port, block_port: zmq_block_port, sequence_port: zmq_sequence_port)
+      %{
+        id: BitcoinStream.Bridge,
+        start: {Supervisor, :start_link, [
+          [
+            { BitcoinStream.Mempool, [name: :mempool] },
+            { BitcoinStream.Mempool.Sync, [name: :mempool_sync] },
+            BitcoinStream.Bridge.Tx.child_spec(host: btc_host, port: zmq_tx_port),
+            BitcoinStream.Bridge.Block.child_spec(host: btc_host, port: zmq_block_port),
+            BitcoinStream.Bridge.Sequence.child_spec(host: btc_host, port: zmq_sequence_port),
+          ],
+          [strategy: :one_for_all]
+        ]},
+        type: :supervisor,
+        restart: :permanent
+      }
     ]
 
     opts = [strategy: :one_for_one, name: BitcoinStream.Application]
