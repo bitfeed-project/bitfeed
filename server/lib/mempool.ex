@@ -323,17 +323,12 @@ defmodule BitcoinStream.Mempool do
       do_sync(pid, txns);
       :ok
     else
-      {:error, :timeout} ->
-        IO.puts("Pool sync timed out");
-
-      {:error, reason} ->
-        IO.puts("Pool sync failed");
-        IO.inspect(reason)
-        :error
       err ->
-        IO.puts("Pool sync failed: (unknown reason)");
+        IO.puts("Pool sync failed");
         IO.inspect(err);
-        :error
+        #retry after 30 seconds
+        :timer.sleep(30000);
+        sync(pid)
     end
   end
 

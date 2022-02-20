@@ -37,7 +37,7 @@ defmodule BitcoinStream.Bridge.Sequence do
     # check rpc online & synced
     IO.puts("Waiting for node to come online and fully sync before connecting to sequence socket");
     wait_for_ibd();
-    IO.puts("Node is fully synced, connecting to sequence socket");
+    IO.puts("Node ready, connecting to sequence socket");
 
     # connect to socket
     {:ok, socket} = :chumak.socket(:sub);
@@ -119,7 +119,6 @@ defmodule BitcoinStream.Bridge.Sequence do
         _ -> true
       end
     else
-      err -> IO.inspect(err)
       _ -> false
     end
     loop(socket)

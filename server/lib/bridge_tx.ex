@@ -38,7 +38,7 @@ defmodule BitcoinStream.Bridge.Tx do
     # check rpc online & synced
     IO.puts("Waiting for node to come online and fully sync before connecting to tx socket");
     wait_for_ibd();
-    IO.puts("Node is fully synced, connecting to tx socket");
+    IO.puts("Node ready, connecting to tx socket");
 
     # connect to socket
     {:ok, socket} = :chumak.socket(:sub);

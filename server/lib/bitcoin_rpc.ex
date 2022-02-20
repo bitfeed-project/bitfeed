@@ -31,7 +31,7 @@ defmodule BitcoinStream.RPC do
   end
 
   @impl true
-  def handle_info(:check_status, {host, port, status, creds, listeners}) do
+  def handle_info(:check_status, {host, port, _status, creds, listeners}) do
     # poll Bitcoin Core for current status
     status = check_status({host, port, creds});
     case status do

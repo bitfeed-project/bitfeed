@@ -3,7 +3,6 @@ defmodule BitcoinStream.SocketHandler do
 
   use Elixometer
 
-  alias BitcoinStream.Protocol.Block, as: BitcoinBlock
   alias BitcoinStream.Mempool, as: Mempool
   alias BitcoinStream.BlockData, as: BlockData
 
