@@ -8,8 +8,6 @@ defmodule BitcoinStream.BlockData do
   """
   use GenServer
 
-  alias BitcoinStream.Protocol.Block, as: BitcoinBlock
-
   def start_link(opts) do
     IO.puts("Starting block data link")
     # load block
@@ -38,7 +36,19 @@ defmodule BitcoinStream.BlockData do
   end
 
   @impl true
-  def handle_cast({:json, {id, json}}, _state) do
-      {:noreply, {id, json}}
+  def handle_call({:json, {id, json}}, _from, _state) do
+      {:reply, :ok, {id, json}}
+  end
+
+  def get_json_block(pid) do
+    GenServer.call(pid, :json_block, 10000)
+  end
+
+  def get_block_id(pid) do
+    GenServer.call(pid, :block_id, 10000)
+  end
+
+  def set_json_block(pid, block_id, json) do
+    GenServer.call(pid, {:json, { block_id, json }}, 10000)
   end
 end

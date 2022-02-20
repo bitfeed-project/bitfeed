@@ -1,6 +1,8 @@
 defmodule BitcoinStream.Router do
   use Plug.Router
 
+  alias BitcoinStream.BlockData, as: BlockData
+
   plug Corsica, origins: "*", allow_headers: :all
   plug Plug.Static,
     at: "/",
@@ -27,10 +29,10 @@ defmodule BitcoinStream.Router do
   end
 
   defp get_block(last_seen) do
-    last_id = GenServer.call(:block_data, :block_id);
+    last_id = BlockData.get_block_id(:block_data);
     cond do
       (last_seen == last_id) ->
-        payload = GenServer.call(:block_data, :json_block);
+        payload = BlockData.get_json_block(:block_data);
         {:ok, payload}
       true -> :err
     end

@@ -1,6 +1,6 @@
 defmodule BitcoinStream.Mempool do
   @moduledoc """
-  Agent for retrieving and maintaining mempool info
+  GenServer for retrieving and maintaining mempool info
   Used for tracking mempool count, and maintaining an :ets cache of transaction prevouts
 
   Transaction lifecycle:
@@ -12,7 +12,7 @@ defmodule BitcoinStream.Mempool do
     ZMQ 'A' and 'R' messages are guaranteed to arrive in order relative to each other
     but rawtx and rawblock messages may arrive in any order
   """
-  use Agent
+  use GenServer
 
   alias BitcoinStream.Protocol.Transaction, as: BitcoinTx
   alias BitcoinStream.RPC, as: RPC
@@ -22,7 +22,7 @@ defmodule BitcoinStream.Mempool do
   connecting to a bitcoin node at RPC `host:port` for ground truth data
   """
   def start_link(opts) do
-    IO.puts("Starting mempool agent");
+    IO.puts("Starting mempool tracker");
     # cache of all transactions in the node mempool, mapped to {inputs, total_input_value}
     :ets.new(:mempool_cache, [:set, :public, :named_table]);
     # cache of transactions ids in the mempool, but not yet synchronized with the :mempool_cache
@@ -30,50 +30,113 @@ defmodule BitcoinStream.Mempool do
     # cache of transaction ids included in the last block
     # used to avoid allowing confirmed transactions back into the mempool if rawtx events arrive late
     :ets.new(:block_cache, [:set, :public, :named_table]);
-    Agent.start_link(fn -> %{count: 0, seq: :infinity, queue: [], done: false} end, opts)
+
+     # state: {count, sequence_number, queue, done}
+    GenServer.start_link(__MODULE__, {0, :infinity, [], false}, opts)
+  end
+
+  @impl true
+  def init(state) do
+    {:ok, state}
+  end
+
+  @impl true
+  def handle_call(:get_count, _from, {count, seq, queue, done}) do
+    {:reply, count, {count, seq, queue, done}}
+  end
+
+  @impl true
+  def handle_call({:set_count, n}, _from, {_count, seq, queue, done}) do
+    {:reply, :ok, {n, seq, queue, done}}
+  end
+
+  @impl true
+  def handle_call(:increment_count, _from, {count, seq, queue, done}) do
+    {:reply, :ok, {count + 1, seq, queue, done}}
+  end
+
+  @impl true
+  def handle_call(:decrement_count, _from, {count, seq, queue, done}) do
+    {:reply, :ok, {count - 1, seq, queue, done}}
+  end
+
+  @impl true
+  def handle_call(:get_seq, _from, {count, seq, queue, done}) do
+    {:reply, seq, {count, seq, queue, done}}
+  end
+
+  @impl true
+  def handle_call({:set_seq, seq}, _from, {count, _seq, queue, done}) do
+    {:reply, :ok, {count, seq, queue, done}}
+  end
+
+  @impl true
+  def handle_call(:get_queue, _from, {count, seq, queue, done}) do
+    {:reply, queue, {count, seq, queue, done}}
+  end
+
+  @impl true
+  def handle_call({:set_queue, queue}, _from, {count, seq, _queue, done}) do
+    {:reply, :ok, {count, seq, queue, done}}
+  end
+
+  @impl true
+  def handle_call({:enqueue, txid}, _from, {count, seq, queue, done}) do
+    {:reply, :ok, {count, seq, [txid | queue], done}}
+  end
+
+  @impl true
+  def handle_call(:is_done, _from, {count, seq, queue, done}) do
+    {:reply, done, {count, seq, queue, done}}
+  end
+
+  @impl true
+  def handle_call(:set_done, _from, {count, seq, queue, _done}) do
+    {:reply, :ok, {count, seq, queue, true}}
   end
 
   def set(pid, n) do
-    Agent.update(pid, &Map.update(&1, :count, 0, fn(_) -> n end))
+    GenServer.call(pid, {:set_count, n})
   end
 
   def get(pid) do
-    Agent.get(pid, &Map.get(&1, :count))
+    GenServer.call(pid, :get_count)
   end
 
   defp increment(pid) do
-    Agent.update(pid, &Map.update(&1, :count, 0, fn(x) -> x + 1 end));
+    GenServer.call(pid, :increment_count)
   end
 
   defp decrement(pid) do
-    Agent.update(pid, &Map.update(&1, :count, 0, fn(x) -> x - 1 end));
+    GenServer.call(pid, :decrement_count)
   end
 
   defp get_seq(pid) do
-    Agent.get(pid, &Map.get(&1, :seq))
+    GenServer.call(pid, :get_seq)
   end
 
   defp set_seq(pid, seq) do
-    Agent.update(pid, &Map.put(&1, :seq, seq))
+    GenServer.call(pid, {:set_seq, seq})
   end
 
   defp get_queue(pid) do
-    Agent.get(pid, &Map.get(&1, :queue))
+    GenServer.call(pid, :get_queue)
   end
 
   defp set_queue(pid, queue) do
-    Agent.update(pid, &Map.put(&1, :queue, queue))
+    GenServer.call(pid, {:set_queue, queue})
   end
 
   defp enqueue(pid, txid) do
-    Agent.update(pid, &Map.update(&1, :queue, [], fn(q) -> [txid | q] end))
+    GenServer.call(pid, {:enqueue, txid})
   end
 
   def is_done(pid) do
-    Agent.get(pid, &Map.get(&1, :done))
+    GenServer.call(pid, :is_done)
   end
+
   defp set_done(pid) do
-    Agent.update(pid, &Map.put(&1, :done, true))
+    GenServer.call(pid, :set_done)
   end
 
   def get_tx_status(_pid, txid) do
@@ -257,8 +320,12 @@ defmodule BitcoinStream.Mempool do
 
       IO.puts("Loaded #{count} mempool transactions");
       send_mempool_count(pid);
-      do_sync(pid, txns)
+      do_sync(pid, txns);
+      :ok
     else
+      {:error, :timeout} ->
+        IO.puts("Pool sync timed out");
+
       {:error, reason} ->
         IO.puts("Pool sync failed");
         IO.inspect(reason)
@@ -275,7 +342,7 @@ defmodule BitcoinStream.Mempool do
     sync_mempool(pid, txns);
     IO.puts("MEMPOOL SYNC FINISHED");
     set_done(pid);
-    IO.inspect(is_done(pid))
+    :ok
   end
 
   defp sync_mempool(pid, txns) do

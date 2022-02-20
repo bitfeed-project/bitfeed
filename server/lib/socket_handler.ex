@@ -20,14 +20,14 @@ defmodule BitcoinStream.SocketHandler do
 
   def get_block(last_seen) do
     IO.puts("getting block with id #{last_seen}")
-    last_id = GenServer.call(:block_data, :block_id)
+    last_id = BlockData.get_block_id(:block_data)
     IO.puts("last block id: #{last_id}")
     cond do
       (last_seen == nil) ->
-        payload = GenServer.call(:block_data, :json_block);
+        payload = BlockData.get_json_block(:block_data);
         {:ok, payload}
       (last_seen != last_id) ->
-        payload = GenServer.call(:block_data, :json_block);
+        payload = BlockData.get_json_block(:block_data);
         {:ok, payload}
       true ->
         {:ok, '{"type": "block", "block": {}}'}
@@ -40,7 +40,7 @@ defmodule BitcoinStream.SocketHandler do
   end
 
   def get_block_id_msg() do
-    last_id = GenServer.call(:block_data, :block_id);
+    last_id = BlockData.get_block_id(:block_data);
     "{ \"type\": \"block_id\", \"block_id\": \"#{last_id}\"}"
   end
 
