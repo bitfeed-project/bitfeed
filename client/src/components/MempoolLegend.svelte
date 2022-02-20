@@ -1,10 +1,16 @@
 <script>
 import { onMount } from 'svelte'
-import { settings } from '../stores.js'
-import { integerFormat } from '../utils/format.js'
+import { settings, colorMode } from '../stores.js'
+import { numberFormat } from '../utils/format.js'
 import { logTxSize, byteTxSize } from '../utils/misc.js'
 import { interpolateHcl } from 'd3-interpolate'
-import { color } from 'd3-color'
+import { color, hcl } from 'd3-color'
+import { hlToHex, orange, teal, green, purple } from '../utils/color.js'
+
+const orangeHex = hlToHex(orange)
+const tealHex = hlToHex(teal)
+const greenHex = hlToHex(green)
+const purpleHex = hlToHex(purple)
 
 const sizes = [
   { value: 1000000, vbytes: 1*256, size: null },
@@ -18,7 +24,14 @@ let unitWidth
 let unitPadding
 let gridSize
 let colorScale
+let feeColorScale
 const colorScaleWidth = 200
+
+let squareColor = orangeHex
+$: {
+  if ($colorMode === 'age') squareColor = orangeHex
+  else squareColor = purpleHex
+}
 
 function resize () {
   unitWidth = Math.floor(Math.max(4, (window.innerWidth - 20) / 250))
@@ -29,7 +42,8 @@ resize()
 
 onMount(() => {
   resize()
-  colorScale = generateColorScale('#f7941d', '#00ffc6')
+  colorScale = generateColorScale(orangeHex, tealHex)
+  feeColorScale = generateColorScale(tealHex, purpleHex)
 })
 
 function calcSizes (gridSize, unitWidth, unitPadding) {
@@ -52,7 +66,7 @@ function calcSize ({ vbytes, value }) {
 }
 
 function formatBytes (bytes) {
-  const str = integerFormat.format(bytes) + ' vbytes'
+  const str = numberFormat.format(bytes) + ' vbytes'
   const padded = str.padStart(13, ' ')
   return padded
 }
@@ -98,6 +112,7 @@ function generateColorScale (colorA, colorB) {
     .size-legend {
       display: table;
       margin: auto;
+      margin-bottom: 5px;
 
       .size-row {
         display: table-row;
@@ -166,23 +181,33 @@ function generateColorScale (colorA, colorB) {
     {#if $settings.vbytes }
       {#each sizes as { size, vbytes } }
         <div class="size-row">
-          <span class="square-container"><div class="square" style="width: {size}px; height: {size}px" /></span>
+          <span class="square-container"><div class="square" style="width: {size}px; height: {size}px; background: {squareColor};" /></span>
           <span class="value"><span class="part left">&lt;</span><span class="part center">&nbsp;</span><span class="part right">{ formatBytes(vbytes) }</span></span>
         </div>
       {/each}
     {:else}
       {#each sizes as { size, value } }
         <div class="size-row">
-          <span class="square-container"><div class="square" style="width: {size}px; height: {size}px" /></span>
+          <span class="square-container"><div class="square" style="width: {size}px; height: {size}px; background: {squareColor}" /></span>
           <span class="value"><span class="part left">&lt;</span> <span class="part center">&#8383;</span><span class="part right">{ formatValue(value) }</span></span>
         </div>
       {/each}
     {/if}
   </div>
-  <h3 class="subheading">Age in seconds</h3>
+  {#if $colorMode === 'age'}
+    <h3 class="subheading">Age in seconds</h3>
+  {:else}
+    <h3 class="subheading">Fee rate in sats/vbyte</h3>
+  {/if}
   <div class="color-legend">
-    <span class="value left">0</span>
-    <img src={colorScale} alt="" class="color-scale-img" width="200" height="15">
-    <span class="value right">60+</span>
+    {#if $colorMode === 'age'}
+      <span class="value left">0</span>
+      <img src={colorScale} alt="" class="color-scale-img" width="200" height="15">
+      <span class="value right">60+</span>
+    {:else}
+      <span class="value left">1</span>
+      <img src={feeColorScale} alt="" class="color-scale-img" width="200" height="15">
+      <span class="value right">64+</span>
+    {/if}
   </div>
 </div>

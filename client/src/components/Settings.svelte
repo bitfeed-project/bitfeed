@@ -46,6 +46,13 @@ let settingConfig = {
     trueLabel: 'vbytes',
     valueType: 'bool'
   },
+  colorByFee: {
+    label: 'Color by',
+    type: 'pill',
+    falseLabel: 'age',
+    trueLabel: 'fee rate',
+    valueType: 'bool'
+  }
 }
 $: {
   if ($nativeAntialias) {

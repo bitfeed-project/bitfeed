@@ -3,7 +3,7 @@
   import TxController from '../controllers/TxController.js'
   import TxRender from './TxRender.svelte'
   import getTxStream from '../controllers/TxStream.js'
-  import { settings, overlay, serverConnected, serverDelay, txQueueLength, txCount, mempoolCount, mempoolScreenHeight, frameRate, avgFrameRate, blockVisible, currentBlock, selectedTx, blockAreaSize, devEvents, devSettings } from '../stores.js'
+  import { settings, overlay, serverConnected, serverDelay, txCount, mempoolCount, mempoolScreenHeight, frameRate, avgFrameRate, blockVisible, currentBlock, selectedTx, blockAreaSize, devEvents, devSettings } from '../stores.js'
   import BitcoinBlock from '../models/BitcoinBlock.js'
   import BlockInfo from '../components/BlockInfo.svelte'
   import TxInfo from '../components/TxInfo.svelte'
@@ -12,7 +12,7 @@
   import DonationOverlay from '../components/DonationOverlay.svelte'
   import SupportersOverlay from '../components/SupportersOverlay.svelte'
   import Alerts from '../components/alert/Alerts.svelte'
-  import { integerFormat } from '../utils/format.js'
+  import { numberFormat } from '../utils/format.js'
   import { exchangeRates, lastBlockId, haveSupporters, sidebarToggle } from '../stores.js'
   import { formatCurrency } from '../utils/fx.js'
   import config from '../config.js'
@@ -54,14 +54,16 @@
       txStream.subscribe('tx', tx => {
         txController.addTx(tx)
       })
+      txStream.subscribe('drop_tx', txid => {
+        txController.dropTx(txid)
+      })
     }
     if (!config.noBlockFeed) {
-      txStream.subscribe('block', block => {
+      txStream.subscribe('block', ({block, realtime}) => {
         if (block) {
-          const added = txController.addBlock(block)
+          const added = txController.addBlock(block, realtime)
           if (added && added.id) $lastBlockId = added.id
         }
-        txStream.sendMempoolRequest()
       })
     }
     if (!config.noTxFeed || !config.noBlockFeed) {
@@ -398,7 +400,7 @@
 
     <div class="mempool-height" style="bottom: calc({$mempoolScreenHeight + 20}px)">
       <div class="height-bar" />
-      <span class="mempool-count">Mempool: { integerFormat.format($mempoolCount) } unconfirmed</span>
+      <span class="mempool-count">Mempool: { numberFormat.format(Math.round($mempoolCount)) } unconfirmed</span>
     </div>
 
     <div class="block-area-wrapper">

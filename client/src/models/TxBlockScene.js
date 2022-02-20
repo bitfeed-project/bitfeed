@@ -1,8 +1,8 @@
 import TxMondrianPoolScene from './TxMondrianPoolScene.js'
 
 export default class TxBlockScene extends TxMondrianPoolScene {
-  constructor ({ width, height, unit = 4, padding = 1, blockId, controller }) {
-    super({ width, height, unit, padding, controller })
+  constructor ({ width, height, unit = 4, padding = 1, blockId, controller, heightStore, colorMode }) {
+    super({ width, height, unit, padding, controller, heightStore, colorMode })
     this.heightLimit = null
     this.expired = false
     this.laidOut = false
@@ -10,6 +10,7 @@ export default class TxBlockScene extends TxMondrianPoolScene {
     this.initialised = true
     this.inverted = true
     this.hidden = false
+    this.sceneType = 'block'
   }
 
   resize ({ width = this.width, height = this.height }) {
@@ -55,7 +56,7 @@ export default class TxBlockScene extends TxMondrianPoolScene {
             y: -(Math.random() * window.innerWidth) - (this.scene.offset.y * 2) - pixelPosition.r,
             r: pixelPosition.r
           },
-          color: this.defaultColor
+          color: tx.getColor('block', this.colorMode).color
         },
         delay: 0,
         state: 'ready'
@@ -67,7 +68,7 @@ export default class TxBlockScene extends TxMondrianPoolScene {
       tx.view.update({
         display: {
           position: tx.screenPosition,
-          color: this.defaultColor
+          color: tx.getColor('block', this.colorMode).color
         },
         duration: 0,
         delay: 0,
@@ -77,7 +78,7 @@ export default class TxBlockScene extends TxMondrianPoolScene {
       tx.view.update({
         display: {
           position: tx.screenPosition,
-          color: this.defaultColor
+          color: tx.getColor('block', this.colorMode).color
         },
         duration: this.laidOut ? 1000 : 2000,
         delay: 0,
@@ -96,7 +97,10 @@ export default class TxBlockScene extends TxMondrianPoolScene {
             y: -(Math.random() * window.innerWidth) - (this.scene.offset.y * 2) - tx.pixelPosition.r,
             r: tx.pixelPosition.r
           },
-          color: this.defaultColor
+          color: {
+            ...tx.getColor('block', this.colorMode).color,
+            alpha: 1
+          }
         },
         delay: 0,
         state: 'ready'
@@ -104,7 +108,7 @@ export default class TxBlockScene extends TxMondrianPoolScene {
     }
     tx.view.update({
       display: {
-        color: this.defaultColor
+      color: tx.getColor('block', this.colorMode).color
       },
       duration: 2000,
       delay: 0
@@ -112,7 +116,7 @@ export default class TxBlockScene extends TxMondrianPoolScene {
   }
 
   prepareTx (tx, sequence) {
-    this.prepareTxOnScreen(tx, this.layoutTx(tx, sequence, false))
+    this.prepareTxOnScreen(tx, this.layoutTx(tx, sequence, 0, false))
   }
 
   hideTx (tx) {

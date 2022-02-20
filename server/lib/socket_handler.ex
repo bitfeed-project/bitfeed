@@ -18,10 +18,6 @@ defmodule BitcoinStream.SocketHandler do
     {:ok, state}
   end
 
-  # def last_block() do
-  #
-  # end
-
   def get_block(last_seen) do
     IO.puts("getting block with id #{last_seen}")
     last_id = GenServer.call(:block_data, :block_id)
@@ -40,8 +36,12 @@ defmodule BitcoinStream.SocketHandler do
 
   def get_mempool_count_msg() do
     count = Mempool.get(:mempool);
-    IO.puts("Count: #{count}");
     "{ \"type\": \"count\", \"count\": #{count}}"
+  end
+
+  def get_block_id_msg() do
+    last_id = GenServer.call(:block_data, :block_id);
+    "{ \"type\": \"block_id\", \"block_id\": \"#{last_id}\"}"
   end
 
   @timed(key: "timed.function")
@@ -52,20 +52,20 @@ defmodule BitcoinStream.SocketHandler do
 
       "block" ->
         IO.puts('block request');
-        {:reply, {:text, "null"}, state};
+        {:reply, {:text, "null"}, state}
 
       "count" ->
         count = get_mempool_count_msg();
-        {:reply, {:text, count}, state};
+        {:reply, {:text, count}, state}
+
+      "block_id" ->
+        last_id = get_block_id_msg();
+        {:reply, {:text, last_id}, state}
 
       json ->
-        IO.puts("attempting to decode msg as json");
         with {:ok, result} <- Jason.decode(json) do
-          IO.puts("decoded ok");
-          IO.inspect(result);
           case result do
             %{"last" => block_id, "method" => "get_block"} ->
-              IO.puts('block request')
               case get_block(block_id) do
                 {:ok, block_msg} ->
                   {:reply, {:text, block_msg}, state};

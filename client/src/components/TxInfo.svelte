@@ -1,7 +1,7 @@
 <script>
 import Icon from './Icon.svelte'
 import BookmarkIcon from '../assets/icon/cil-bookmark.svg'
-import { longBtcFormat, integerFormat } from '../utils/format.js'
+import { longBtcFormat, numberFormat, feeRateFormat } from '../utils/format.js'
 import { exchangeRates, settings, sidebarToggle, newHighlightQuery, highlightingFull } from '../stores.js'
 import { formatCurrency } from '../utils/fx.js'
 
@@ -84,6 +84,24 @@ function highlight () {
       word-break: break-all;
     }
 
+    .inputs {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: baseline;
+
+      span {
+        width: 0;
+        flex-shrink: 1;
+        flex-grow: 1;
+        &.arrow {
+          min-width: 1.5em;
+          flex-shrink: 1;
+          flex-grow: 0;
+        }
+      }
+    }
+
     &:hover {
       .hash {
         white-space: pre-wrap;
@@ -119,12 +137,21 @@ function highlight () {
   <p class="field hash">
     TxID: { tx.id }
   </p>
-  {#if tx.inputs && !tx.coinbase }<p class="field inputs">{ tx.inputs.length } input{#if tx.inputs.length != 1}s{/if}</p>
+  {#if tx.inputs && tx.outputs && !tx.coinbase }
+    <p class="field inputs">
+      <span>{ tx.inputs.length } input{#if tx.inputs.length != 1}s{/if}</span>
+      <span class="arrow"> &rarr; </span>
+      <span>{ tx.outputs.length } output{#if tx.outputs.length != 1}s{/if}</span>
+    </p>
   {:else if tx.coinbase }
     <p class="field coinbase">Coinbase: { tx.coinbase.sigAscii }</p>
+    <p class="field inputs">{ tx.outputs.length } output{#if tx.outputs.length != 1}s{/if}</p>
   {/if}
-  {#if tx.outputs }<p class="field outputs">{ tx.outputs.length } output{#if tx.outputs.length != 1}s{/if}</p>{/if}
-  <p class="field vbytes">{ integerFormat.format(tx.vbytes) } vbytes</p>
+  <p class="field vbytes">Size: { numberFormat.format(tx.vbytes) } vbytes</p>
+  {#if !tx.coinbase && tx.fee != null }
+    <p class="field feerate">Fee rate: { numberFormat.format(tx.feerate.toFixed(2)) } sats/vbyte</p>
+    <p class="field fee">Fee: { numberFormat.format(tx.fee) } sats</p>
+  {/if}
   <p class="field value">
     Total value: { formatBTC(tx.value) }
     {#if formattedLocalValue != null }

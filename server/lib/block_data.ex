@@ -1,3 +1,5 @@
+Application.ensure_all_started(BitcoinStream.RPC)
+
 defmodule BitcoinStream.BlockData do
   @moduledoc """
   Block data module.
@@ -10,12 +12,11 @@ defmodule BitcoinStream.BlockData do
 
   def start_link(opts) do
     IO.puts("Starting block data link")
-    # load block.dat
+    # load block
 
-    with {:ok, block_data} <- File.read("data/block.dat"),
-         {:ok, block} <- BitcoinBlock.decode(block_data),
-         {:ok, payload} <- Jason.encode(%{type: "block", block: block}) do
-      GenServer.start_link(__MODULE__, {block, payload}, opts)
+    with {:ok, json} <- File.read("data/last_block.json"),
+         {:ok, %{"id" => id}} <- Jason.decode(json) do
+      GenServer.start_link(__MODULE__, {id, json}, opts)
     else
       _ -> GenServer.start_link(__MODULE__, {nil, "null"}, opts)
     end
@@ -27,41 +28,17 @@ defmodule BitcoinStream.BlockData do
   end
 
   @impl true
-  def handle_call(:block_id, _from, {block, json}) do
-    case block do
-      %{id: id} ->
-        {:reply, id, {block, json}}
-      _ -> {:reply, nil, {block, json}}
-    end
+  def handle_call(:block_id, _from, {id, json}) do
+    {:reply, id, {id, json}}
   end
 
   @impl true
-  def handle_call(:block, _from, {block, json}) do
-    {:reply, block, {block, json}}
+  def handle_call(:json_block, _from, {id, json}) do
+    {:reply, json, {id, json}}
   end
 
   @impl true
-  def handle_call(:json_block, _from, {block, json}) do
-    {:reply, json, {block, json}}
+  def handle_cast({:json, {id, json}}, _state) do
+      {:noreply, {id, json}}
   end
-
-  @impl true
-  def handle_cast({:block, block}, state) do
-    with {:ok, json } <- Jason.encode(%{type: "block", block: block}) do
-      IO.puts("Storing block data");
-      {:noreply, {block, json}}
-    else
-      {:err, reason} ->
-        IO.puts("Failed to json encode block data");
-        IO.inspect(reason);
-        {:noreply, state}
-      _ ->
-        IO.puts("Failed to json encode block data");
-        {:noreply, state}
-    end
-  end
-
-  def get_block_number() do
-  end
-
 end

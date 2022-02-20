@@ -1,17 +1,9 @@
 import TxView from './TxView.js'
 import config from '../config.js'
-
-const highlightColor = {
-  h: 0.03,
-  l: 0.35
-}
-const hoverColor = {
-  h: 0.4,
-  l: 0.42
-}
+import { mixColor, pink, bluegreen, orange, teal, green, purple  } from '../utils/color.js'
 
 export default class BitcoinTx {
-  constructor ({ version, id, value, vbytes, inputs, outputs, time, block }, vertexArray) {
+  constructor ({ version, id, value, fee, vbytes, inputs, outputs, time, block }, vertexArray) {
     this.version = version
     this.id = id
     this.vertexArray = vertexArray
@@ -21,7 +13,10 @@ export default class BitcoinTx {
     this.inputs = inputs
     this.outputs = outputs
     this.value = value
+    this.fee = fee
     this.vbytes = vbytes
+
+    if (this.fee != null) this.feerate = fee / vbytes
 
     if (inputs && outputs && value == null) {
       this.value = this.calcValue()
@@ -31,8 +26,35 @@ export default class BitcoinTx {
     this.highlight = false
 
     // is a coinbase transaction?
-    if (this.inputs && this.inputs.length === 1 && this.inputs[0].prev_txid === "0000000000000000000000000000000000000000000000000000000000000000") {
-      const cbInfo = this.inputs[0].script_sig
+    this.coinbase = this.isCoinbase(this)
+    if (this.coinbase) {
+      this.fee = null
+      this.feerate = null
+    }
+
+    this.setBlock(block)
+
+    const feeColor = (this.feerate == null
+      ? orange
+      : mixColor(teal, purple, 1, Math.log2(64), Math.log2(this.feerate))
+    )
+    this.colors = {
+      age: {
+        block: { color: orange },
+        pool: { color: orange, endColor: teal, duration: 60000 },
+      },
+      fee: {
+        block: { color: feeColor },
+        pool: { color: feeColor },
+      }
+    }
+
+    this.view = new TxView(this)
+  }
+
+  isCoinbase (txn) {
+    if (txn.inputs && txn.inputs.length === 1 && txn.inputs[0].prev_txid === "0000000000000000000000000000000000000000000000000000000000000000") {
+      const cbInfo = txn.inputs[0].script_sig
       // number of bytes encoding the block height
       const height_bytes = parseInt(cbInfo.substring(0,2), 16)
       // extract the specified number of bytes, reverse the endianness (reverse pairs of hex characters), parse as a hex string
@@ -42,15 +64,13 @@ export default class BitcoinTx {
       const sigAscii = sig.match(/../g).reduce((parsed, hexChar) => {
         return parsed + String.fromCharCode(parseInt(hexChar, 16))
       }, "")
-      this.coinbase = {
+
+      return {
         height,
         sig,
         sigAscii
       }
-    }
-
-    this.setBlock(block)
-    this.view = new TxView(this)
+    } else return false
   }
 
   destroy () {
@@ -70,7 +90,15 @@ export default class BitcoinTx {
     this.state = this.block ? 'block' : 'pool'
   }
 
-  hoverOn (color = hoverColor) {
+  onEnterScene () {
+    this.enteredTime = performance.now()
+  }
+
+  getColor (scene, mode) {
+    return this.colors[mode][scene]
+  }
+
+  hoverOn (color = bluegreen) {
     if (this.view) this.view.setHover(true, color)
   }
 
@@ -78,7 +106,7 @@ export default class BitcoinTx {
     if (this.view) this.view.setHover(false)
   }
 
-  highlightOn (color = highlightColor) {
+  highlightOn (color = pink) {
     if (this.view) this.view.setHighlight(true, color)
     this.highlight = true
   }
@@ -104,6 +132,6 @@ export default class BitcoinTx {
         })
       }
     })
-    this.view.setHighlight(this.highlight, color || highlightColor)
+    this.view.setHighlight(this.highlight, color || pink)
   }
 }
