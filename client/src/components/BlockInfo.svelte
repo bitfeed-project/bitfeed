@@ -114,6 +114,27 @@
       font-size: 4.4vw;
     }
 
+    .compact {
+      display: none;
+    }
+
+    @media (max-aspect-ratio: 1/1) and (max-height: 760px) {
+      .compact {
+        display: block;
+      }
+      .full-size {
+        display: none;
+      }
+    }
+    @media (aspect-ratio: 1/1) and (max-height: 760px) {
+      .compact {
+        display: none;
+      }
+      .full-size {
+        display: block;
+      }
+    }
+
     .data-row {
       display: flex;
       flex-direction: row;
@@ -210,26 +231,46 @@
   {#if block != null && visible }
     <div class="block-info" out:fly="{{ y: -50, duration: 2000, easing: linear }}" in:fly="{{ y: (restoring ? -50 : 50), duration: (restoring ? 500 : 1000), easing: linear, delay: (restoring ? 0 : newBlockDelay) }}">
         <!-- <span class="data-field">Hash: { block.id }</span> -->
-        <div class="data-row">
-          <span class="data-field title-field" title="{block.miner_sig}"><b>Latest Block: </b>{ numberFormat.format(block.height) }</span>
-          <button class="data-field close-button" on:click={hideBlock}><Icon icon={closeIcon} color="var(--palette-x)" /></button>
+        <div class="full-size">
+          <div class="data-row">
+            <span class="data-field title-field" title="{block.miner_sig}"><b>Latest Block: </b>{ numberFormat.format(block.height) }</span>
+            <button class="data-field close-button" on:click={hideBlock}><Icon icon={closeIcon} color="var(--palette-x)" /></button>
+          </div>
+          <div class="data-row">
+            <span class="data-field">Mined { formatTime(block.time) }</span>
+            <span class="data-field">{ formattedBlockValue }</span>
+          </div>
+          <div class="data-row">
+            <span class="data-field">{ formatBytes(block.bytes) }</span>
+            <span class="data-field">{ formatCount(block.txnCount) } transactions</span>
+          </div>
+          <div class="data-row spacer">&nbsp;</div>
+          <div class="data-row">
+            <span class="data-field">Avg Fee Rate</span>
+            {#if block.fees != null}
+              <span class="data-field">{ formatFee(block.avgFeerate) } sats/vbyte</span>
+            {:else}
+              <span class="data-field">unavailable</span>
+            {/if}
+          </div>
         </div>
-        <div class="data-row">
-          <span class="data-field">Mined { formatTime(block.time) }</span>
-          <span class="data-field">{ formattedBlockValue }</span>
-        </div>
-        <div class="data-row">
-          <span class="data-field">{ formatBytes(block.bytes) }</span>
-          <span class="data-field">{ formatCount(block.txnCount) } transactions</span>
-        </div>
-        <div class="data-row spacer">&nbsp;</div>
-        <div class="data-row">
-          <span class="data-field">Avg Fee Rate</span>
-          {#if block.fees != null}
-            <span class="data-field">{ formatFee(block.avgFeerate) } sats/vbyte</span>
-          {:else}
-            <span class="data-field">unavailable</span>
-          {/if}
+        <div class="compact">
+          <div class="data-row">
+            <span class="data-field title-field" title="{block.miner_sig}"><b>Latest Block: </b>{ numberFormat.format(block.height) }</span>
+            <button class="data-field close-button" on:click={hideBlock}><Icon icon={closeIcon} color="var(--palette-x)" /></button>
+          </div>
+          <div class="data-row">
+            <span class="data-field">Mined { formatTime(block.time) }</span>
+            <span class="data-field">{ formattedBlockValue }</span>
+          </div>
+          <div class="data-row">
+            <span class="data-field">{ formatCount(block.txnCount) } transactions</span>
+            {#if block.fees != null}
+              <span class="data-field">{ formatFee(block.avgFeerate) } sats/vb</span>
+            {:else}
+              <span class="data-field">{ formatBytes(block.bytes) }</span>
+            {/if}
+          </div>
         </div>
     </div>
     <button class="close-button standalone" on:click={hideBlock} out:fly="{{ y: -50, duration: 2000, easing: linear }}" in:fly="{{ y: (restoring ? -50 : 50), duration: (restoring ? 500 : 1000), easing: linear, delay: (restoring ? 0 : newBlockDelay) }}" >
