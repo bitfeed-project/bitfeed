@@ -37,7 +37,6 @@ defmodule BitcoinStream.Bridge.Block do
 
   defp connect(host, port) do
     # check rpc online & synced
-    IO.puts("Waiting for node to come online and fully sync before connecting to block socket");
     wait_for_ibd();
     IO.puts("Node ready, connecting to block socket");
 
@@ -61,6 +60,7 @@ defmodule BitcoinStream.Bridge.Block do
       {:ok, %{"initialblockdownload" => false}} -> true
 
       _ ->
+        IO.puts("Waiting for node to come online and fully sync before connecting to block socket");
         RPC.notify_on_ready(:rpc)
     end
   end
@@ -79,13 +79,15 @@ defmodule BitcoinStream.Bridge.Block do
   end
 
   defp loop(socket, seq) do
-    IO.puts("client block loop");
+    IO.puts("waiting for block");
     with  {:ok, message} <- :chumak.recv_multipart(socket), # wait for the next zmq message in the queue
           [_topic, payload, <<sequence::little-size(32)>>] <- message,
           true <- (seq != sequence), # discard contiguous duplicate messages
           _ <- IO.puts("block received"),
+          _ <- Mempool.set_block_locked(:mempool, true),
           {:ok, block} <- BitcoinBlock.decode(payload),
           count <- Mempool.clear_block_txs(:mempool, block),
+          _ <- Mempool.set_block_locked(:mempool, false),
           {:ok, json} <- Jason.encode(block),
           :ok <- File.write("data/last_block.json", json) do
       IO.puts("processed block #{block.id}");

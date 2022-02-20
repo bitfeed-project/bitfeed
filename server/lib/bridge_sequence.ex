@@ -35,7 +35,6 @@ defmodule BitcoinStream.Bridge.Sequence do
 
   defp connect(host, port) do
     # check rpc online & synced
-    IO.puts("Waiting for node to come online and fully sync before connecting to sequence socket");
     wait_for_ibd();
     IO.puts("Node ready, connecting to sequence socket");
 
@@ -59,6 +58,7 @@ defmodule BitcoinStream.Bridge.Sequence do
       {:ok, %{"initialblockdownload" => false}} -> true
 
       _ ->
+        IO.puts("Waiting for node to come online and fully sync before connecting to sequence socket");
         RPC.notify_on_ready(:rpc)
     end
   end
