@@ -20,12 +20,13 @@ defmodule BitcoinStream.Router do
         put_resp_header(conn, "cache-control", "public, max-age=604800, immutable")
         |> send_resp(200, block)
       _ ->
-        IO.puts("Error getting block hash")
+        IO.puts("Error getting block hash");
+        send_resp(conn, 404, "Block not available")
     end
   end
 
   match _ do
-    send_resp(conn, 404, "404")
+    send_resp(conn, 404, "Not found")
   end
 
   defp get_block(last_seen) do
