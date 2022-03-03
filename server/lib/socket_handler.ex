@@ -1,8 +1,6 @@
 defmodule BitcoinStream.SocketHandler do
   @behaviour :cowboy_websocket
 
-  use Elixometer
-
   alias BitcoinStream.Mempool, as: Mempool
   alias BitcoinStream.BlockData, as: BlockData
 
@@ -43,7 +41,6 @@ defmodule BitcoinStream.SocketHandler do
     "{ \"type\": \"block_id\", \"block_id\": \"#{last_id}\"}"
   end
 
-  @timed(key: "timed.function")
   def websocket_handle({:text, msg}, state) do
     # IO.puts("message received: #{msg} | #{inspect self()}");
     case msg do

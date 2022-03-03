@@ -370,7 +370,12 @@ defmodule BitcoinStream.Mempool do
               {:ok, txn } <- BitcoinTx.decode(rawtx),
               inflated_txn <- BitcoinTx.inflate(txn) do
           register(pid, txid, nil, false);
-          insert(pid, txid, inflated_txn)
+          if inflated_txn.inflated do
+            insert(pid, txid, inflated_txn)
+          else
+            IO.puts("failed to inflate loaded mempool txn #{txid}")
+          end
+
         else
           _ -> IO.puts("sync_mempool_txn failed #{txid}")
         end

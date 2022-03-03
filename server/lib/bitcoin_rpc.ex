@@ -1,10 +1,10 @@
-Application.ensure_all_started(:hackney)
-
 defmodule BitcoinStream.RPC do
   @moduledoc """
   GenServer for bitcoin rpc requests
   """
   use GenServer
+
+  alias Plug.BasicAuth, as: BasicAuth
 
   def start_link(opts) do
     {port, opts} = Keyword.pop(opts, :port);
@@ -85,14 +85,13 @@ defmodule BitcoinStream.RPC do
   defp make_request(host, port, creds, method, params) do
     with  { user, pw } <- creds,
           {:ok, rpc_request} <- Jason.encode(%{method: method, params: params}),
-          {:ok, code, _headers, body_ref} <- :hackney.request(:post, "http://#{host}:#{port}", [{"content-type", "application/json"}], rpc_request, [basic_auth: { user, pw }]),
-          {:ok, body} <- :hackney.body(body_ref),
+          {:ok, %Finch.Response{body: body, headers: _headers, status: status}} <- Finch.build(:post, "http://#{host}:#{port}", [{"content-type", "application/json"}, {"authorization", BasicAuth.encode_basic_auth(user, pw)}], rpc_request) |> Finch.request(FinchClient),
           {:ok, %{"result" => info}} <- Jason.decode(body) do
-      {:ok, code, info}
+      {:ok, status, info}
     else
-      {:ok, code, _} ->
-        IO.puts("RPC request #{method} failed with HTTP code #{code}")
-        {:error, code}
+      {:ok, status, _} ->
+        IO.puts("RPC request #{method} failed with HTTP code #{status}")
+        {:error, status}
       {:error, reason} ->
         IO.puts("RPC request #{method} failed");
         IO.inspect(reason)

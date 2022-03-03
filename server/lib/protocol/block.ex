@@ -66,8 +66,12 @@ defp summarise_txns(txns) do
   end
 end
 
-defp summarise_txns([], summarised, total, fees, _do_inflate) do
-  {Enum.reverse(summarised), total, fees}
+defp summarise_txns([], summarised, total, fees, do_inflate) do
+  if do_inflate do
+    {Enum.reverse(summarised), total, fees}
+  else
+    {Enum.reverse(summarised), total, nil}
+  end
 end
 
 defp summarise_txns([next | rest], summarised, total, fees, do_inflate) do
@@ -76,9 +80,13 @@ defp summarise_txns([next | rest], summarised, total, fees, do_inflate) do
   # if the mempool is still syncing, inflating txs will take too long, so skip it
   if do_inflate do
     inflated_txn = BitcoinTx.inflate(extended_txn)
-    summarise_txns(rest, [inflated_txn | summarised], total + inflated_txn.value, fees + inflated_txn.fee, true)
+    if (inflated_txn.inflated) do
+      summarise_txns(rest, [inflated_txn | summarised], total + inflated_txn.value, fees + inflated_txn.fee, true)
+    else
+      summarise_txns(rest, [inflated_txn | summarised], total + inflated_txn.value, nil, false)
+    end
   else
-    summarise_txns(rest, [extended_txn | summarised], nil, nil, false)
+    summarise_txns(rest, [extended_txn | summarised], total + extended_txn.value, nil, false)
   end
 end
 

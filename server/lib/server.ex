@@ -7,6 +7,8 @@ defmodule BitcoinStream.Server do
     { zmq_block_port, "" } = Integer.parse(System.get_env("BITCOIN_ZMQ_RAWBLOCK_PORT"));
     { zmq_sequence_port, "" } = Integer.parse(System.get_env("BITCOIN_ZMQ_SEQUENCE_PORT"));
     { rpc_port, "" } = Integer.parse(System.get_env("BITCOIN_RPC_PORT"));
+    { rpc_pools, "" } = Integer.parse(System.get_env("RPC_POOLS"));
+    { rpc_pool_size, "" } = Integer.parse(System.get_env("RPC_POOL_SIZE"));
     btc_host = System.get_env("BITCOIN_HOST");
 
     children = [
@@ -14,9 +16,14 @@ defmodule BitcoinStream.Server do
         keys: :duplicate,
         name: Registry.BitcoinStream
       ),
+      {Finch,
+       name: FinchClient,
+       pools: %{
+         :default => [size: rpc_pool_size, count: rpc_pools],
+         "http://#{btc_host}:#{rpc_port}" => [size: rpc_pool_size, count: rpc_pools]
+       }},
       { BitcoinStream.RPC, [host: btc_host, port: rpc_port, name: :rpc] },
       { BitcoinStream.BlockData, [name: :block_data] },
-      BitcoinStream.Metrics.Probe,
       Plug.Cowboy.child_spec(
         scheme: :http,
         plug: BitcoinStream.Router,
@@ -51,7 +58,6 @@ defmodule BitcoinStream.Server do
       {:_,
         [
           {"/ws/txs", BitcoinStream.SocketHandler, []},
-          {"/ws/status", BitcoinStream.Metrics.SocketHandler, []},
           {:_, Plug.Cowboy.Handler, {BitcoinStream.Router, []}}
         ]
       }

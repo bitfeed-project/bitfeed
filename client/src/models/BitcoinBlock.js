@@ -30,7 +30,6 @@ export default class BitcoinBlock {
       this.avgFeerate = 0
       this.txns.forEach(txn => {
         if (!BitcoinTx.prototype.isCoinbase(txn)) {
-          if (txn.fee <= 0) console.log(txn)
           const txFeerate = txn.fee / txn.vbytes
           this.maxFeerate = Math.max(this.maxFeerate, txFeerate)
           this.minFeerate = Math.min(this.minFeerate, txFeerate)

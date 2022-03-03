@@ -18,6 +18,7 @@ defmodule BitcoinStream.Protocol.Transaction do
   @derive Jason.Encoder
   defstruct [
     :version,
+    :inflated,
     :vbytes,
     :inputs,
     :outputs,
@@ -38,6 +39,7 @@ defmodule BitcoinStream.Protocol.Transaction do
 
     {:ok, %__MODULE__{
       version: raw_tx.version,
+      inflated: false,
       vbytes: raw_tx.vbytes,
       inputs: raw_tx.inputs,
       outputs: raw_tx.outputs,
@@ -60,6 +62,7 @@ defmodule BitcoinStream.Protocol.Transaction do
 
     %__MODULE__{
       version: txn.version,
+      inflated: false,
       vbytes: txn.vbytes,
       inputs: txn.inputs,
       outputs: txn.outputs,
@@ -72,19 +75,37 @@ defmodule BitcoinStream.Protocol.Transaction do
   end
 
   def inflate(txn) do
-    {inputs, in_value } = inflate_inputs(txn.id, txn.inputs);
-    %__MODULE__{
-      version: txn.version,
-      vbytes: txn.vbytes,
-      inputs: inputs,
-      outputs: txn.outputs,
-      value: txn.value,
-      fee: (in_value - txn.value),
-      # witnesses: txn.witnesses,
-      lock_time: txn.lock_time,
-      id: txn.id,
-      time: txn.time
-    }
+    case inflate_inputs(txn.id, txn.inputs) do
+      {:ok, inputs, in_value} ->
+        %__MODULE__{
+          version: txn.version,
+          inflated: true,
+          vbytes: txn.vbytes,
+          inputs: inputs,
+          outputs: txn.outputs,
+          value: txn.value,
+          fee: (in_value - txn.value),
+          # witnesses: txn.witnesses,
+          lock_time: txn.lock_time,
+          id: txn.id,
+          time: txn.time
+        }
+
+      {:failed, inputs, _in_value} ->
+        %__MODULE__{
+          version: txn.version,
+          inflated: false,
+          vbytes: txn.vbytes,
+          inputs: inputs,
+          outputs: txn.outputs,
+          value: txn.value,
+          fee: 0,
+          # witnesses: txn.witnesses,
+          lock_time: txn.lock_time,
+          id: txn.id,
+          time: txn.time
+        }
+    end
   end
 
   defp count_value([], total) do
@@ -136,18 +157,18 @@ defmodule BitcoinStream.Protocol.Transaction do
   end
 
   defp inflate_inputs([], inflated, total) do
-    {inflated, total}
+    {:ok, Enum.reverse(inflated), total}
   end
   defp inflate_inputs([next_input | rest], inflated, total) do
     case inflate_input(next_input) do
       {:ok, inflated_txn} ->
         inflate_inputs(rest, [inflated_txn | inflated], total + inflated_txn.value)
       _ ->
-        inflate_inputs(rest, [inflated], total)
+        {:failed, Enum.reverse(inflated) ++ [next_input | rest], 0}
     end
   end
   def inflate_inputs([], nil) do
-    { nil, 0 }
+    { :failed, nil, 0 }
   end
   def inflate_inputs(txid, inputs) do
     case :ets.lookup(:mempool_cache, txid) do
@@ -160,8 +181,8 @@ defmodule BitcoinStream.Protocol.Transaction do
         inflate_inputs(inputs, [], 0)
 
       # cache hit, just return the cached values
-      [{_, input_state, _}] ->
-        input_state
+      [{_, {inputs, total}, _}] ->
+        {:ok, inputs, total}
 
       other ->
         IO.puts("unexpected cached value: ")
