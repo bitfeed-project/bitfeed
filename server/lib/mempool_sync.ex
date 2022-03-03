@@ -36,9 +36,16 @@ defmodule BitcoinStream.Mempool.Sync do
     {:noreply, state}
   end
 
+  @impl true
+  def handle_info(_event, state) do
+    # if RPC responds after the calling process already timed out, garbled messages get dumped to handle_info
+    # quietly discard
+    {:noreply, state}
+  end
+
   defp wait_for_ibd() do
     case RPC.get_node_status(:rpc) do
-      {:ok, %{"initialblockdownload" => false}} -> true
+      :ok -> true
 
       _ ->
         IO.puts("Waiting for node to come online and fully sync before synchronizing mempool");

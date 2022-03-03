@@ -81,6 +81,7 @@ defp summarise_txns([next | rest], summarised, total, fees, do_inflate) do
   if do_inflate do
     inflated_txn = BitcoinTx.inflate(extended_txn)
     if (inflated_txn.inflated) do
+      IO.puts("Processing block tx #{length(summarised)}/#{length(summarised) + length(rest) + 1} | #{next.id}");
       summarise_txns(rest, [inflated_txn | summarised], total + inflated_txn.value, fees + inflated_txn.fee, true)
     else
       summarise_txns(rest, [inflated_txn | summarised], total + inflated_txn.value, nil, false)

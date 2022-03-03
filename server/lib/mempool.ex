@@ -191,7 +191,8 @@ defmodule BitcoinStream.Mempool do
           :ets.insert(:mempool_cache, {txid, { txn.inputs, txn.value + txn.fee }, nil});
           get(pid)
         else
-          _ -> false
+          _ ->
+            false
         end
 
       # new transaction, not yet registered

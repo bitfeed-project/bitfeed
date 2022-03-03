@@ -10,16 +10,16 @@ defmodule BitcoinStream.RPC do
     {port, opts} = Keyword.pop(opts, :port);
     {host, opts} = Keyword.pop(opts, :host);
     IO.puts("Starting Bitcoin RPC server on #{host} port #{port}")
-    GenServer.start_link(__MODULE__, {host, port, nil, nil, []}, opts)
+    GenServer.start_link(__MODULE__, {host, port, nil, nil, [], %{}}, opts)
   end
 
   @impl true
-  def init({host, port, status, _, listeners}) do
+  def init({host, port, status, _, listeners, inflight}) do
     # start node monitoring loop
     creds = rpc_creds();
 
     send(self(), :check_status);
-    {:ok, {host, port, status, creds, listeners}}
+    {:ok, {host, port, status, creds, listeners, inflight}}
   end
 
   defp notify_listeners([]) do
@@ -31,75 +31,112 @@ defmodule BitcoinStream.RPC do
   end
 
   @impl true
-  def handle_info(:check_status, {host, port, _status, creds, listeners}) do
-    # poll Bitcoin Core for current status
-    status = check_status({host, port, creds});
-    case status do
-      # if node is connected and finished with the initial block download
-      {:ok, %{"initialblockdownload" => false}} ->
-        # notify all listening processes
-        notify_listeners(listeners);
-        Process.send_after(self(), :check_status, 300 * 1000);
-        {:noreply, {host, port, status, creds, []}}
+  def handle_info(:check_status, {host, port, status, creds, listeners, inflight}) do
+    case async_request("getblockchaininfo", [], host, port, creds) do
+      {:ok, task_ref} ->
+        {:noreply, {host, port, status, creds, listeners, Map.put(inflight, task_ref, :status)}}
 
-      {:ok, %{"initialblockdownload" => true}} ->
-        IO.puts("Bitcoin Core connected, waiting for initial block download");
-        Process.send_after(self(), :check_status, 30 * 1000);
-        {:noreply, {host, port, status, creds, listeners}}
-
-      _ ->
+      :error ->
         IO.puts("Waiting to connect to Bitcoin Core");
         Process.send_after(self(), :check_status, 10 * 1000);
-        {:noreply, {host, port, status, creds, listeners}}
+        {:noreply, {host, port, status, creds, listeners, inflight}}
     end
   end
 
   @impl true
-  def handle_call({:request, method, params}, _from, {host, port, status, creds, listeners}) do
-    case make_request(host, port, creds, method, params) do
-      {:ok, code, info} ->
-        {:reply, {:ok, code, info}, {host, port, status, creds, listeners}}
+  def handle_info({:DOWN, ref, :process, _pid, _reason}, {host, port, status, creds, listeners, inflight}) do
+    # IO.puts("DOWN: #{inspect pid} #{inspect reason}")
+    {_, inflight} = Map.pop(inflight, ref);
+    {:noreply, {host, port, status, creds, listeners, inflight}}
+  end
 
-      {:error, reason} ->
-        {:reply, {:error, reason}, {host, port, status, creds, listeners}}
+  @impl true
+  def handle_info({ref, result}, {host, port, status, creds, listeners, inflight}) do
+    case Map.pop(inflight, ref) do
+      {nil, inflight} ->
+        {:noreply, {host, port, status, creds, listeners, inflight}}
 
-      error ->
-        {:reply, error, {host, port, status, creds, listeners}}
+      {:status, inflight} ->
+        case result do
+          # if node is connected and finished with the initial block download
+          {:ok, 200, %{"initialblockdownload" => false}} ->
+            # notify all listening processes
+            IO.puts("Bitcoin Core connected and synced");
+            notify_listeners(listeners);
+            Process.send_after(self(), :check_status, 300 * 1000);
+            {:noreply, {host, port, :ok, creds, [], inflight}}
+
+          {:ok, 200, %{"initialblockdownload" => true}} ->
+            IO.puts("Bitcoin Core connected, waiting for initial block download");
+            Process.send_after(self(), :check_status, 30 * 1000);
+            {:noreply, {host, port, :ibd, creds, listeners, inflight}}
+
+          _ ->
+            IO.puts("Waiting to connect to Bitcoin Core");
+            Process.send_after(self(), :check_status, 10 * 1000);
+            {:noreply, {host, port, :disconnected, creds, listeners, inflight}}
+        end
+
+      {from, inflight} ->
+        GenServer.reply(from, result)
+        {:noreply, {host, port, status, creds, listeners, inflight}}
     end
   end
 
   @impl true
-  def handle_call(:get_node_status, _from, {host, port, status, creds, listeners}) do
-    {:reply, status, {host, port, status, creds, listeners}}
+  def handle_call({:request, method, params}, from, {host, port, status, creds, listeners, inflight}) do
+    case async_request(method, params, host, port, creds) do
+      {:ok, task_ref} ->
+        {:noreply, {host, port, status, creds, listeners, Map.put(inflight, task_ref, from)}}
+
+      :error ->
+        {:reply, 500, {host, port, status, creds, listeners, inflight}}
+    end
   end
 
   @impl true
-  def handle_call(:notify_on_ready, from, {host, port, status, creds, listeners}) do
-    {:noreply, {host, port, status, creds, [from | listeners]}}
+  def handle_call(:get_node_status, _from, {host, port, status, creds, listeners, inflight}) do
+    {:reply, status, {host, port, status, creds, listeners, inflight}}
+  end
+
+  @impl true
+  def handle_call(:notify_on_ready, from, {host, port, status, creds, listeners, inflight}) do
+    {:noreply, {host, port, status, creds, [from | listeners], inflight}}
   end
 
   def notify_on_ready(pid) do
     GenServer.call(pid, :notify_on_ready, :infinity)
   end
 
-  defp make_request(host, port, creds, method, params) do
+  defp async_request(method, params, host, port, creds) do
     with  { user, pw } <- creds,
-          {:ok, rpc_request} <- Jason.encode(%{method: method, params: params}),
-          {:ok, %Finch.Response{body: body, headers: _headers, status: status}} <- Finch.build(:post, "http://#{host}:#{port}", [{"content-type", "application/json"}, {"authorization", BasicAuth.encode_basic_auth(user, pw)}], rpc_request) |> Finch.request(FinchClient),
-          {:ok, %{"result" => info}} <- Jason.decode(body) do
-      {:ok, status, info}
+          {:ok, rpc_request} <- Jason.encode(%{method: method, params: params}) do
+      task = Task.async(
+        fn ->
+          with  {:ok, %Finch.Response{body: body, headers: _headers, status: status}} <- Finch.build(:post, "http://#{host}:#{port}", [{"content-type", "application/json"}, {"authorization", BasicAuth.encode_basic_auth(user, pw)}], rpc_request) |> Finch.request(FinchClient),
+                {:ok, %{"result" => info}} <- Jason.decode(body) do
+            {:ok, status, info}
+          else
+            {:ok, status, _} ->
+              IO.puts("RPC request #{method} failed with HTTP code #{status}")
+              {:error, status}
+            {:error, reason} ->
+              IO.puts("RPC request #{method} failed");
+              IO.inspect(reason)
+              {:error, reason}
+            err ->
+              IO.puts("RPC request #{method} failed: (unknown reason)");
+              IO.inspect(err);
+              {:error, err}
+          end
+        end
+      )
+      {:ok, task.ref}
     else
-      {:ok, status, _} ->
-        IO.puts("RPC request #{method} failed with HTTP code #{status}")
-        {:error, status}
-      {:error, reason} ->
-        IO.puts("RPC request #{method} failed");
-        IO.inspect(reason)
-        {:error, reason}
       err ->
-        IO.puts("RPC request #{method} failed: (unknown reason)");
+        IO.puts("failed to make RPC request");
         IO.inspect(err);
-        {:error, err}
+        :error
     end
   end
 
@@ -118,16 +155,6 @@ defmodule BitcoinStream.RPC do
 
   def get_node_status(pid) do
     GenServer.call(pid, :get_node_status, 10000)
-  end
-
-  defp check_status({host, port, creds}) do
-    case make_request(host, port, creds, "getblockchaininfo", []) do
-      {:ok, 200, info} -> {:ok, info}
-
-      {:ok, code, info} -> {:error, code, info}
-
-      _ -> {:error}
-    end
   end
 
   defp rpc_creds() do

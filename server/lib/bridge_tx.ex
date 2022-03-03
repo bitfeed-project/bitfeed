@@ -56,7 +56,7 @@ defmodule BitcoinStream.Bridge.Tx do
 
   defp wait_for_ibd() do
     case RPC.get_node_status(:rpc) do
-      {:ok, %{"initialblockdownload" => false}} -> true
+      :ok -> true
 
       _ ->
         IO.puts("Waiting for node to come online and fully sync before connecting to tx socket");

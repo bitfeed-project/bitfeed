@@ -185,7 +185,6 @@ defmodule BitcoinStream.Protocol.Transaction do
         {:ok, inputs, total}
 
       other ->
-        IO.puts("unexpected cached value: ")
         IO.inspect(other);
         inflate_inputs(inputs, [], 0)
     end
