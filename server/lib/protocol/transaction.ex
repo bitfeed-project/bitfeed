@@ -46,6 +46,7 @@ defmodule BitcoinStream.Protocol.Transaction do
       inputs: raw_tx.inputs,
       outputs: raw_tx.outputs,
       value: total_value,
+      fee: 0,
       # witnesses: raw_tx.witnesses,
       lock_time: raw_tx.lock_time,
       id: id,
@@ -69,6 +70,7 @@ defmodule BitcoinStream.Protocol.Transaction do
       inputs: txn.inputs,
       outputs: txn.outputs,
       value: total_value,
+      fee: 0,
       # witnesses: txn.witnesses,
       lock_time: txn.lock_time,
       id: id,
@@ -76,8 +78,8 @@ defmodule BitcoinStream.Protocol.Transaction do
     }
   end
 
-  def inflate(txn) do
-    case inflate_inputs(txn.id, txn.inputs) do
+  def inflate(txn, fail_fast) do
+    case inflate_inputs(txn.id, txn.inputs, fail_fast) do
       {:ok, inputs, in_value} ->
         %__MODULE__{
           version: txn.version,
@@ -94,7 +96,6 @@ defmodule BitcoinStream.Protocol.Transaction do
         }
 
       {:failed, inputs, _in_value} ->
-        Logger.error("failed to inflate #{txn.id}");
         %__MODULE__{
           version: txn.version,
           inflated: false,
@@ -108,6 +109,10 @@ defmodule BitcoinStream.Protocol.Transaction do
           id: txn.id,
           time: txn.time
         }
+
+      catchall ->
+        Logger.error("unexpected inflate result: #{inspect(catchall)}");
+        :ok
     end
   end
 
@@ -119,10 +124,10 @@ defmodule BitcoinStream.Protocol.Transaction do
     count_value(rest, total + next_output.value)
   end
 
-  defp inflate_batch(batch) do
+  defp inflate_batch(batch, fail_fast) do
     with  batch_params <- Enum.map(batch, fn input -> [input.prev_txid, input.prev_txid <> "#{input.prev_vout}"] end),
           batch_map <- Enum.into(batch, %{}, fn p -> {p.prev_txid <> "#{p.prev_vout}", p} end),
-          {:ok, 200, txs} <- RPC.batch_request(:rpc, "getrawtransaction", batch_params),
+          {:ok, 200, txs} <- RPC.batch_request(:rpc, "getrawtransaction", batch_params, fail_fast),
           successes <- Enum.filter(txs, fn %{"error" => error} -> error == nil end),
           rawtxs <- Enum.map(successes, fn tx -> %{"error" => nil, "id" => input_id, "result" => hextx} = tx; rawtx = Base.decode16!(hextx, case: :lower); [input_id, rawtx] end),
           decoded <- Enum.map(rawtxs, fn [input_id, rawtx] -> {:ok, txn} = decode(rawtx); [input_id, txn] end),
@@ -147,56 +152,57 @@ defmodule BitcoinStream.Protocol.Transaction do
         {:failed, outputs, total}
       end
     else
-      {:ok, 500, reason} ->
-        Logger.error("input in batch not found");
-        Logger.error("#{inspect(reason)}")
-      {:error, reason} ->
-        Logger.error("Failed to inflate batched inputs:");
-        Logger.error("#{inspect(reason)}")
-        :error
-      err ->
-        Logger.error("Failed to inflate batched inputs: (unknown reason)");
-        Logger.error("#{inspect(err)}")
+      _ ->
         :error
     end
+
+  catch
+    err ->
+      Logger.error("unexpected error inflating batch");
+      IO.inspect(err);
+      :error
   end
 
-  defp inflate_inputs([], inflated, total) do
+  defp inflate_inputs([], inflated, total, _fail_fast) do
     {:ok, inflated, total}
   end
 
-  defp inflate_inputs([next_chunk | rest], inflated, total) do
-    case inflate_batch(next_chunk) do
+  defp inflate_inputs([next_chunk | rest], inflated, total, fail_fast) do
+    case inflate_batch(next_chunk, fail_fast) do
       {:ok, inflated_chunk, chunk_total} ->
-        inflate_inputs(rest, inflated ++ inflated_chunk, total + chunk_total)
+        inflate_inputs(rest, inflated ++ inflated_chunk, total + chunk_total, fail_fast)
       _ ->
         {:failed, inflated ++ next_chunk ++ rest, 0}
     end
   end
 
-  def inflate_inputs([], nil) do
+  def inflate_inputs([], nil, _fail_fast) do
     { :failed, nil, 0 }
   end
 
   # Retrieves cached inputs if available,
   # otherwise inflates inputs in batches of up to 100
-  def inflate_inputs(txid, inputs) do
+  def inflate_inputs(txid, inputs, fail_fast) do
     case :ets.lookup(:mempool_cache, txid) do
       # cache miss, actually inflate
       [] ->
-        inflate_inputs(Enum.chunk_every(inputs, 100), [], 0)
+        inflate_inputs(Enum.chunk_every(inputs, 100), [], 0, fail_fast)
 
       # cache hit, but processed inputs not available
       [{_, nil, _}] ->
-        inflate_inputs(Enum.chunk_every(inputs, 100), [], 0)
+        inflate_inputs(Enum.chunk_every(inputs, 100), [], 0, fail_fast)
+
+      # cache hit, but inputs not inflated
+      [{_, {_inputs, _total, false}, _}] ->
+        inflate_inputs(Enum.chunk_every(inputs, 100), [], 0, fail_fast)
 
       # cache hit, just return the cached values
-      [{_, {inputs, total}, _}] ->
+      [{_, {inputs, total, true}, _}] ->
         {:ok, inputs, total}
 
       other ->
         Logger.error("unexpected mempool cache response while inflating inputs #{inspect(other)}");
-        inflate_inputs(Enum.chunk_every(inputs, 100), [], 0)
+        inflate_inputs(Enum.chunk_every(inputs, 100), [], 0, fail_fast)
     end
   end
 

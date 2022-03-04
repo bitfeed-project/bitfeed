@@ -54,7 +54,7 @@ defmodule BitcoinStream.Bridge.Block do
     end
 
     # start block loop
-    loop(socket, 0)
+    loop(socket, nil)
   end
 
   defp wait_for_ibd() do
@@ -83,21 +83,32 @@ defmodule BitcoinStream.Bridge.Block do
   defp loop(socket, seq) do
     Logger.debug("waiting for block");
     with  {:ok, message} <- :chumak.recv_multipart(socket), # wait for the next zmq message in the queue
+          _ <- Logger.debug("block msg received"),
           [_topic, payload, <<sequence::little-size(32)>>] <- message,
+          _ <- Logger.debug("block msg decoded #{seq}"),
           true <- (seq != sequence), # discard contiguous duplicate messages
-          _ <- Logger.info("block received"),
+          _ <- Logger.info("new block received"),
           _ <- Mempool.set_block_locked(:mempool, true),
+          _ <- Logger.debug("locked mempool resync"),
           {:ok, block} <- BitcoinBlock.decode(payload),
+          _ <- Logger.debug("decoded block msg"),
           count <- Mempool.clear_block_txs(:mempool, block),
+          _ <- Logger.debug("#{count} txs remain in mempool"),
           _ <- Mempool.set_block_locked(:mempool, false),
+          _ <- Logger.debug("unlocked mempool resync"),
           {:ok, json} <- Jason.encode(block),
-          :ok <- File.write("data/last_block.json", json) do
+          _ <- Logger.debug("json encoded block data"),
+          :ok <- File.write("data/last_block.json", json),
+          _ <- Logger.debug("wrote block to file") do
       Logger.info("processed block #{block.id}");
       BlockData.set_json_block(:block_data, block.id, json);
+      Logger.debug("cached block data");
       send_block(block, count);
       loop(socket, sequence)
     else
-      _ -> loop(socket, seq)
+      _ ->
+        Logger.debug("block exception");
+        loop(socket, seq)
     end
   end
 

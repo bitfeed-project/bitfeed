@@ -84,11 +84,12 @@ defmodule BitcoinStream.Bridge.Tx do
         case Mempool.get_tx_status(:mempool, txn.id) do
           # :registered and :new transactions are inflated and inserted into the mempool
           status when (status in [:registered, :new]) ->
-            inflated_txn = BitcoinTx.inflate(txn);
+            inflated_txn = BitcoinTx.inflate(txn, true);
             case Mempool.insert(:mempool, txn.id, inflated_txn) do
               # Mempool.insert returns the size of the mempool if insertion was successful
               # Forward tx to clients in this case
-              count when is_integer(count) -> send_txn(inflated_txn, count)
+              count when is_integer(count) ->
+                send_txn(inflated_txn, count)
 
               _ -> false
             end

@@ -132,7 +132,7 @@ defmodule BitcoinStream.Mempool do
   end
 
   defp get_queue(pid) do
-    GenServer.call(pid, :get_queue)
+    GenServer.call(pid, :get_queue, 60000)
   end
 
   defp set_queue(pid, queue) do
@@ -190,7 +190,7 @@ defmodule BitcoinStream.Mempool do
       # new transaction, id already registered
       :registered ->
         with [] <- :ets.lookup(:block_cache, txid) do # double check tx isn't included in the last block
-          :ets.insert(:mempool_cache, {txid, { txn.inputs, txn.value + txn.fee }, nil});
+          :ets.insert(:mempool_cache, {txid, { txn.inputs, txn.value + txn.fee, txn.inflated }, nil});
           get(pid)
         else
           _ ->
@@ -246,7 +246,7 @@ defmodule BitcoinStream.Mempool do
 
           # data already received, but tx not registered
           [{_txid, _, txn}] when txn != nil ->
-            :ets.insert(:mempool_cache, {txid, { txn.inputs, txn.value + txn.fee }, nil});
+            :ets.insert(:mempool_cache, {txid, { txn.inputs, txn.value + txn.fee, txn.inflated }, nil});
             :ets.delete(:sync_cache, txid);
             if do_count do
               increment(pid);
@@ -371,14 +371,9 @@ defmodule BitcoinStream.Mempool do
         with  {:ok, 200, hextx} <- RPC.request(:rpc, "getrawtransaction", [txid]),
               rawtx <- Base.decode16!(hextx, case: :lower),
               {:ok, txn } <- BitcoinTx.decode(rawtx),
-              inflated_txn <- BitcoinTx.inflate(txn) do
+              inflated_txn <- BitcoinTx.inflate(txn, false) do
           register(pid, txid, nil, false);
-          if inflated_txn.inflated do
-            insert(pid, txid, inflated_txn)
-          else
-            Logger.debug("failed to inflate loaded mempool txn #{txid}")
-          end
-
+          insert(pid, txid, inflated_txn)
         else
           _ -> Logger.debug("sync_mempool_txn failed #{txid}")
         end
@@ -395,6 +390,66 @@ defmodule BitcoinStream.Mempool do
     Logger.debug("Syncing mempool tx #{count}/#{count + length(tail) + 1} | #{head}");
     sync_mempool_txn(pid, head);
     sync_mempool_txns(pid, tail, count + 1)
+  end
+
+  # when transaction inflation fails, we fall back to storing deflated inputs in the cache
+  # the repair function scans the mempool cache for deflated inputs, and attempts to reinflate
+  def repair(_pid) do
+    Logger.debug("Checking mempool integrity");
+    repaired = :ets.foldl(&(repair_mempool_txn/2), 0, :mempool_cache);
+    if repaired > 0 do
+      Logger.info("MEMPOOL CHECK COMPLETE #{repaired} REPAIRED");
+    else
+      Logger.debug("MEMPOOL REPAIR NOT REQUIRED");
+    end
+    :ok
+  catch
+    err ->
+      Logger.error("Failed to repair mempool: #{inspect(err)}");
+      :error
+  end
+
+  defp repair_mempool_txn(entry, repaired) do
+    case entry do
+      # unprocessed
+      {_, nil, _} ->
+        repaired
+
+      # valid entry, already inflated
+      {_txid, {_inputs, _total, true}, _} ->
+        repaired
+
+      # valid entry, not inflated
+      # repair
+      {txid, {_inputs, _total, false}, status} ->
+        Logger.debug("repairing #{txid}");
+        with  {:ok, 200, hextx} <- RPC.request(:rpc, "getrawtransaction", [txid]),
+              rawtx <- Base.decode16!(hextx, case: :lower),
+              {:ok, txn } <- BitcoinTx.decode(rawtx),
+              inflated_txn <- BitcoinTx.inflate(txn, false) do
+          if inflated_txn.inflated do
+            :ets.insert(:mempool_cache, {txid, { txn.inputs, txn.value + txn.fee, true }, status});
+            Logger.debug("repaired #{repaired} mempool txns #{txid}");
+            repaired + 1
+          else
+            Logger.debug("failed to inflate transaction for repair #{txid}");
+            repaired
+          end
+
+        else
+          _ -> Logger.debug("failed to fetch transaction for repair #{txid}");
+          repaired
+        end
+
+      # catch all
+      other ->
+        Logger.error("unexpected cache entry: #{inspect(other)}");
+        repaired
+    end
+  catch
+    err ->
+      Logger.debug("unexpected error repairing transaction");
+      repaired
   end
 
   defp cache_sync_ids(pid, txns) do

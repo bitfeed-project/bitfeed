@@ -59,7 +59,7 @@ defmodule BitcoinStream.Mempool.Sync do
     wait_for_ibd();
     Logger.info("Preparing mempool sync");
     Mempool.sync(:mempool);
-    Process.send_after(self(), :resync, 20 * 1000);
+    Process.send_after(self(), :resync, 1000);
   end
 
   defp loop() do
@@ -82,6 +82,10 @@ defmodule BitcoinStream.Mempool.Sync do
             newcount = Mempool.get(:mempool);
             Logger.debug("updated to #{newcount}");
           end
+
+          # repair transactions with deflated inputs
+          Mempool.repair(:mempool);
+
           # next check in 1 minute
           Process.send_after(self(), :resync, 60 * 1000)
         else

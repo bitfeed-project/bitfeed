@@ -85,7 +85,7 @@ defp summarise_txns([next | rest], summarised, total, fees, do_inflate) do
 
   # if the mempool is still syncing, inflating txs will take too long, so skip it
   if do_inflate do
-    inflated_txn = BitcoinTx.inflate(extended_txn)
+    inflated_txn = BitcoinTx.inflate(extended_txn, false)
     if (inflated_txn.inflated) do
       Logger.debug("Processing block tx #{length(summarised)}/#{length(summarised) + length(rest) + 1} | #{extended_txn.id}");
       summarise_txns(rest, [inflated_txn | summarised], total + inflated_txn.value, fees + inflated_txn.fee, true)
