@@ -1,3 +1,5 @@
+require Logger
+
 defmodule BitcoinStream.Mempool do
   @moduledoc """
   GenServer for retrieving and maintaining mempool info
@@ -22,7 +24,7 @@ defmodule BitcoinStream.Mempool do
   connecting to a bitcoin node at RPC `host:port` for ground truth data
   """
   def start_link(opts) do
-    IO.puts("Starting Mempool Tracker");
+    Logger.info("Starting Mempool Tracker");
     # cache of all transactions in the node mempool, mapped to {inputs, total_input_value}
     :ets.new(:mempool_cache, [:set, :public, :named_table]);
     # cache of transactions ids in the mempool, but not yet synchronized with the :mempool_cache
@@ -311,7 +313,7 @@ defmodule BitcoinStream.Mempool do
             Process.send(pid, payload, []);
           end
         end)
-      {:error, reason} -> IO.puts("Error json encoding count: #{reason}");
+      {:error, reason} -> Logger.error("Error json encoding count: #{reason}");
     end
   end
 
@@ -325,7 +327,7 @@ defmodule BitcoinStream.Mempool do
   end
 
   def sync(pid) do
-    IO.puts("Preparing mempool sync");
+    Logger.info("Preparing mempool sync");
     with  {:ok, 200, %{"mempool_sequence" => sequence, "txids" => txns}} <- RPC.request(:rpc, "getrawmempool", [false, true]) do
       set_seq(pid, sequence);
       count = length(txns);
@@ -337,14 +339,14 @@ defmodule BitcoinStream.Mempool do
       sync_queue(pid, queue);
       set_queue(pid, []);
 
-      IO.puts("Loaded #{count} mempool transactions");
+      Logger.info("Loaded #{count} mempool transactions");
       send_mempool_count(pid);
       do_sync(pid, txns);
       :ok
     else
       err ->
-        IO.puts("Pool sync failed");
-        IO.inspect(err);
+        Logger.error("Pool sync failed");
+        Logger.error("#{inspect(err)}");
         #retry after 30 seconds
         :timer.sleep(10000);
         sync(pid)
@@ -352,9 +354,9 @@ defmodule BitcoinStream.Mempool do
   end
 
   def do_sync(pid, txns) do
-    IO.puts("Syncing #{length(txns)} mempool transactions");
+    Logger.info("Syncing #{length(txns)} mempool transactions");
     sync_mempool(pid, txns);
-    IO.puts("MEMPOOL SYNC FINISHED");
+    Logger.info("MEMPOOL SYNC FINISHED");
     set_done(pid);
     :ok
   end
@@ -374,11 +376,11 @@ defmodule BitcoinStream.Mempool do
           if inflated_txn.inflated do
             insert(pid, txid, inflated_txn)
           else
-            IO.puts("failed to inflate loaded mempool txn #{txid}")
+            Logger.debug("failed to inflate loaded mempool txn #{txid}")
           end
 
         else
-          _ -> IO.puts("sync_mempool_txn failed #{txid}")
+          _ -> Logger.debug("sync_mempool_txn failed #{txid}")
         end
 
       [_] -> true
@@ -390,7 +392,7 @@ defmodule BitcoinStream.Mempool do
   end
 
   defp sync_mempool_txns(pid, [head | tail], count) do
-    IO.puts("Syncing mempool tx #{count}/#{count + length(tail) + 1} | #{head}");
+    Logger.debug("Syncing mempool tx #{count}/#{count + length(tail) + 1} | #{head}");
     sync_mempool_txn(pid, head);
     sync_mempool_txns(pid, tail, count + 1)
   end

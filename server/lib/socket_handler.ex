@@ -1,3 +1,5 @@
+require Logger
+
 defmodule BitcoinStream.SocketHandler do
   @behaviour :cowboy_websocket
 
@@ -16,9 +18,9 @@ defmodule BitcoinStream.SocketHandler do
   end
 
   def get_block(last_seen) do
-    IO.puts("getting block with id #{last_seen}")
+    Logger.debug("getting block with id #{last_seen}")
     last_id = BlockData.get_block_id(:block_data)
-    IO.puts("last block id: #{last_id}")
+    Logger.debug("last block id: #{last_id}")
     cond do
       (last_seen == nil) ->
         payload = BlockData.get_json_block(:block_data);
@@ -42,12 +44,11 @@ defmodule BitcoinStream.SocketHandler do
   end
 
   def websocket_handle({:text, msg}, state) do
-    # IO.puts("message received: #{msg} | #{inspect self()}");
     case msg do
       "hb" -> {:reply, {:text, msg}, state};
 
       "block" ->
-        IO.puts('block request');
+        Logger.debug('block request');
         {:reply, {:text, "null"}, state}
 
       "count" ->
@@ -72,11 +73,11 @@ defmodule BitcoinStream.SocketHandler do
           end
         else
           {:error, reason} ->
-            IO.puts("Failed to parse websocket message");
-            IO.inspect(reason)
+            Logger.error("Failed to parse websocket message");
+            Logger.error("#{inspect(reason)}")
           reason ->
-            IO.puts("other response");
-            IO.inspect(reason)
+            Logger.error("other response");
+            Logger.error("#{inspect(reason)}")
           _ -> {:reply, {:text, "?"}, state}
         end
     end

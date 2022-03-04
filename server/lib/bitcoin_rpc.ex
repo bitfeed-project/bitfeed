@@ -1,3 +1,5 @@
+require Logger
+
 defmodule BitcoinStream.RPC do
   @moduledoc """
   GenServer for bitcoin rpc requests
@@ -9,7 +11,7 @@ defmodule BitcoinStream.RPC do
   def start_link(opts) do
     {port, opts} = Keyword.pop(opts, :port);
     {host, opts} = Keyword.pop(opts, :host);
-    IO.puts("Starting Bitcoin RPC server on #{host} port #{port}")
+    Logger.info("Starting Bitcoin RPC server on #{host} port #{port}")
     GenServer.start_link(__MODULE__, {host, port, nil, nil, [], %{}}, opts)
   end
 
@@ -37,7 +39,7 @@ defmodule BitcoinStream.RPC do
         {:noreply, {host, port, status, creds, listeners, Map.put(inflight, task_ref, :status)}}
 
       :error ->
-        IO.puts("Waiting to connect to Bitcoin Core");
+        Logger.info("Waiting to connect to Bitcoin Core");
         Process.send_after(self(), :check_status, 10 * 1000);
         {:noreply, {host, port, status, creds, listeners, inflight}}
     end
@@ -45,13 +47,15 @@ defmodule BitcoinStream.RPC do
 
   @impl true
   def handle_info({:DOWN, ref, :process, _pid, _reason}, {host, port, status, creds, listeners, inflight}) do
-    # IO.puts("DOWN: #{inspect pid} #{inspect reason}")
     {_, inflight} = Map.pop(inflight, ref);
     {:noreply, {host, port, status, creds, listeners, inflight}}
   end
 
   @impl true
   def handle_info({ref, result}, {host, port, status, creds, listeners, inflight}) do
+    if Enum.count(inflight) > 2 do
+      Logger.debug("#{Enum.count(inflight)} rpc requests inflight");
+    end
     case Map.pop(inflight, ref) do
       {nil, inflight} ->
         {:noreply, {host, port, status, creds, listeners, inflight}}
@@ -61,18 +65,18 @@ defmodule BitcoinStream.RPC do
           # if node is connected and finished with the initial block download
           {:ok, 200, %{"initialblockdownload" => false}} ->
             # notify all listening processes
-            IO.puts("Bitcoin Core connected and synced");
+            Logger.info("Bitcoin Core connected and synced");
             notify_listeners(listeners);
             Process.send_after(self(), :check_status, 300 * 1000);
             {:noreply, {host, port, :ok, creds, [], inflight}}
 
           {:ok, 200, %{"initialblockdownload" => true}} ->
-            IO.puts("Bitcoin Core connected, waiting for initial block download");
+            Logger.info("Bitcoin Core connected, waiting for initial block download");
             Process.send_after(self(), :check_status, 30 * 1000);
             {:noreply, {host, port, :ibd, creds, listeners, inflight}}
 
           _ ->
-            IO.puts("Waiting to connect to Bitcoin Core");
+            Logger.info("Waiting to connect to Bitcoin Core");
             Process.send_after(self(), :check_status, 10 * 1000);
             {:noreply, {host, port, :disconnected, creds, listeners, inflight}}
         end
@@ -118,15 +122,15 @@ defmodule BitcoinStream.RPC do
             {:ok, status, info}
           else
             {:ok, status, _} ->
-              IO.puts("RPC request #{method} failed with HTTP code #{status}")
+              Logger.error("RPC request #{method} failed with HTTP code #{status}")
               {:error, status}
             {:error, reason} ->
-              IO.puts("RPC request #{method} failed");
-              IO.inspect(reason)
+              Logger.error("RPC request #{method} failed");
+              Logger.error("#{inspect(reason)}");
               {:error, reason}
             err ->
-              IO.puts("RPC request #{method} failed: (unknown reason)");
-              IO.inspect(err);
+              Logger.error("RPC request #{method} failed: (unknown reason)");
+              Logger.error("#{inspect(err)}");
               {:error, err}
           end
         end
@@ -134,8 +138,8 @@ defmodule BitcoinStream.RPC do
       {:ok, task.ref}
     else
       err ->
-        IO.puts("failed to make RPC request");
-        IO.inspect(err);
+        Logger.error("failed to make RPC request");
+        Logger.error("#{inspect(err)}");
         :error
     end
   end
@@ -171,16 +175,16 @@ defmodule BitcoinStream.RPC do
             { user, pw }
           else
             {:error, reason} ->
-              IO.puts("Failed to load bitcoin rpc cookie");
-              IO.inspect(reason)
+              Logger.error("Failed to load bitcoin rpc cookie");
+              Logger.error("#{inspect(reason)}")
               :error
             err ->
-              IO.puts("Failed to load bitcoin rpc cookie: (unknown reason)");
-              IO.inspect(err);
+              Logger.error("Failed to load bitcoin rpc cookie: (unknown reason)");
+              Logger.error("#{inspect(err)}")
               :error
           end
       true ->
-        IO.puts("Missing bitcoin rpc credentials");
+        Logger.error("Missing bitcoin rpc credentials");
         :error
     end
   end

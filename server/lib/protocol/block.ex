@@ -1,5 +1,7 @@
 Application.ensure_all_started(BitcoinStream.RPC)
 
+require Logger
+
 defmodule BitcoinStream.Protocol.Block do
 @moduledoc """
   Summarised bitcoin block.
@@ -49,10 +51,10 @@ def decode(block_binary) do
     }}
   else
     {:error, reason} ->
-      IO.puts("Error decoding data for BitcoinBlock: #{reason}")
+      Logger.error("Error decoding data for BitcoinBlock: #{reason}")
       :error
     _ ->
-      IO.puts("Error decoding data for BitcoinBlock: (unknown reason)")
+      Logger.error("Error decoding data for BitcoinBlock: (unknown reason)")
       :error
   end
 end
@@ -81,7 +83,7 @@ defp summarise_txns([next | rest], summarised, total, fees, do_inflate) do
   if do_inflate do
     inflated_txn = BitcoinTx.inflate(extended_txn)
     if (inflated_txn.inflated) do
-      IO.puts("Processing block tx #{length(summarised)}/#{length(summarised) + length(rest) + 1} | #{next.id}");
+      Logger.debug("Processing block tx #{length(summarised)}/#{length(summarised) + length(rest) + 1} | #{next.id}");
       summarise_txns(rest, [inflated_txn | summarised], total + inflated_txn.value, fees + inflated_txn.fee, true)
     else
       summarise_txns(rest, [inflated_txn | summarised], total + inflated_txn.value, nil, false)

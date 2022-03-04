@@ -1,3 +1,5 @@
+require Logger
+
 defmodule BitcoinStream.Mempool.Sync do
 
   use GenServer
@@ -14,7 +16,7 @@ defmodule BitcoinStream.Mempool.Sync do
   end
 
   def start_link(args) do
-    IO.puts("Starting Mempool Synchronizer")
+    Logger.info("Starting Mempool Synchronizer")
     GenServer.start_link(__MODULE__, args)
   end
 
@@ -48,14 +50,14 @@ defmodule BitcoinStream.Mempool.Sync do
       :ok -> true
 
       _ ->
-        IO.puts("Waiting for node to come online and fully sync before synchronizing mempool");
+        Logger.info("Waiting for node to come online and fully sync before synchronizing mempool");
         RPC.notify_on_ready(:rpc)
     end
   end
 
   defp first_sync() do
     wait_for_ibd();
-    IO.puts("Preparing mempool sync");
+    Logger.info("Preparing mempool sync");
     Mempool.sync(:mempool);
     Process.send_after(self(), :resync, 20 * 1000);
   end
@@ -64,28 +66,28 @@ defmodule BitcoinStream.Mempool.Sync do
     wait_for_ibd();
     case Mempool.is_block_locked(:mempool) do
       true ->
-        IO.puts("Processing block, delay mempool health check by 5 seconds");
+        Logger.debug("Processing block, delay mempool health check by 5 seconds");
         Process.send_after(self(), :resync, 5 * 1000)
 
       false ->
         with  {:ok, 200, %{"size" => size}} when is_integer(size) <- RPC.request(:rpc, "getmempoolinfo", []),
               count when is_integer(count) <- Mempool.get(:mempool) do
-          IO.puts("Mempool health check - Core count: #{size} | Bitfeed count: #{count}");
+          Logger.debug("Mempool health check - Core count: #{size} | Bitfeed count: #{count}");
 
           # if we've diverged from the true count by more than 50 txs, then fix
           # ensures our count doesn't stray too far due to missed events & unexpected errors.
           if (abs(size - count) > 50) do
-            IO.puts("resync");
+            Logger.debug("resync");
             Mempool.set(:mempool, size);
             newcount = Mempool.get(:mempool);
-            IO.puts("updated to #{newcount}");
+            Logger.debug("updated to #{newcount}");
           end
           # next check in 1 minute
           Process.send_after(self(), :resync, 60 * 1000)
         else
           err ->
-            IO.puts("mempool health check failed");
-            IO.inspect(err);
+            Logger.error("mempool health check failed");
+            Logger.error("#{inspect(err)}");
             #retry in 10 seconds
             Process.send_after(self(), :resync, 10 * 1000)
         end

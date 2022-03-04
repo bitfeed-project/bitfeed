@@ -1,5 +1,7 @@
 Application.ensure_all_started(BitcoinStream.RPC)
 
+require Logger
+
 defmodule BitcoinStream.Protocol.Transaction do
   @moduledoc """
     Extended bitcoin transaction struct
@@ -142,15 +144,15 @@ defmodule BitcoinStream.Protocol.Transaction do
           } }
         else
           {:ok, 500, reason} ->
-            IO.puts("transaction not found #{input.prev_txid}");
-            IO.inspect(reason)
+            Logger.error("transaction not found #{input.prev_txid}");
+            Logger.error("#{inspect(reason)}")
           {:error, reason} ->
-            IO.puts("Failed to inflate input:");
-            IO.inspect(reason)
+            Logger.error("Failed to inflate input:");
+            Logger.error("#{inspect(reason)}")
             :error
           err ->
-            IO.puts("Failed to inflate input: (unknown reason)");
-            IO.inspect(err);
+            Logger.error("Failed to inflate input: (unknown reason)");
+            Logger.error("#{inspect(err)}")
             :error
         end
     end
@@ -185,7 +187,7 @@ defmodule BitcoinStream.Protocol.Transaction do
         {:ok, inputs, total}
 
       other ->
-        IO.inspect(other);
+        Logger.error("#{inspect(other)}");
         inflate_inputs(inputs, [], 0)
     end
   end

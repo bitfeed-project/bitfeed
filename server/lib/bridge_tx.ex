@@ -1,3 +1,5 @@
+require Logger
+
 defmodule BitcoinStream.Bridge.Tx do
   @moduledoc """
   Bitcoin event bridge module.
@@ -19,7 +21,7 @@ defmodule BitcoinStream.Bridge.Tx do
   end
 
   def start_link(host, port) do
-    IO.puts("Starting Bitcoin Tx bridge on #{host} port #{port}")
+    Logger.info("Starting Bitcoin Tx bridge on #{host} port #{port}")
     GenServer.start_link(__MODULE__, {host, port})
   end
 
@@ -37,17 +39,17 @@ defmodule BitcoinStream.Bridge.Tx do
   defp connect(host, port) do
     # check rpc online & synced
     wait_for_ibd();
-    IO.puts("Node ready, connecting to tx socket");
+    Logger.info("Node ready, connecting to tx socket");
 
     # connect to socket
     {:ok, socket} = :chumak.socket(:sub);
-    IO.puts("Connected tx zmq socket on #{host} port #{port}");
+    Logger.info("Connected tx zmq socket on #{host} port #{port}");
     :chumak.subscribe(socket, 'rawtx')
-    IO.puts("Subscribed to rawtx events")
+    Logger.debug("Subscribed to rawtx events")
     case :chumak.connect(socket, :tcp, String.to_charlist(host), port) do
-      {:ok, pid} -> IO.puts("Binding ok to tx socket pid #{inspect pid}");
-      {:error, reason} -> IO.puts("Binding tx socket failed: #{reason}");
-      _ -> IO.puts("???");
+      {:ok, pid} -> Logger.debug("Binding ok to tx socket pid #{inspect pid}");
+      {:error, reason} -> Logger.error("Binding tx socket failed: #{reason}");
+      _ -> Logger.info("???");
     end
 
     # start tx loop
@@ -59,13 +61,12 @@ defmodule BitcoinStream.Bridge.Tx do
       :ok -> true
 
       _ ->
-        IO.puts("Waiting for node to come online and fully sync before connecting to tx socket");
+        Logger.info("Waiting for node to come online and fully sync before connecting to tx socket");
         RPC.notify_on_ready(:rpc)
     end
   end
 
   defp send_txn(txn, count) do
-    # IO.puts("Forwarding transaction to websocket clients")
     case Jason.encode(%{type: "txn", txn: txn, count: count}) do
       {:ok, payload} ->
         Registry.dispatch(Registry.BitcoinStream, "txs", fn(entries) ->
@@ -73,7 +74,7 @@ defmodule BitcoinStream.Bridge.Tx do
             Process.send(pid, payload, [])
           end
         end)
-      {:error, reason} -> IO.puts("Error json encoding transaction: #{reason}");
+      {:error, reason} -> Logger.error("Error json encoding transaction: #{reason}");
     end
   end
 
@@ -97,12 +98,12 @@ defmodule BitcoinStream.Bridge.Tx do
         end
 
       {:err, reason} ->
-        IO.puts("Error decoding tx: #{reason}");
+        Logger.error("Error decoding tx: #{reason}");
         false
 
       error ->
-        IO.puts("Error decoding tx");
-        IO.inspect(error);
+        Logger.error("Error decoding tx");
+        Logger.error("#{inspect(error)}");
         false
     end
   end

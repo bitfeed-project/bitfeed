@@ -1,3 +1,5 @@
+require Logger
+
 defmodule BitcoinStream.Server do
   use Application
 
@@ -9,7 +11,19 @@ defmodule BitcoinStream.Server do
     { rpc_port, "" } = Integer.parse(System.get_env("BITCOIN_RPC_PORT"));
     { rpc_pools, "" } = Integer.parse(System.get_env("RPC_POOLS"));
     { rpc_pool_size, "" } = Integer.parse(System.get_env("RPC_POOL_SIZE"));
+    log_level = System.get_env("LOG_LEVEL");
     btc_host = System.get_env("BITCOIN_HOST");
+
+    case log_level do
+      "debug" ->
+        Logger.configure(level: :debug);
+
+      "error" ->
+        Logger.configure(level: :error);
+
+      _ ->
+        Logger.configure(level: :info);
+    end
 
     children = [
       Registry.child_spec(

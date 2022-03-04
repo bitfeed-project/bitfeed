@@ -17,6 +17,7 @@ RUN mix do deps.compile
 
 COPY lib ./lib
 COPY log ./log
+COPY config ./config
 
 ENV MIX_ENV prod
 ENV RELEASE_NODE bitfeed
