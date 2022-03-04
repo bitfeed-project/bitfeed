@@ -94,6 +94,7 @@ defmodule BitcoinStream.Protocol.Transaction do
         }
 
       {:failed, inputs, _in_value} ->
+        Logger.error("failed to inflate #{txn.id}");
         %__MODULE__{
           version: txn.version,
           inflated: false,
@@ -118,77 +119,84 @@ defmodule BitcoinStream.Protocol.Transaction do
     count_value(rest, total + next_output.value)
   end
 
-  defp inflate_input(input) do
-    case input.prev_txid do
-      "0000000000000000000000000000000000000000000000000000000000000000" ->
-        {:ok, %{
-          prev_txid: input.prev_txid,
-          prev_vout: input.prev_vout,
-          script_sig: input.script_sig,
-          sequence_no: input.sequence_no,
-          value: 0,
-          script_pub_key: nil,
-        } }
-      _prev_txid ->
-        with  {:ok, 200, hextx} <- RPC.request(:rpc, "getrawtransaction", [input.prev_txid]),
-              rawtx <- Base.decode16!(hextx, case: :lower),
-              {:ok, txn } <- decode(rawtx),
-              output <- Enum.at(txn.outputs, input.prev_vout) do
-          {:ok, %{
-            prev_txid: input.prev_txid,
-            prev_vout: input.prev_vout,
-            script_sig: input.script_sig,
-            sequence_no: input.sequence_no,
-            value: output.value,
-            script_pub_key: output.script_pub_key,
-          } }
-        else
-          {:ok, 500, reason} ->
-            Logger.error("transaction not found #{input.prev_txid}");
-            Logger.error("#{inspect(reason)}")
-          {:error, reason} ->
-            Logger.error("Failed to inflate input:");
-            Logger.error("#{inspect(reason)}")
-            :error
-          err ->
-            Logger.error("Failed to inflate input: (unknown reason)");
-            Logger.error("#{inspect(err)}")
-            :error
-        end
+  defp inflate_batch(batch) do
+    with  batch_params <- Enum.map(batch, fn input -> [input.prev_txid, input.prev_txid <> "#{input.prev_vout}"] end),
+          batch_map <- Enum.into(batch, %{}, fn p -> {p.prev_txid <> "#{p.prev_vout}", p} end),
+          {:ok, 200, txs} <- RPC.batch_request(:rpc, "getrawtransaction", batch_params),
+          successes <- Enum.filter(txs, fn %{"error" => error} -> error == nil end),
+          rawtxs <- Enum.map(successes, fn tx -> %{"error" => nil, "id" => input_id, "result" => hextx} = tx; rawtx = Base.decode16!(hextx, case: :lower); [input_id, rawtx] end),
+          decoded <- Enum.map(rawtxs, fn [input_id, rawtx] -> {:ok, txn} = decode(rawtx); [input_id, txn] end),
+          outputs <- Enum.map(decoded,
+            fn [input_id, txn] ->
+              input = Map.get(batch_map, input_id);
+              output = Enum.at(txn.outputs, input.prev_vout);
+              %{
+                prev_txid: input.prev_txid,
+                prev_vout: input.prev_vout,
+                script_sig: input.script_sig,
+                sequence_no: input.sequence_no,
+                value: output.value,
+                script_pub_key: output.script_pub_key,
+              }
+            end
+          ),
+          total <- Enum.reduce(outputs, 0, fn output, acc -> acc + output.value end ) do
+      if length(batch) == length(outputs) do
+        {:ok, outputs, total}
+      else
+        {:failed, outputs, total}
+      end
+    else
+      {:ok, 500, reason} ->
+        Logger.error("input in batch not found");
+        Logger.error("#{inspect(reason)}")
+      {:error, reason} ->
+        Logger.error("Failed to inflate batched inputs:");
+        Logger.error("#{inspect(reason)}")
+        :error
+      err ->
+        Logger.error("Failed to inflate batched inputs: (unknown reason)");
+        Logger.error("#{inspect(err)}")
+        :error
     end
   end
 
   defp inflate_inputs([], inflated, total) do
-    {:ok, Enum.reverse(inflated), total}
+    {:ok, inflated, total}
   end
-  defp inflate_inputs([next_input | rest], inflated, total) do
-    case inflate_input(next_input) do
-      {:ok, inflated_txn} ->
-        inflate_inputs(rest, [inflated_txn | inflated], total + inflated_txn.value)
+
+  defp inflate_inputs([next_chunk | rest], inflated, total) do
+    case inflate_batch(next_chunk) do
+      {:ok, inflated_chunk, chunk_total} ->
+        inflate_inputs(rest, inflated ++ inflated_chunk, total + chunk_total)
       _ ->
-        {:failed, Enum.reverse(inflated) ++ [next_input | rest], 0}
+        {:failed, inflated ++ next_chunk ++ rest, 0}
     end
   end
+
   def inflate_inputs([], nil) do
     { :failed, nil, 0 }
   end
+
+  # Retrieves cached inputs if available,
+  # otherwise inflates inputs in batches of up to 100
   def inflate_inputs(txid, inputs) do
     case :ets.lookup(:mempool_cache, txid) do
       # cache miss, actually inflate
       [] ->
-        inflate_inputs(inputs, [], 0)
+        inflate_inputs(Enum.chunk_every(inputs, 100), [], 0)
 
       # cache hit, but processed inputs not available
       [{_, nil, _}] ->
-        inflate_inputs(inputs, [], 0)
+        inflate_inputs(Enum.chunk_every(inputs, 100), [], 0)
 
       # cache hit, just return the cached values
       [{_, {inputs, total}, _}] ->
         {:ok, inputs, total}
 
       other ->
-        Logger.error("#{inspect(other)}");
-        inflate_inputs(inputs, [], 0)
+        Logger.error("unexpected mempool cache response while inflating inputs #{inspect(other)}");
+        inflate_inputs(Enum.chunk_every(inputs, 100), [], 0)
     end
   end
 

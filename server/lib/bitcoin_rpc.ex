@@ -34,7 +34,7 @@ defmodule BitcoinStream.RPC do
 
   @impl true
   def handle_info(:check_status, {host, port, status, creds, listeners, inflight}) do
-    case async_request("getblockchaininfo", [], host, port, creds) do
+    case single_request("getblockchaininfo", [], host, port, creds) do
       {:ok, task_ref} ->
         {:noreply, {host, port, status, creds, listeners, Map.put(inflight, task_ref, :status)}}
 
@@ -53,9 +53,6 @@ defmodule BitcoinStream.RPC do
 
   @impl true
   def handle_info({ref, result}, {host, port, status, creds, listeners, inflight}) do
-    if Enum.count(inflight) > 2 do
-      Logger.debug("#{Enum.count(inflight)} rpc requests inflight");
-    end
     case Map.pop(inflight, ref) do
       {nil, inflight} ->
         {:noreply, {host, port, status, creds, listeners, inflight}}
@@ -89,7 +86,18 @@ defmodule BitcoinStream.RPC do
 
   @impl true
   def handle_call({:request, method, params}, from, {host, port, status, creds, listeners, inflight}) do
-    case async_request(method, params, host, port, creds) do
+    case single_request(method, params, host, port, creds) do
+      {:ok, task_ref} ->
+        {:noreply, {host, port, status, creds, listeners, Map.put(inflight, task_ref, from)}}
+
+      :error ->
+        {:reply, 500, {host, port, status, creds, listeners, inflight}}
+    end
+  end
+
+  @impl true
+  def handle_call({:batch_request, method, batch_params}, from, {host, port, status, creds, listeners, inflight}) do
+    case batch_request(method, batch_params, host, port, creds) do
       {:ok, task_ref} ->
         {:noreply, {host, port, status, creds, listeners, Map.put(inflight, task_ref, from)}}
 
@@ -112,24 +120,50 @@ defmodule BitcoinStream.RPC do
     GenServer.call(pid, :notify_on_ready, :infinity)
   end
 
-  defp async_request(method, params, host, port, creds) do
-    with  { user, pw } <- creds,
-          {:ok, rpc_request} <- Jason.encode(%{method: method, params: params}) do
+  defp single_request(method, params, host, port, creds) do
+    case Jason.encode(%{method: method, params: params}) do
+      {:ok, body} ->
+        async_request(body, host, port, creds)
+
+      err ->
+        Logger.error("Failed to build RPC request body");
+        {:error, err}
+    end
+  end
+
+  defp batch_request(method, batch_params, host, port, creds) do
+    case Jason.encode(Enum.map(batch_params, fn [params, id] -> %{method: method, params: [params], id: id} end)) do
+      {:ok, body} ->
+        async_request(body, host, port, creds)
+
+      err ->
+        Logger.error("Failed to build RPC request body");
+        {:error, err}
+    end
+  end
+
+  defp async_request(body, host, port, creds) do
+    with  { user, pw } <- creds do
       task = Task.async(
         fn ->
-          with  {:ok, %Finch.Response{body: body, headers: _headers, status: status}} <- Finch.build(:post, "http://#{host}:#{port}", [{"content-type", "application/json"}, {"authorization", BasicAuth.encode_basic_auth(user, pw)}], rpc_request) |> Finch.request(FinchClient),
-                {:ok, %{"result" => info}} <- Jason.decode(body) do
-            {:ok, status, info}
+          with  {:ok, %Finch.Response{body: body, headers: _headers, status: status}} <- Finch.build(:post, "http://#{host}:#{port}", [{"content-type", "application/json"}, {"authorization", BasicAuth.encode_basic_auth(user, pw)}], body) |> Finch.request(FinchClient),
+                {:ok, response} <- Jason.decode(body) do
+            case response do
+              %{"result" => info} ->
+                {:ok, status, info}
+
+              _ -> {:ok, status, response}
+            end
           else
             {:ok, status, _} ->
-              Logger.error("RPC request #{method} failed with HTTP code #{status}")
+              Logger.error("RPC request failed with HTTP code #{status}")
               {:error, status}
             {:error, reason} ->
-              Logger.error("RPC request #{method} failed");
+              Logger.error("RPC request failed");
               Logger.error("#{inspect(reason)}");
               {:error, reason}
             err ->
-              Logger.error("RPC request #{method} failed: (unknown reason)");
+              Logger.error("RPC request failed: (unknown reason)");
               Logger.error("#{inspect(err)}");
               {:error, err}
           end
@@ -146,6 +180,19 @@ defmodule BitcoinStream.RPC do
 
   def request(pid, method, params) do
     GenServer.call(pid, {:request, method, params}, 30000)
+  catch
+    :exit, reason ->
+      case reason do
+        {:timeout, _} -> {:error, :timeout}
+
+        _ -> {:error, reason}
+      end
+
+    error -> {:error, error}
+  end
+
+  def batch_request(pid, method, batch_params) do
+    GenServer.call(pid, {:batch_request, method, batch_params}, 30000)
   catch
     :exit, reason ->
       case reason do
