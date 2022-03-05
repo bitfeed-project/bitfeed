@@ -1,3 +1,5 @@
+require Logger
+
 defmodule BitcoinStream.Bridge.Sequence do
   @moduledoc """
   Bitcoin event bridge module.
@@ -18,7 +20,7 @@ defmodule BitcoinStream.Bridge.Sequence do
   end
 
   def start_link(host, port) do
-    IO.puts("Starting Bitcoin Sequence bridge on #{host} port #{port}")
+    Logger.info("Starting Bitcoin Sequence bridge on #{host} port #{port}")
     GenServer.start_link(__MODULE__, {host, port})
   end
 
@@ -36,17 +38,17 @@ defmodule BitcoinStream.Bridge.Sequence do
   defp connect(host, port) do
     # check rpc online & synced
     wait_for_ibd();
-    IO.puts("Node ready, connecting to sequence socket");
+    Logger.info("Node ready, connecting to sequence socket");
 
     # connect to socket
     {:ok, socket} = :chumak.socket(:sub);
-    IO.puts("Connected sequence zmq socket on #{host} port #{port}");
+    Logger.info("Connected sequence zmq socket on #{host} port #{port}");
     :chumak.subscribe(socket, 'sequence')
-    IO.puts("Subscribed to sequence events")
+    Logger.debug("Subscribed to sequence events")
     case :chumak.connect(socket, :tcp, String.to_charlist(host), port) do
-      {:ok, pid} -> IO.puts("Binding ok to sequence socket pid #{inspect pid}");
-      {:error, reason} -> IO.puts("Binding sequence socket failed: #{reason}");
-      _ -> IO.puts("???");
+      {:ok, pid} -> Logger.debug("Binding ok to sequence socket pid #{inspect pid}");
+      {:error, reason} -> Logger.error("Binding sequence socket failed: #{reason}");
+      _ -> Logger.info("???");
     end
 
     # start tx loop
@@ -55,16 +57,16 @@ defmodule BitcoinStream.Bridge.Sequence do
 
   defp wait_for_ibd() do
     case RPC.get_node_status(:rpc) do
-      {:ok, %{"initialblockdownload" => false}} -> true
+      :ok -> true
 
       _ ->
-        IO.puts("Waiting for node to come online and fully sync before connecting to sequence socket");
+        Logger.info("Waiting for node to come online and fully sync before connecting to sequence socket");
         RPC.notify_on_ready(:rpc)
     end
   end
 
   defp send_txn(txn, count) do
-    # IO.puts("Forwarding transaction to websocket clients")
+    # Logger.info("Forwarding transaction to websocket clients")
     case Jason.encode(%{type: "txn", txn: txn, count: count}) do
       {:ok, payload} ->
         Registry.dispatch(Registry.BitcoinStream, "txs", fn(entries) ->
@@ -72,7 +74,7 @@ defmodule BitcoinStream.Bridge.Sequence do
             Process.send(pid, payload, [])
           end
         end)
-      {:error, reason} -> IO.puts("Error json encoding transaction: #{reason}");
+      {:error, reason} -> Logger.error("Error json encoding transaction: #{reason}");
     end
   end
 
@@ -84,7 +86,7 @@ defmodule BitcoinStream.Bridge.Sequence do
             Process.send(pid, payload, []);
           end
         end)
-      {:error, reason} -> IO.puts("Error json encoding drop message: #{reason}");
+      {:error, reason} -> Logger.error("Error json encoding drop message: #{reason}");
     end
   end
 
@@ -93,7 +95,6 @@ defmodule BitcoinStream.Bridge.Sequence do
           [_topic, <<hash::binary-size(32), type::binary-size(1), seq::little-size(64)>>, <<_sequence::little-size(32)>>] <- message,
           txid <- Base.encode16(hash, case: :lower),
           event <- to_charlist(type) do
-      # IO.puts("loop #{sequence}");
       case event do
         # Transaction added to mempool
         'A' ->
@@ -101,7 +102,6 @@ defmodule BitcoinStream.Bridge.Sequence do
             false -> false
 
             { txn, count } ->
-              # IO.puts("*SEQ* #{txid}");
               send_txn(txn, count)
           end
 

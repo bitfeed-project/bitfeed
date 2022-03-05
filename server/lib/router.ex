@@ -1,3 +1,5 @@
+require Logger
+
 defmodule BitcoinStream.Router do
   use Plug.Router
 
@@ -20,7 +22,7 @@ defmodule BitcoinStream.Router do
         put_resp_header(conn, "cache-control", "public, max-age=604800, immutable")
         |> send_resp(200, block)
       _ ->
-        IO.puts("Error getting block hash");
+        Logger.debug("Error getting block hash");
         send_resp(conn, 404, "Block not available")
     end
   end

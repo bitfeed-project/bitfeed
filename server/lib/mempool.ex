@@ -1,3 +1,5 @@
+require Logger
+
 defmodule BitcoinStream.Mempool do
   @moduledoc """
   GenServer for retrieving and maintaining mempool info
@@ -22,7 +24,7 @@ defmodule BitcoinStream.Mempool do
   connecting to a bitcoin node at RPC `host:port` for ground truth data
   """
   def start_link(opts) do
-    IO.puts("Starting Mempool Tracker");
+    Logger.info("Starting Mempool Tracker");
     # cache of all transactions in the node mempool, mapped to {inputs, total_input_value}
     :ets.new(:mempool_cache, [:set, :public, :named_table]);
     # cache of transactions ids in the mempool, but not yet synchronized with the :mempool_cache
@@ -130,7 +132,7 @@ defmodule BitcoinStream.Mempool do
   end
 
   defp get_queue(pid) do
-    GenServer.call(pid, :get_queue)
+    GenServer.call(pid, :get_queue, 60000)
   end
 
   defp set_queue(pid, queue) do
@@ -188,10 +190,11 @@ defmodule BitcoinStream.Mempool do
       # new transaction, id already registered
       :registered ->
         with [] <- :ets.lookup(:block_cache, txid) do # double check tx isn't included in the last block
-          :ets.insert(:mempool_cache, {txid, { txn.inputs, txn.value + txn.fee }, nil});
+          :ets.insert(:mempool_cache, {txid, { txn.inputs, txn.value + txn.fee, txn.inflated }, nil});
           get(pid)
         else
-          _ -> false
+          _ ->
+            false
         end
 
       # new transaction, not yet registered
@@ -243,7 +246,7 @@ defmodule BitcoinStream.Mempool do
 
           # data already received, but tx not registered
           [{_txid, _, txn}] when txn != nil ->
-            :ets.insert(:mempool_cache, {txid, { txn.inputs, txn.value + txn.fee }, nil});
+            :ets.insert(:mempool_cache, {txid, { txn.inputs, txn.value + txn.fee, txn.inflated }, nil});
             :ets.delete(:sync_cache, txid);
             if do_count do
               increment(pid);
@@ -310,7 +313,7 @@ defmodule BitcoinStream.Mempool do
             Process.send(pid, payload, []);
           end
         end)
-      {:error, reason} -> IO.puts("Error json encoding count: #{reason}");
+      {:error, reason} -> Logger.error("Error json encoding count: #{reason}");
     end
   end
 
@@ -324,7 +327,7 @@ defmodule BitcoinStream.Mempool do
   end
 
   def sync(pid) do
-    IO.puts("Preparing mempool sync");
+    Logger.info("Preparing mempool sync");
     with  {:ok, 200, %{"mempool_sequence" => sequence, "txids" => txns}} <- RPC.request(:rpc, "getrawmempool", [false, true]) do
       set_seq(pid, sequence);
       count = length(txns);
@@ -336,14 +339,14 @@ defmodule BitcoinStream.Mempool do
       sync_queue(pid, queue);
       set_queue(pid, []);
 
-      IO.puts("Loaded #{count} mempool transactions");
+      Logger.info("Loaded #{count} mempool transactions");
       send_mempool_count(pid);
       do_sync(pid, txns);
       :ok
     else
       err ->
-        IO.puts("Pool sync failed");
-        IO.inspect(err);
+        Logger.error("Pool sync failed");
+        Logger.error("#{inspect(err)}");
         #retry after 30 seconds
         :timer.sleep(10000);
         sync(pid)
@@ -351,9 +354,9 @@ defmodule BitcoinStream.Mempool do
   end
 
   def do_sync(pid, txns) do
-    IO.puts("Syncing #{length(txns)} mempool transactions");
+    Logger.info("Syncing #{length(txns)} mempool transactions");
     sync_mempool(pid, txns);
-    IO.puts("MEMPOOL SYNC FINISHED");
+    Logger.info("MEMPOOL SYNC FINISHED");
     set_done(pid);
     :ok
   end
@@ -368,11 +371,11 @@ defmodule BitcoinStream.Mempool do
         with  {:ok, 200, hextx} <- RPC.request(:rpc, "getrawtransaction", [txid]),
               rawtx <- Base.decode16!(hextx, case: :lower),
               {:ok, txn } <- BitcoinTx.decode(rawtx),
-              inflated_txn <- BitcoinTx.inflate(txn) do
+              inflated_txn <- BitcoinTx.inflate(txn, false) do
           register(pid, txid, nil, false);
           insert(pid, txid, inflated_txn)
         else
-          _ -> IO.puts("sync_mempool_txn failed #{txid}")
+          _ -> Logger.debug("sync_mempool_txn failed #{txid}")
         end
 
       [_] -> true
@@ -384,9 +387,69 @@ defmodule BitcoinStream.Mempool do
   end
 
   defp sync_mempool_txns(pid, [head | tail], count) do
-    IO.puts("Syncing mempool tx #{count}/#{count + length(tail) + 1} | #{head}");
+    Logger.debug("Syncing mempool tx #{count}/#{count + length(tail) + 1} | #{head}");
     sync_mempool_txn(pid, head);
     sync_mempool_txns(pid, tail, count + 1)
+  end
+
+  # when transaction inflation fails, we fall back to storing deflated inputs in the cache
+  # the repair function scans the mempool cache for deflated inputs, and attempts to reinflate
+  def repair(_pid) do
+    Logger.debug("Checking mempool integrity");
+    repaired = :ets.foldl(&(repair_mempool_txn/2), 0, :mempool_cache);
+    if repaired > 0 do
+      Logger.info("MEMPOOL CHECK COMPLETE #{repaired} REPAIRED");
+    else
+      Logger.debug("MEMPOOL REPAIR NOT REQUIRED");
+    end
+    :ok
+  catch
+    err ->
+      Logger.error("Failed to repair mempool: #{inspect(err)}");
+      :error
+  end
+
+  defp repair_mempool_txn(entry, repaired) do
+    case entry do
+      # unprocessed
+      {_, nil, _} ->
+        repaired
+
+      # valid entry, already inflated
+      {_txid, {_inputs, _total, true}, _} ->
+        repaired
+
+      # valid entry, not inflated
+      # repair
+      {txid, {_inputs, _total, false}, status} ->
+        Logger.debug("repairing #{txid}");
+        with  {:ok, 200, hextx} <- RPC.request(:rpc, "getrawtransaction", [txid]),
+              rawtx <- Base.decode16!(hextx, case: :lower),
+              {:ok, txn } <- BitcoinTx.decode(rawtx),
+              inflated_txn <- BitcoinTx.inflate(txn, false) do
+          if inflated_txn.inflated do
+            :ets.insert(:mempool_cache, {txid, { txn.inputs, txn.value + txn.fee, true }, status});
+            Logger.debug("repaired #{repaired} mempool txns #{txid}");
+            repaired + 1
+          else
+            Logger.debug("failed to inflate transaction for repair #{txid}");
+            repaired
+          end
+
+        else
+          _ -> Logger.debug("failed to fetch transaction for repair #{txid}");
+          repaired
+        end
+
+      # catch all
+      other ->
+        Logger.error("unexpected cache entry: #{inspect(other)}");
+        repaired
+    end
+  catch
+    err ->
+      Logger.debug("unexpected error repairing transaction");
+      repaired
   end
 
   defp cache_sync_ids(pid, txns) do

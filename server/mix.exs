@@ -21,7 +21,7 @@ defmodule BitcoinStream.MixProject do
   def application do
     [
       mod: {BitcoinStream.Server, []},
-      extra_applications: [:logger, :elixometer, :corsica]
+      extra_applications: [:logger, :corsica]
     ]
   end
 
@@ -36,13 +36,12 @@ defmodule BitcoinStream.MixProject do
       # {:bitcoinex, "~> 0.1.0"},
       # {:bitcoinex, git: "git@github.com:mononaut/bitcoinex.git", tag: "master"},
       {:bitcoinex, path: "./bitcoinex", override: true},
-      {:hackney, "~> 1.15"},
-      {:cowboy, "~> 2.4"},
-      {:plug, "~> 1.7"},
+      {:finch, "~> 0.10"},
+      {:cowboy, "~> 2.7"},
+      {:plug, "~> 1.13"},
       {:corsica, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
-      {:jason, "~> 1.1"},
-      {:elixometer, "~> 1.4"}
+      {:jason, "~> 1.1"}
     ]
   end
 end

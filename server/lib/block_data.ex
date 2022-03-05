@@ -1,5 +1,7 @@
 Application.ensure_all_started(BitcoinStream.RPC)
 
+require Logger
+
 defmodule BitcoinStream.BlockData do
   @moduledoc """
   Block data module.
@@ -9,7 +11,7 @@ defmodule BitcoinStream.BlockData do
   use GenServer
 
   def start_link(opts) do
-    IO.puts("Starting block data link")
+    Logger.info("Starting block data link");
     # load block
 
     with {:ok, json} <- File.read("data/last_block.json"),

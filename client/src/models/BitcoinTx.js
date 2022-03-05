@@ -3,8 +3,9 @@ import config from '../config.js'
 import { mixColor, pink, bluegreen, orange, teal, green, purple  } from '../utils/color.js'
 
 export default class BitcoinTx {
-  constructor ({ version, id, value, fee, vbytes, inputs, outputs, time, block }, vertexArray) {
+  constructor ({ version, inflated, id, value, fee, vbytes, inputs, outputs, time, block }, vertexArray) {
     this.version = version
+    this.is_inflated = !!inflated
     this.id = id
     this.vertexArray = vertexArray
     this.pixelPosition = { x: 0, y: 0, r: 0}
@@ -27,7 +28,7 @@ export default class BitcoinTx {
 
     // is a coinbase transaction?
     this.coinbase = this.isCoinbase(this)
-    if (this.coinbase) {
+    if (this.coinbase || !this.is_inflated || (this.fee < 0)) {
       this.fee = null
       this.feerate = null
     }
