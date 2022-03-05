@@ -15,7 +15,7 @@ export default class BitcoinBlock {
     this.txns = txns
     this.coinbase = new BitcoinTx(this.txns[0])
     if (fees) {
-      this.fees = fees + this.coinbase.value
+      this.fees = fees
     } else {
       this.fees = null
     }
