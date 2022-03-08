@@ -85,19 +85,19 @@ function highlight () {
     }
 
     .inputs {
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      align-items: baseline;
+      display: inline-table;
+      table-layout: fixed;
+      width: calc(100% - 40px);
 
       span {
-        width: 0;
-        flex-shrink: 1;
-        flex-grow: 1;
+        display: table-cell;
+        white-space: nowrap;
         &.arrow {
           min-width: 1.5em;
-          flex-shrink: 1;
-          flex-grow: 0;
+          text-align: center;
+        }
+        &:last-child {
+          text-align: right;
         }
       }
     }
@@ -140,7 +140,7 @@ function highlight () {
   {#if tx.inputs && tx.outputs && !tx.coinbase }
     <p class="field inputs">
       <span>{ tx.inputs.length } input{#if tx.inputs.length != 1}s{/if}</span>
-      <span class="arrow"> &rarr; </span>
+      <span class="arrow"> &#10230; </span>
       <span>{ tx.outputs.length } output{#if tx.outputs.length != 1}s{/if}</span>
     </p>
   {:else if tx.coinbase }

@@ -63,7 +63,7 @@ defp summarise_txns([coinbase | txns]) do
   # Mempool.is_done returns false while the mempool is still syncing
   with extended_coinbase <- BitcoinTx.extend(coinbase),
        {summarised, total, fees} <- summarise_txns(txns, [], 0, 0, Mempool.is_done(:mempool)) do
-    {[extended_coinbase | summarised], total, fees}
+    {[extended_coinbase | summarised], total + extended_coinbase.value, fees}
   else
     err ->
       Logger.error("Failed to inflate block");

@@ -448,7 +448,7 @@ defmodule BitcoinStream.Mempool do
     end
   catch
     err ->
-      Logger.debug("unexpected error repairing transaction");
+      Logger.debug("unexpected error repairing transaction: #{inspect(err)}");
       repaired
   end
 

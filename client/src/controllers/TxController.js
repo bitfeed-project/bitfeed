@@ -123,6 +123,7 @@ export default class TxController {
     for (let i = 0; i < block.txns.length; i++) {
       if (this.poolScene.remove(block.txns[i].id)) {
         knownCount++
+        this.txs[block.txns[i].id].setData(block.txns[i])
         this.txs[block.txns[i].id].setBlock(block)
         this.blockScene.insert(this.txs[block.txns[i].id], 0, false)
       } else {

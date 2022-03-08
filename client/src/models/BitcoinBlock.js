@@ -19,7 +19,6 @@ export default class BitcoinBlock {
     } else {
       this.fees = null
     }
-    if (this.coinbase && this.coinbase.value) this.value += this.coinbase.value
     this.height = this.coinbase.coinbase.height
     this.miner_sig = this.coinbase.coinbase.sigAscii
 

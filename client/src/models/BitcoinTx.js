@@ -3,11 +3,37 @@ import config from '../config.js'
 import { mixColor, pink, bluegreen, orange, teal, green, purple  } from '../utils/color.js'
 
 export default class BitcoinTx {
-  constructor ({ version, inflated, id, value, fee, vbytes, inputs, outputs, time, block }, vertexArray) {
+  constructor (data, vertexArray) {
+    this.vertexArray = vertexArray
+    this.setData(data)
+    this.view = new TxView(this)
+  }
+
+  isCoinbase (txn) {
+    if (txn.inputs && txn.inputs.length === 1 && txn.inputs[0].prev_txid === "0000000000000000000000000000000000000000000000000000000000000000") {
+      const cbInfo = txn.inputs[0].script_sig
+      // number of bytes encoding the block height
+      const height_bytes = parseInt(cbInfo.substring(0,2), 16)
+      // extract the specified number of bytes, reverse the endianness (reverse pairs of hex characters), parse as a hex string
+      const height = parseInt(cbInfo.substring(2,2 + (height_bytes * 2)).match(/../g).reverse().join(''),16)
+      // save remaining bytes as free data
+      const sig = cbInfo.substring(2 + (height_bytes * 2))
+      const sigAscii = sig.match(/../g).reduce((parsed, hexChar) => {
+        return parsed + String.fromCharCode(parseInt(hexChar, 16))
+      }, "")
+
+      return {
+        height,
+        sig,
+        sigAscii
+      }
+    } else return false
+  }
+
+  setData ({ version, inflated, id, value, fee, vbytes, inputs, outputs, time, block }) {
     this.version = version
     this.is_inflated = !!inflated
     this.id = id
-    this.vertexArray = vertexArray
     this.pixelPosition = { x: 0, y: 0, r: 0}
     this.screenPosition = { x: 0, y: 0, r: 0}
     this.gridPosition = { x: 0, y: 0, r: 0}
@@ -33,7 +59,7 @@ export default class BitcoinTx {
       this.feerate = null
     }
 
-    this.setBlock(block)
+    if (!this.block) this.setBlock(block)
 
     const feeColor = (this.feerate == null
       ? orange
@@ -49,29 +75,6 @@ export default class BitcoinTx {
         pool: { color: feeColor },
       }
     }
-
-    this.view = new TxView(this)
-  }
-
-  isCoinbase (txn) {
-    if (txn.inputs && txn.inputs.length === 1 && txn.inputs[0].prev_txid === "0000000000000000000000000000000000000000000000000000000000000000") {
-      const cbInfo = txn.inputs[0].script_sig
-      // number of bytes encoding the block height
-      const height_bytes = parseInt(cbInfo.substring(0,2), 16)
-      // extract the specified number of bytes, reverse the endianness (reverse pairs of hex characters), parse as a hex string
-      const height = parseInt(cbInfo.substring(2,2 + (height_bytes * 2)).match(/../g).reverse().join(''),16)
-      // save remaining bytes as free data
-      const sig = cbInfo.substring(2 + (height_bytes * 2))
-      const sigAscii = sig.match(/../g).reduce((parsed, hexChar) => {
-        return parsed + String.fromCharCode(parseInt(hexChar, 16))
-      }, "")
-
-      return {
-        height,
-        sig,
-        sigAscii
-      }
-    } else return false
   }
 
   destroy () {
