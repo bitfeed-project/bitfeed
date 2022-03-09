@@ -19,19 +19,22 @@ function createCounter () {
 	}
 }
 
-function createCachedDict (namespace, defaultValues) {
+function createCachedDict (namespace, setValues, defaultValues) {
 	const initial = {
 		...defaultValues
 	}
 
-	// load from local storage
 	Object.keys(initial).forEach(field => {
-		const val = localStorage.getItem(`${namespace}-${field}`)
-		if (val != null) {
-			try {
-				initial[field] = JSON.parse(val)
-			} catch (e) {
-				initial[field] = val
+		// fields take setValues first, then fall back to cached values, then defaults
+		if (setValues[field] != null) initial[field] = setValues[field]
+		else {
+			const val = localStorage.getItem(`${namespace}-${field}`)
+			if (val != null) {
+				try {
+					initial[field] = JSON.parse(val)
+				} catch (e) {
+					initial[field] = val
+				}
 			}
 		}
 	})
@@ -96,7 +99,7 @@ export const settingsOpen = writable(false)
 let localeCurrencyCode = LocaleCurrency.getCurrency(navigator.language)
 if (!currencies[localeCurrencyCode]) localeCurrencyCode = 'USD'
 
-export const settings = createCachedDict('settings', {
+const defaultSettings = {
 	darkMode: true,
 	showNetworkStatus: true,
 	currency: localeCurrencyCode,
@@ -105,13 +108,28 @@ export const settings = createCachedDict('settings', {
 	colorByFee: false,
 	fancyGraphics: true,
 	showMessages: true,
-	noTrack: false
-})
+	noTrack: false,
+}
+
+const searchParams = URL ? (new URL(document.location)).searchParams : {}
+const urlSettings = Object.keys(defaultSettings).reduce((map, key) => {
+	const param = searchParams.get(key)
+	if (param != null) {
+		if (param.toLowerCase() === 'false') map[key] = false
+		else map[key] = param
+	}
+
+	return map
+}, {})
+if (urlSettings.showMessages == null) urlSettings.showMessages = true
+
+export const settings = createCachedDict('settings', urlSettings, defaultSettings)
+
 export const colorMode = derived([settings], ([$settings]) => {
 	return $settings.colorByFee ? "fee" : "age"
 })
 
-export const devSettings = (config.dev && config.debug) ? createCachedDict('dev-settings', {
+export const devSettings = (config.dev && config.debug) ? createCachedDict('dev-settings', {}, {
 	guides: false,
 	layoutHints: false,
 }) : writable({})
@@ -127,3 +145,7 @@ export const overlay = writable(null)
 export const highlight = writable([])
 export const newHighlightQuery = writable(null)
 export const highlightingFull = writable(false)
+
+const aspectRatio = window.innerWidth / window.innerHeight
+let isTinyScreen = (window.innerWidth < 480 && window.innerHeight < 480)
+export const tinyScreen = writable(isTinyScreen)

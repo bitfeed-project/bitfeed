@@ -3,7 +3,7 @@
   import TxController from '../controllers/TxController.js'
   import TxRender from './TxRender.svelte'
   import getTxStream from '../controllers/TxStream.js'
-  import { settings, overlay, serverConnected, serverDelay, txCount, mempoolCount, mempoolScreenHeight, frameRate, avgFrameRate, blockVisible, currentBlock, selectedTx, blockAreaSize, devEvents, devSettings } from '../stores.js'
+  import { settings, overlay, serverConnected, serverDelay, txCount, mempoolCount, mempoolScreenHeight, frameRate, avgFrameRate, blockVisible, tinyScreen, currentBlock, selectedTx, blockAreaSize, devEvents, devSettings } from '../stores.js'
   import BlockInfo from '../components/BlockInfo.svelte'
   import TxInfo from '../components/TxInfo.svelte'
   import Sidebar from '../components/Sidebar.svelte'
@@ -74,8 +74,6 @@
     $devEvents.addOneCallback = fakeTx
     $devEvents.addManyCallback = fakeTxs
     $devEvents.addBlockCallback = fakeBlock
-
-    if (!$settings.showMessages) $settings.showMessages = true
   })
 
   function resize () {
@@ -87,6 +85,12 @@
         width,
         height
       })
+    }
+    const aspectRatio = window.innerWidth / window.innerHeight
+    if ((aspectRatio >= 1 && window.innerWidth < 480) || (aspectRatio <= 1 && window.innerHeight < 480)) {
+      $tinyScreen = true
+    } else {
+      $tinyScreen = false
     }
   }
 
@@ -226,17 +230,19 @@
       left: 0.5rem;
       font-size: 0.9rem;
       color: var(--palette-x);
+    }
 
-      // &::before {
-      //   content: '';
-      //   position: absolute;
-      //   left: 0;
-      //   top: 0;
-      //   right: 0;
-      //   bottom: 0;
-      //   background: var(--palette-b);
-      //   opacity: 0.5;
-      // }
+    .mempool-info {
+      position: absolute;
+      bottom: .5em;
+      left: 0.5rem;
+      right: 0.5em;
+      font-size: 0.9rem;
+      color: var(--palette-x);
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: baseline;
     }
 
     .height-bar {
@@ -277,6 +283,11 @@
       text-align: left;
       padding: 1rem;
       flex-shrink: 0;
+      box-sizing: border-box;
+
+      .row {
+        margin-bottom: 5px;
+      }
 
       .status-light {
         display: inline-block;
@@ -296,7 +307,6 @@
       }
 
       .stat-counter, .fx-ticker {
-        margin-top: 5px;
         white-space: nowrap;
         cursor: pointer;
 
@@ -308,6 +318,21 @@
         }
         &.good {
           color: var(--palette-good);
+        }
+      }
+
+      .block-height {
+        margin-bottom: 5px;
+        color: white;
+      }
+
+      &.tiny {
+        width: 100%;
+        .row {
+          width: 100%;
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
         }
       }
     }
@@ -399,14 +424,21 @@
 
     <div class="mempool-height" style="bottom: calc({$mempoolScreenHeight + 20}px)">
       <div class="height-bar" />
-      <span class="mempool-count">Mempool: { numberFormat.format(Math.round($mempoolCount)) } unconfirmed</span>
+      {#if $tinyScreen}
+        <div class="mempool-info">
+          <span class="left">Mempool</span>
+          <span class="right">{ numberFormat.format(Math.round($mempoolCount)) }</span>
+        </div>
+      {:else}
+        <span class="mempool-count">Mempool: { numberFormat.format(Math.round($mempoolCount)) } unconfirmed</span>
+      {/if}
     </div>
 
     <div class="block-area-wrapper">
       <div class="spacer"></div>
       <div class="block-area-outer" style="width: {$blockAreaSize}px; height: {$blockAreaSize}px">
         <div class="block-area">
-          <BlockInfo block={$currentBlock} visible={$blockVisible} on:hideBlock={hideBlock} />
+          <BlockInfo block={$currentBlock} visible={$blockVisible && !$tinyScreen} on:hideBlock={hideBlock} />
         </div>
         {#if config.dev && config.debug && $devSettings.guides }
           <div class="guide-area" />
@@ -422,10 +454,13 @@
   {/if}
 
   <div class="top-bar">
-    <div class="status">
+    <div class="status" class:tiny={$tinyScreen}>
       <div class="row">
         {#if $settings.showFX && fxLabel }
           <span class="fx-ticker {fxColor}" on:click={() => { $sidebarToggle = 'settings'}}>{ fxLabel }</span>
+        {/if}
+        {#if $tinyScreen && $currentBlock }
+          <span class="block-height"><b>Block: </b>{ numberFormat.format($currentBlock.height) }</span>
         {/if}
       </div>
       <div class="row">
@@ -435,7 +470,7 @@
       </div>
     </div>
     <div class="spacer" />
-    {#if config.messagesEnabled && $settings.showMessages }
+    {#if config.messagesEnabled && $settings.showMessages && !$tinyScreen }
       <Alerts />
     {/if}
   </div>

@@ -4,13 +4,6 @@
 	import config from './config.js'
 	import { settings } from './stores.js'
 
-	if (URL) {
-		const queryParams = (new URL(document.location)).searchParams
-		if (queryParams.get('noTrack') != null) {
-			$settings.noTrack = true
-		}
-	}
-
 	if (!$settings.noTrack && config.public) analytics.init()
 </script>
 

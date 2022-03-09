@@ -107,8 +107,6 @@ export default class TxController {
       return
     }
 
-    this.poolScene.scrollLock = true
-
     const block = new BitcoinBlock(blockData)
     this.knownBlocks[block.id] = true
     if (this.clearBlockTimeout) clearTimeout(this.clearBlockTimeout)
@@ -142,8 +140,9 @@ export default class TxController {
     this.blockScene.initialLayout()
     setTimeout(() => { this.poolScene.scrollLock = false; this.poolScene.layoutAll() }, 4000)
 
-    currentBlock.set(block)
     blockVisible.set(true)
+
+    currentBlock.set(block)
 
     return block
   }
