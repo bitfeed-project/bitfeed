@@ -428,7 +428,7 @@ defmodule BitcoinStream.Mempool do
               {:ok, txn } <- BitcoinTx.decode(rawtx),
               inflated_txn <- BitcoinTx.inflate(txn, false) do
           if inflated_txn.inflated do
-            :ets.insert(:mempool_cache, {txid, { txn.inputs, txn.value + txn.fee, true }, status});
+            :ets.insert(:mempool_cache, {txid, { inflated_txn.inputs, inflated_txn.value + inflated_txn.fee, inflated_txn.inflated }, status});
             Logger.debug("repaired #{repaired} mempool txns #{txid}");
             repaired + 1
           else
