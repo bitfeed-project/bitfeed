@@ -5,7 +5,7 @@ import BitcoinTx from '../models/BitcoinTx.js'
 import BitcoinBlock from '../models/BitcoinBlock.js'
 import TxSprite from '../models/TxSprite.js'
 import { FastVertexArray } from '../utils/memory.js'
-import { txCount, mempoolCount, mempoolScreenHeight, blockVisible, blocksEnabled, currentBlock, selectedTx, blockAreaSize } from '../stores.js'
+import { txCount, mempoolCount, mempoolScreenHeight, blockVisible, currentBlock, selectedTx, blockAreaSize, highlight, colorMode } from '../stores.js'
 import config from "../config.js"
 
 export default class TxController {
@@ -35,9 +35,6 @@ export default class TxController {
     })
     colorMode.subscribe(mode => {
       this.setColorMode(mode)
-    })
-    blocksEnabled.subscribe(enabled => {
-      this.blocksEnabled = enabled
     })
   }
 
@@ -108,10 +105,6 @@ export default class TxController {
     // discard duplicate blocks
     if (!blockData || !blockData.id || this.knownBlocks[blockData.id]) {
       return
-    }
-
-    if (this.blocksEnabled) {
-      this.poolScene.scrollLock = true
     }
 
     const block = new BitcoinBlock(blockData)

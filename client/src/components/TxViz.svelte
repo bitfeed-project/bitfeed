@@ -3,7 +3,7 @@
   import TxController from '../controllers/TxController.js'
   import TxRender from './TxRender.svelte'
   import getTxStream from '../controllers/TxStream.js'
-  import { settings, overlay, serverConnected, serverDelay, txCount, mempoolCount, mempoolScreenHeight, frameRate, avgFrameRate, blockVisible, blocksEnabled, tinyScreen, currentBlock, selectedTx, blockAreaSize, devEvents, devSettings } from '../stores.js'
+  import { settings, overlay, serverConnected, serverDelay, txCount, mempoolCount, mempoolScreenHeight, frameRate, avgFrameRate, blockVisible, tinyScreen, currentBlock, selectedTx, blockAreaSize, devEvents, devSettings } from '../stores.js'
   import BlockInfo from '../components/BlockInfo.svelte'
   import TxInfo from '../components/TxInfo.svelte'
   import Sidebar from '../components/Sidebar.svelte'
@@ -29,7 +29,7 @@
   if (!config.noTxFeed || !config.noBlockFeed) txStream = getTxStream()
 
   $: {
-    if ($blockVisible && $blocksEnabled) {
+    if ($blockVisible) {
       if (txController) txController.showBlock()
     } else {
       if (txController) txController.hideBlock()
@@ -74,8 +74,6 @@
     $devEvents.addOneCallback = fakeTx
     $devEvents.addManyCallback = fakeTxs
     $devEvents.addBlockCallback = fakeBlock
-
-    if (!$settings.showMessages) $settings.showMessages = true
   })
 
   function resize () {
@@ -232,17 +230,19 @@
       left: 0.5rem;
       font-size: 0.9rem;
       color: var(--palette-x);
+    }
 
-      // &::before {
-      //   content: '';
-      //   position: absolute;
-      //   left: 0;
-      //   top: 0;
-      //   right: 0;
-      //   bottom: 0;
-      //   background: var(--palette-b);
-      //   opacity: 0.5;
-      // }
+    .mempool-info {
+      position: absolute;
+      bottom: .5em;
+      left: 0.5rem;
+      right: 0.5em;
+      font-size: 0.9rem;
+      color: var(--palette-x);
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: baseline;
     }
 
     .height-bar {
@@ -424,7 +424,14 @@
 
     <div class="mempool-height" style="bottom: calc({$mempoolScreenHeight + 20}px)">
       <div class="height-bar" />
-      <span class="mempool-count">Mempool: { numberFormat.format(Math.round($mempoolCount)) } unconfirmed</span>
+      {#if $tinyScreen}
+        <div class="mempool-info">
+          <span class="left">Mempool</span>
+          <span class="right">{ numberFormat.format(Math.round($mempoolCount)) }</span>
+        </div>
+      {:else}
+        <span class="mempool-count">Mempool: { numberFormat.format(Math.round($mempoolCount)) } unconfirmed</span>
+      {/if}
     </div>
 
     <div class="block-area-wrapper">
@@ -453,7 +460,7 @@
           <span class="fx-ticker {fxColor}" on:click={() => { $sidebarToggle = 'settings'}}>{ fxLabel }</span>
         {/if}
         {#if $tinyScreen && $currentBlock }
-          <span class="block-height"><b>Block: </b>{ integerFormat.format($currentBlock.height) }</span>
+          <span class="block-height"><b>Block: </b>{ numberFormat.format($currentBlock.height) }</span>
         {/if}
       </div>
       <div class="row">
