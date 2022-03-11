@@ -205,9 +205,10 @@ export default class TxController {
       }
       this.selectedTx = selected
       selectedTx.set(this.selectedTx)
-      console.log(this.selectedTx)
-      detailTx.set(this.selectedTx)
-      if (this.selectedTx) overlay.set('tx')
+      if (sameTx && this.selectedTx) {
+        detailTx.set(this.selectedTx)
+        overlay.set('tx')
+      }
       this.selectionLocked = !!this.selectedTx && !(this.selectionLocked && sameTx)
     }
   }

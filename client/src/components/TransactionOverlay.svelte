@@ -6,6 +6,7 @@ import { longBtcFormat, numberFormat, feeRateFormat } from '../utils/format.js'
 import { exchangeRates, settings, sidebarToggle, newHighlightQuery, highlightingFull, detailTx, pageWidth } from '../stores.js'
 import { formatCurrency } from '../utils/fx.js'
 import { hlToHex, mixColor, teal, purple } from '../utils/color.js'
+import { SPKToAddress } from '../utils/encodings.js'
 
 function onClose () {
   $detailTx = null
@@ -50,6 +51,29 @@ $: {
   }
 }
 
+function expandAddresses(items) {
+  return items.map(item => {
+    let address = 'unknown'
+    if (item.script_pub_key) {
+      address = SPKToAddress(item.script_pub_key) || ""
+    }
+    return {
+      ...item,
+      address
+    }
+  })
+}
+
+let inputs = []
+let outputs = []
+$: {
+  if ($detailTx && $detailTx.inputs) {
+    inputs = expandAddresses($detailTx.inputs)
+  } else inputs = []
+  if ($detailTx && $detailTx.outputs) {
+    outputs = expandAddresses($detailTx.outputs)
+  } else outputs = []
+}
 
 let sankeyLines
 let sankeyHeight
@@ -230,10 +254,8 @@ function getMiterOffset (weight, dy, dx) {
     }
 
     .flow-diagram {
-      display: flex;
-      flex-direction: row;
-      justify-content: center;
-      align-items: flex-start;
+      display: grid;
+      grid-template-columns: minmax(0px, 1fr) 380px minmax(0px, 1fr);
 
       .header {
         height: 60px;
@@ -244,8 +266,7 @@ function getMiterOffset (weight, dy, dx) {
       }
 
       .column {
-        flex-grow: 1;
-        flex-shrink: 1;
+        width: 100%;
         margin: 0;
 
         .entry {
@@ -257,28 +278,41 @@ function getMiterOffset (weight, dy, dx) {
           border-top: solid 1px var(--grey);
           box-sizing: border-box;
           text-align: right;
+          width: 100%;
+          overflow: hidden;
           &:last-child {
             border-bottom: solid 1px var(--grey);
           }
 
           .amount, .address {
             margin: 0;
-          }
-          .amount {
             font-family: monospace;
             font-size: 1.1em;
+          }
+          .amount {
             white-space: nowrap;
+          }
+          .address {
+            width: 100%;
+            text-align: right;
+            span {
+              overflow: hidden;
+              text-overflow: ellipsis;
+              display: inline-block;
+            }
+            .truncatable {
+              max-width: calc(100% - 4em);
+            }
           }
         }
 
         &.inputs {
           .entry {
             align-items: flex-start;
+            .address {
+              text-align: left;
+            }
           }
-        }
-        &.diagram {
-          flex-grow: 0;
-          flex-shrink: 0;
         }
       }
 
@@ -301,23 +335,11 @@ function getMiterOffset (weight, dy, dx) {
 
     @media (max-width: 460px) {
       .flow-diagram {
-        flex-direction: column;
-        align-items: center;
-        font-size: 0.8em;
+        display: block;
 
         .column {
           width: 100%;
-
-          &.diagram {
-            order: 1;
-          }
-          &.inputs {
-            order: 2
-          }
-          &.outputs {
-            margin-top: 30px;
-            order: 3
-          }
+          margin: 30px 0;
         }
       }
     }
@@ -356,12 +378,12 @@ function getMiterOffset (weight, dy, dx) {
       </div>
 
       <h2>Inputs &amp; Outputs</h2>
-      <div class="pane flow-diagram">
+      <div class="pane flow-diagram" style="grid-template-columns: minmax(0px, 1fr) {svgWidth}px minmax(0px, 1fr);">
         <div class="column inputs">
           <p class="header">{$detailTx.inputs.length} input{$detailTx.inputs.length > 1 ? 's' : ''}</p>
-          {#each $detailTx.inputs as input}
+          {#each inputs as input}
             <div class="entry">
-              <p class="address">address</p>
+              <p class="address" title={input.address}><span class="truncatable">{input.address.slice(0,-6)}</span><span class="suffix">{input.address.slice(-6)}</span></p>
               <p class="amount">{ formatBTC(input.value) }</p>
             </div>
           {/each}
@@ -399,9 +421,9 @@ function getMiterOffset (weight, dy, dx) {
             <p class="address">fee</p>
             <p class="amount">{ formatBTC($detailTx.fee) }</p>
           </div>
-          {#each $detailTx.outputs as output}
+          {#each outputs as output}
             <div class="entry">
-              <p class="address">address</p>
+              <p class="address" title={output.address}><span class="truncatable">{output.address.slice(0,-6)}</span><span class="suffix">{output.address.slice(-6)}</span></p>
               <p class="amount">{ formatBTC(output.value) }</p>
             </div>
           {/each}
