@@ -45,6 +45,9 @@ export function SPKToAddress (spk) {
     const payload = "05" + spk.slice(4, -2)
     const checksum = hash(hash(payload)).slice(0, 8)
     return binary_to_base58(hexToUintArray(payload + checksum))
+  } else if (spk.startsWith('6a')) {
+    // OP_RETURN
+    return 'OP_RETURN'
   }
 }
 

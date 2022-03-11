@@ -54,12 +54,19 @@ $: {
 function expandAddresses(items) {
   return items.map(item => {
     let address = 'unknown'
+    let title = null
     if (item.script_pub_key) {
       address = SPKToAddress(item.script_pub_key) || ""
+      if (address === 'OP_RETURN') {
+        title = item.script_pub_key.substring(2).match(/../g).reduce((parsed, hexChar) => {
+          return parsed + String.fromCharCode(parseInt(hexChar, 16))
+        }, "")
+      }
     }
     return {
       ...item,
-      address
+      address,
+      title
     }
   })
 }
@@ -68,24 +75,34 @@ let inputs = []
 let outputs = []
 $: {
   if ($detailTx && $detailTx.inputs) {
-    inputs = expandAddresses($detailTx.inputs)
+    if ($detailTx.isCoinbase) {
+      inputs = [{
+        address: 'coinbase',
+        value: $detailTx.value
+      }]
+    } else {
+      inputs = expandAddresses($detailTx.inputs)
+    }
   } else inputs = []
   if ($detailTx && $detailTx.outputs) {
-    outputs = expandAddresses($detailTx.outputs)
+    if ($detailTx.isCoinbase) {
+      outputs = expandAddresses($detailTx.outputs)
+    } else {
+      outputs = [{address: 'fee', value: $detailTx.fee}, ...expandAddresses($detailTx.outputs)]
+    }
   } else outputs = []
 }
 
 let sankeyLines
 let sankeyHeight
 $: {
-  if ($detailTx && $detailTx.inputs && $detailTx.outputs) {
-    sankeyHeight = Math.max($detailTx.inputs.length, $detailTx.outputs.length + 1) * rowHeight
-    sankeyLines = calcSankeyLines($detailTx.inputs, $detailTx.outputs, $detailTx.fee || null, $detailTx.value, sankeyHeight, svgWidth, flowWeight)
+  if ($detailTx && inputs && outputs) {
+    sankeyHeight = Math.max(inputs.length, outputs.length) * rowHeight
+    sankeyLines = calcSankeyLines(inputs, outputs, $detailTx.fee || null, $detailTx.value, sankeyHeight, svgWidth, flowWeight)
   }
 }
 
 function calcSankeyLines(inputs, outputs, fee, value, totalHeight, svgWidth, flowWeight) {
-  const feeAndOutputs = [{ value: fee }, ...outputs]
   const total = fee + value
   const mergeOffset = (totalHeight - flowWeight) / 2
   let cumThick = 0
@@ -126,7 +143,7 @@ function calcSankeyLines(inputs, outputs, fee, value, totalHeight, svgWidth, flo
   cumThick = 0
   xOffset = 0
 
-  const outLines = feeAndOutputs.map((output, index) => {
+  const outLines = outputs.map((output, index) => {
     const weight = (output.value / total) * flowWeight
     const height = ((index + 0.5) * rowHeight)
     const step = (weight / 2)
@@ -151,7 +168,7 @@ function calcSankeyLines(inputs, outputs, fee, value, totalHeight, svgWidth, flo
 
     cumThick += weight
 
-    return { line, weight, index, total: feeAndOutputs.length }
+    return { line, weight, index, total: outputs.length }
   })
   outLines.forEach(line => {
     line.line[1].x -= xOffset
@@ -222,7 +239,7 @@ function getMiterOffset (weight, dy, dx) {
 
     .pane {
       background: var(--palette-b);
-      padding: .5em 1em;
+      padding: 16px;
       border-radius: .5em;
       margin: 0 0 1em;
 
@@ -236,6 +253,10 @@ function getMiterOffset (weight, dy, dx) {
           font-size: 0.8em;
           color: var(--grey);
         }
+
+        .value.coinbase-sig {
+          word-break: break-all;
+        }
       }
     }
 
@@ -245,6 +266,7 @@ function getMiterOffset (weight, dy, dx) {
       flex-direction: row;
       justify-content: center;
       width: auto;
+      color: var(--palette-x);
 
       .operator {
         font-size: 2em;
@@ -333,7 +355,13 @@ function getMiterOffset (weight, dy, dx) {
       }
     }
 
-    @media (max-width: 460px) {
+    @media (min-width: 411px) and (max-width: 479px) {
+      .flow-diagram {
+        font-size: 0.7em;
+      }
+    }
+
+    @media (max-width: 410px) {
       .flow-diagram {
         display: block;
 
@@ -352,30 +380,57 @@ function getMiterOffset (weight, dy, dx) {
       <div class="icon-button" class:disabled={$highlightingFull} on:click={() => highlight($detailTx.id)} title="Add transaction to watchlist">
         <Icon icon={BookmarkIcon}/>
       </div>
-      <h2>Transaction <span class="tx-id">{ $detailTx.id }</span></h2>
-      <div class="pane fee-calc">
-        <div class="field">
-          <span class="label">fee</span>
-          <span class="value" style="color: {feeColor};">{ numberFormat.format($detailTx.fee) } sats</span>
+      {#if $detailTx.isCoinbase }
+        <h2>Coinbase <span class="tx-id">{ $detailTx.id }</span></h2>
+        <div class="pane fee-calc">
+          <div class="field">
+            <span class="label">block subsidy</span>
+            <span class="value">{ formatBTC($detailTx.coinbase.subsidy) }</span>
+          </div>
+          <span class="operator">+</span>
+          <div class="field">
+            <span class="label">fees</span>
+            <span class="value">{ formatBTC($detailTx.coinbase.fees) }</span>
+          </div>
+          <span class="operator">=</span>
+          <div class="field">
+            <span class="label">total reward</span>
+            <span class="value">{ formatBTC($detailTx.value) }</span>
+          </div>
         </div>
-        <span class="operator">/</span>
-        <div class="field">
-          <span class="label">size</span>
-          <span class="value" style="color: {feeColor};">{ numberFormat.format($detailTx.vbytes) } vbytes</span>
-        </div>
-        <span class="operator">=</span>
-        <div class="field">
-          <span class="label">fee rate</span>
-          <span class="value" style="color: {feeColor};">{ numberFormat.format($detailTx.feerate.toFixed(2)) } sats/vbyte</span>
-        </div>
-      </div>
 
-      <div class="pane total-value">
-        <div class="field">
-          <span class="label">Total value</span>
-          <span class="value" style="color: {feeColor};">{ formatBTC($detailTx.value) }</span>
+        <div class="pane fee-calc">
+          <div class="field">
+            <span class="label">coinbase</span>
+            <span class="value coinbase-sig">{ $detailTx.coinbase.sigAscii }</span>
+          </div>
         </div>
-      </div>
+      {:else}
+        <h2>Transaction <span class="tx-id">{ $detailTx.id }</span></h2>
+        <div class="pane fee-calc">
+          <div class="field">
+            <span class="label">fee</span>
+            <span class="value" style="color: {feeColor};">{ numberFormat.format($detailTx.fee) } sats</span>
+          </div>
+          <span class="operator">/</span>
+          <div class="field">
+            <span class="label">size</span>
+            <span class="value" style="color: {feeColor};">{ numberFormat.format($detailTx.vbytes) } vbytes</span>
+          </div>
+          <span class="operator">=</span>
+          <div class="field">
+            <span class="label">fee rate</span>
+            <span class="value" style="color: {feeColor};">{ numberFormat.format($detailTx.feerate.toFixed(2)) } sats/vbyte</span>
+          </div>
+        </div>
+
+        <div class="pane total-value">
+          <div class="field">
+            <span class="label">total value</span>
+            <span class="value" style="color: {feeColor};">{ formatBTC($detailTx.value) }</span>
+          </div>
+        </div>
+      {/if}
 
       <h2>Inputs &amp; Outputs</h2>
       <div class="pane flow-diagram" style="grid-template-columns: minmax(0px, 1fr) {svgWidth}px minmax(0px, 1fr);">
@@ -389,7 +444,7 @@ function getMiterOffset (weight, dy, dx) {
           {/each}
         </div>
         <div class="column diagram">
-          {#if sankeyLines && $pageWidth > 460}
+          {#if sankeyLines && $pageWidth > 410}
             <svg class="sankey" height="{sankeyHeight}px" width="{svgWidth}px">
               <defs>
                 {#each sankeyLines as line, index}
@@ -416,14 +471,10 @@ function getMiterOffset (weight, dy, dx) {
           {/if}
         </div>
         <div class="column outputs">
-          <p class="header">{$detailTx.outputs.length} output{$detailTx.outputs.length > 1 ? 's' : ''}</p>
-          <div class="entry fee">
-            <p class="address">fee</p>
-            <p class="amount">{ formatBTC($detailTx.fee) }</p>
-          </div>
+          <p class="header">{$detailTx.outputs.length} output{$detailTx.outputs.length > 1 ? 's' : ''} {#if !$detailTx.isCoinbase}+ fee{/if}</p>
           {#each outputs as output}
             <div class="entry">
-              <p class="address" title={output.address}><span class="truncatable">{output.address.slice(0,-6)}</span><span class="suffix">{output.address.slice(-6)}</span></p>
+              <p class="address" title={output.title || output.address}><span class="truncatable">{output.address.slice(0,-6)}</span><span class="suffix">{output.address.slice(-6)}</span></p>
               <p class="amount">{ formatBTC(output.value) }</p>
             </div>
           {/each}

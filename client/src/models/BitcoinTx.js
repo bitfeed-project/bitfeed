@@ -3,34 +3,34 @@ import config from '../config.js'
 import { mixColor, pink, bluegreen, orange, teal, green, purple  } from '../utils/color.js'
 
 export default class BitcoinTx {
-  constructor (data, vertexArray) {
+  constructor (data, vertexArray, isCoinbase = false) {
     this.vertexArray = vertexArray
-    this.setData(data)
+    this.setData(data, isCoinbase)
     this.view = new TxView(this)
   }
 
-  isCoinbase (txn) {
-    if (txn.inputs && txn.inputs.length === 1 && txn.inputs[0].prev_txid === "0000000000000000000000000000000000000000000000000000000000000000") {
-      const cbInfo = txn.inputs[0].script_sig
-      // number of bytes encoding the block height
-      const height_bytes = parseInt(cbInfo.substring(0,2), 16)
-      // extract the specified number of bytes, reverse the endianness (reverse pairs of hex characters), parse as a hex string
-      const height = parseInt(cbInfo.substring(2,2 + (height_bytes * 2)).match(/../g).reverse().join(''),16)
-      // save remaining bytes as free data
-      const sig = cbInfo.substring(2 + (height_bytes * 2))
-      const sigAscii = sig.match(/../g).reduce((parsed, hexChar) => {
-        return parsed + String.fromCharCode(parseInt(hexChar, 16))
-      }, "")
+  setCoinbaseData (block) {
+    const cbInfo = this.inputs[0].script_sig
+    // number of bytes encoding the block height
+    const height_bytes = parseInt(cbInfo.substring(0,2), 16)
+    // extract the specified number of bytes, reverse the endianness (reverse pairs of hex characters), parse as a hex string
+    const height = parseInt(cbInfo.substring(2,2 + (height_bytes * 2)).match(/../g).reverse().join(''),16)
+    // save remaining bytes as free data
+    const sig = cbInfo.substring(2 + (height_bytes * 2))
+    const sigAscii = sig.match(/../g).reduce((parsed, hexChar) => {
+      return parsed + String.fromCharCode(parseInt(hexChar, 16))
+    }, "")
 
-      return {
-        height,
-        sig,
-        sigAscii
-      }
-    } else return false
+    this.coinbase = {
+      height,
+      sig,
+      sigAscii,
+      fees: block.fees,
+      subsidy: this.value - (block.fees || 0)
+    }
   }
 
-  setData ({ version, inflated, id, value, fee, vbytes, inputs, outputs, time, block }) {
+  setData ({ version, inflated, id, value, fee, vbytes, inputs, outputs, time, block }, isCoinbase=false) {
     this.version = version
     this.is_inflated = !!inflated
     this.id = id
@@ -53,8 +53,8 @@ export default class BitcoinTx {
     this.highlight = false
 
     // is a coinbase transaction?
-    this.coinbase = this.isCoinbase(this)
-    if (this.coinbase || !this.is_inflated || (this.fee < 0)) {
+    this.isCoinbase = isCoinbase
+    if (this.isCoinbase || !this.is_inflated || (this.fee < 0)) {
       this.fee = null
       this.feerate = null
     }
@@ -92,6 +92,10 @@ export default class BitcoinTx {
   setBlock (block) {
     this.block = block
     this.state = this.block ? 'block' : 'pool'
+    if (this.block && this.block.coinbase && this.id == this.block.coinbase.id) {
+      this.isCoinbase = true
+      this.setCoinbaseData(this.block)
+    }
   }
 
   onEnterScene () {
