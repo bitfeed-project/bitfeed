@@ -3,10 +3,11 @@
   import TxController from '../controllers/TxController.js'
   import TxRender from './TxRender.svelte'
   import getTxStream from '../controllers/TxStream.js'
-  import { settings, overlay, serverConnected, serverDelay, txCount, mempoolCount, mempoolScreenHeight, frameRate, avgFrameRate, blockVisible, tinyScreen, currentBlock, selectedTx, blockAreaSize, devEvents, devSettings } from '../stores.js'
+  import { settings, overlay, serverConnected, serverDelay, txCount, mempoolCount, mempoolScreenHeight, frameRate, avgFrameRate, blockVisible, tinyScreen, currentBlock, selectedTx, blockAreaSize, devEvents, devSettings, pageWidth } from '../stores.js'
   import BlockInfo from '../components/BlockInfo.svelte'
   import TxInfo from '../components/TxInfo.svelte'
   import Sidebar from '../components/Sidebar.svelte'
+  import TransactionOverlay from '../components/TransactionOverlay.svelte'
   import AboutOverlay from '../components/AboutOverlay.svelte'
   import DonationOverlay from '../components/DonationOverlay.svelte'
   import SupportersOverlay from '../components/SupportersOverlay.svelte'
@@ -77,6 +78,7 @@
   })
 
   function resize () {
+    $pageWidth = window.innerWidth
     if (width !== window.innerWidth - 20 || height !== window.innerHeight - 20) {
       // don't force resize unless the viewport has actually changed
       width = window.innerWidth - 20
@@ -477,6 +479,7 @@
 
   <Sidebar />
 
+  <TransactionOverlay />
   <AboutOverlay />
   {#if config.donationsEnabled }
     <DonationOverlay />

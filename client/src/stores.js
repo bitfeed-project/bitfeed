@@ -92,6 +92,7 @@ export const avgFrameRate = writable(null)
 export const blockVisible = writable(false)
 export const currentBlock = writable(null)
 export const selectedTx = writable(null)
+export const detailTx = writable(null)
 export const blockAreaSize = writable(0)
 
 export const settingsOpen = writable(false)
@@ -149,3 +150,5 @@ export const highlightingFull = writable(false)
 const aspectRatio = window.innerWidth / window.innerHeight
 let isTinyScreen = (window.innerWidth < 480 && window.innerHeight < 480)
 export const tinyScreen = writable(isTinyScreen)
+
+export const pageWidth = writable(window.innerWidth)

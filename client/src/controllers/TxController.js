@@ -5,7 +5,7 @@ import BitcoinTx from '../models/BitcoinTx.js'
 import BitcoinBlock from '../models/BitcoinBlock.js'
 import TxSprite from '../models/TxSprite.js'
 import { FastVertexArray } from '../utils/memory.js'
-import { txCount, mempoolCount, mempoolScreenHeight, blockVisible, currentBlock, selectedTx, blockAreaSize, highlight, colorMode } from '../stores.js'
+import { overlay, txCount, mempoolCount, mempoolScreenHeight, blockVisible, currentBlock, selectedTx, detailTx, blockAreaSize, highlight, colorMode } from '../stores.js'
 import config from "../config.js"
 
 export default class TxController {
@@ -29,6 +29,9 @@ export default class TxController {
     this.lastTxTime = 0
     this.txDelay = 0
 
+    detailTx.subscribe(tx => {
+      this.onDetailTxChanged(tx)
+    })
     highlight.subscribe(criteria => {
       this.highlightCriteria = criteria
       this.applyHighlighting()
@@ -202,7 +205,23 @@ export default class TxController {
       }
       this.selectedTx = selected
       selectedTx.set(this.selectedTx)
+      console.log(this.selectedTx)
+      detailTx.set(this.selectedTx)
+      if (this.selectedTx) overlay.set('tx')
       this.selectionLocked = !!this.selectedTx && !(this.selectionLocked && sameTx)
     }
+  }
+
+  onDetailTxChanged (tx) {
+    if (!tx) {
+      if (this.selectedTx) {
+        this.selectedTx.hoverOff()
+        this.selectedTx = null
+      }
+      selectedTx.set(null)
+      this.selectionLocked = false
+    }
+
+    selectedTx.set(null)
   }
 }
