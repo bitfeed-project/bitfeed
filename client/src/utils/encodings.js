@@ -1,7 +1,8 @@
 import { Buffer } from 'buffer/'
 window.Buffer = Buffer
 import bech32 from 'bech32-buffer'
-import { base58_to_binary } from 'base58-js'
+import { base58_to_binary, binary_to_base58 } from 'base58-js'
+import { sha256 } from 'hash.js'
 
 // Extract a raw script hash from an address
 export function addressToSPK (address) {
@@ -24,4 +25,40 @@ export function addressToSPK (address) {
     }
     return prefix + Buffer.from(result).toString('hex').slice(2, -8) + postfix
   }
+}
+
+// Extract an address from a raw scriptpubkey
+export function SPKToAddress (spk) {
+  if (spk.startsWith('5120')) {
+    // taproot
+    return (new bech32.BitcoinAddress('bc', 1, hexToUintArray(spk.slice(4)))).encode()
+  } else if (spk.startsWith('0020') || spk.startsWith('0014')) {
+    // p2wsh or p2wpkh
+    return (new bech32.BitcoinAddress('bc', 0, hexToUintArray(spk.slice(4)))).encode()
+  } else if (spk.startsWith('76a914')) {
+    // p2pkh
+    const payload = "00" + spk.slice(6, -4)
+    const checksum = hash(hash(payload)).slice(0, 8)
+    return binary_to_base58(hexToUintArray(payload + checksum))
+  } else if (spk.startsWith('a914')) {
+    // p2sh
+    const payload = "05" + spk.slice(4, -2)
+    const checksum = hash(hash(payload)).slice(0, 8)
+    return binary_to_base58(hexToUintArray(payload + checksum))
+  } else if (spk.startsWith('6a')) {
+    // OP_RETURN
+    return 'OP_RETURN'
+  }
+}
+
+function hexToUintArray(hex) {
+  let a = new Uint8Array(hex.length / 2)
+  for (let i = 0; i < a.length; i++) {
+    a[i] = parseInt(hex.substr(2 * i, 2), 16)
+  }
+  return a
+}
+
+function hash (hex) {
+  return sha256().update(hexToUintArray(hex)).digest('hex')
 }

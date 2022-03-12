@@ -13,12 +13,13 @@ export default class BitcoinBlock {
     this.bytes = bytes // OTW size of this block in bytes
     this.txnCount = txn_count
     this.txns = txns
-    this.coinbase = new BitcoinTx(this.txns[0])
+    this.coinbase = new BitcoinTx(this.txns[0], true)
     if (fees) {
       this.fees = fees
     } else {
       this.fees = null
     }
+    this.coinbase.setBlock(this)
     this.height = this.coinbase.coinbase.height
     this.miner_sig = this.coinbase.coinbase.sigAscii
 
@@ -29,7 +30,7 @@ export default class BitcoinBlock {
       this.minFeerate = this.txnCount > 1 ? Infinity : 0
       this.avgFeerate = 0
       this.txns.forEach(txn => {
-        if (!BitcoinTx.prototype.isCoinbase(txn)) {
+        if (txn.id !== this.coinbase.id) {
           const txFeerate = txn.fee / txn.vbytes
           this.maxFeerate = Math.max(this.maxFeerate, txFeerate)
           this.minFeerate = Math.min(this.minFeerate, txFeerate)
