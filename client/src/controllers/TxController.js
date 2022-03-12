@@ -5,7 +5,7 @@ import BitcoinTx from '../models/BitcoinTx.js'
 import BitcoinBlock from '../models/BitcoinBlock.js'
 import TxSprite from '../models/TxSprite.js'
 import { FastVertexArray } from '../utils/memory.js'
-import { overlay, txCount, mempoolCount, mempoolScreenHeight, blockVisible, currentBlock, selectedTx, detailTx, blockAreaSize, highlight, colorMode } from '../stores.js'
+import { overlay, txCount, mempoolCount, mempoolScreenHeight, blockVisible, currentBlock, selectedTx, detailTx, blockAreaSize, highlight, colorMode, blocksEnabled } from '../stores.js'
 import config from "../config.js"
 
 export default class TxController {
@@ -29,6 +29,10 @@ export default class TxController {
     this.lastTxTime = 0
     this.txDelay = 0
 
+    this.blocksEnabled = true
+    blocksEnabled.subscribe(enabled => {
+      this.blocksEnabled = enabled
+    })
     detailTx.subscribe(tx => {
       this.onDetailTxChanged(tx)
     })
@@ -118,32 +122,72 @@ export default class TxController {
 
     this.clearBlock()
 
-    this.blockScene = new TxBlockScene({ width: this.blockAreaSize, height: this.blockAreaSize, blockId: block.id, controller: this, colorMode: this.colorMode })
-    let knownCount = 0
-    let unknownCount = 0
-    for (let i = 0; i < block.txns.length; i++) {
-      if (this.poolScene.remove(block.txns[i].id)) {
-        knownCount++
-        this.txs[block.txns[i].id].setData(block.txns[i])
-        this.txs[block.txns[i].id].setBlock(block)
-        this.blockScene.insert(this.txs[block.txns[i].id], 0, false)
-      } else {
-        unknownCount++
-        const tx = new BitcoinTx({
-          ...block.txns[i],
-          block: block
-        }, this.vertexArray)
-        this.txs[tx.id] = tx
-        this.txs[tx.id].applyHighlighting(this.highlightCriteria)
-        this.blockScene.insert(tx, 0, false)
+    if (this.blocksEnabled) {
+      this.blockScene = new TxBlockScene({ width: this.blockAreaSize, height: this.blockAreaSize, blockId: block.id, controller: this, colorMode: this.colorMode })
+      let knownCount = 0
+      let unknownCount = 0
+      for (let i = 0; i < block.txns.length; i++) {
+        if (this.poolScene.remove(block.txns[i].id)) {
+          knownCount++
+          this.txs[block.txns[i].id].setData(block.txns[i])
+          this.txs[block.txns[i].id].setBlock(block)
+          this.blockScene.insert(this.txs[block.txns[i].id], 0, false)
+        } else {
+          unknownCount++
+          const tx = new BitcoinTx({
+            ...block.txns[i],
+            block: block
+          }, this.vertexArray)
+          this.txs[tx.id] = tx
+          this.txs[tx.id].applyHighlighting(this.highlightCriteria)
+          this.blockScene.insert(tx, 0, false)
+        }
+        this.expiredTxs[block.txns[i].id] = true
       }
-      this.expiredTxs[block.txns[i].id] = true
-    }
-    console.log(`New block with ${knownCount} known transactions and ${unknownCount} unknown transactions`)
-    this.blockScene.initialLayout()
-    setTimeout(() => { this.poolScene.scrollLock = false; this.poolScene.layoutAll() }, 4000)
+      console.log(`New block with ${knownCount} known transactions and ${unknownCount} unknown transactions`)
+      this.blockScene.initialLayout()
+      setTimeout(() => { this.poolScene.scrollLock = false; this.poolScene.layoutAll() }, 4000)
 
-    blockVisible.set(true)
+      blockVisible.set(true)
+    } else {
+      this.poolScene.scrollLock = true
+      for (let i = 0; i < block.txns.length; i++) {
+        if (this.txs[block.txns[i].id] && this.txs[block.txns[i].id].view) {
+          this.txs[block.txns[i].id].view.update({
+            display: {
+              color: this.txs[block.txns[i].id].getColor('block', 'age').color
+            },
+            duration: 1000,
+            delay: 0,
+            jitter: 0,
+          })
+        }
+        this.expiredTxs[block.txns[i].id] = true
+      }
+      setTimeout(() => {
+        for (let i = 0; i < block.txns.length; i++) {
+          if (this.txs[block.txns[i].id] && this.txs[block.txns[i].id].view) {
+            this.txs[block.txns[i].id].view.update({
+              display: {
+                position: { y: window.innerHeight + 50, r: 10 },
+                color: { alpha: 0 }
+              },
+              duration: 3000,
+              delay: 0,
+              jitter: 1000,
+            })
+          }
+          this.expiredTxs[block.txns[i].id] = true
+        }
+      }, 1500)
+      setTimeout(() => {
+        for (let i = 0; i < block.txns.length; i++) {
+          this.poolScene.remove(block.txns[i].id)
+        }
+        this.poolScene.scrollLock = false
+        this.poolScene.layoutAll()
+      }, 5500)
+    }
 
     currentBlock.set(block)
 

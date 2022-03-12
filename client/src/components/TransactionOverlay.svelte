@@ -51,12 +51,13 @@ $: {
   }
 }
 
-function expandAddresses(items) {
-  return items.map(item => {
+function expandAddresses(items, truncate) {
+  let truncated = truncate ? items.slice(0,100) : items
+  const expanded = truncated.map(item => {
     let address = 'unknown'
     let title = null
     if (item.script_pub_key) {
-      address = SPKToAddress(item.script_pub_key) || ""
+      address = SPKToAddress(item.script_pub_key) || "unknown"
       if (address === 'OP_RETURN') {
         title = item.script_pub_key.substring(2).match(/../g).reduce((parsed, hexChar) => {
           return parsed + String.fromCharCode(parseInt(hexChar, 16))
@@ -66,9 +67,25 @@ function expandAddresses(items) {
     return {
       ...item,
       address,
-      title
+      title,
+      opreturn: (address === 'OP_RETURN')
     }
   })
+  if (truncate && items.length > 100) {
+    const remainingCount = items.length - 100
+    const remainingValue = items.slice(100).reduce((acc, item) => { return acc + item.value }, 0)
+    expanded.push({
+      address: `+ ${remainingCount} more`,
+      value: remainingValue,
+      rest: true
+    })
+  }
+  return expanded
+}
+
+let truncate = true
+$: {
+  if ($detailTx && $detailTx.id) truncate = true
 }
 
 let inputs = []
@@ -81,14 +98,14 @@ $: {
         value: $detailTx.value
       }]
     } else {
-      inputs = expandAddresses($detailTx.inputs)
+      inputs = expandAddresses($detailTx.inputs, truncate)
     }
   } else inputs = []
   if ($detailTx && $detailTx.outputs) {
-    if ($detailTx.isCoinbase) {
-      outputs = expandAddresses($detailTx.outputs)
+    if ($detailTx.isCoinbase || !$detailTx.is_inflated || $detailTx.fee == null) {
+      outputs = expandAddresses($detailTx.outputs, truncate)
     } else {
-      outputs = [{address: 'fee', value: $detailTx.fee}, ...expandAddresses($detailTx.outputs)]
+      outputs = [{address: 'fee', value: $detailTx.fee, fee: true}, ...expandAddresses($detailTx.outputs, truncate)]
     }
   } else outputs = []
 }
@@ -107,41 +124,50 @@ function calcSankeyLines(inputs, outputs, fee, value, totalHeight, svgWidth, flo
   const mergeOffset = (totalHeight - flowWeight) / 2
   let cumThick = 0
   let xOffset = 0
+  let maxXOffset = 0
 
   const inLines = inputs.map((input, index) => {
-    const weight = (input.value / total) * flowWeight
-    const height = ((index + 0.5) * rowHeight)
-    const step = (weight / 2)
-    const line = []
-    const yOffset = 0.5
+    if (input.value == null) {
+      return { line: [], weight: 0, index, total: inputs.length, in: true }
+    } else {
+      const weight = (input.value / total) * flowWeight
+      const height = ((index + 0.5) * rowHeight)
+      const step = (weight / 2)
+      const line = []
+      const yOffset = 0.5
 
-    line.push({ x: triangleWidth, y: height })
-    line.push({ x: triangleWidth + (0.25 * svgWidth), y: height })
-    line.push({ x: 0.375 * svgWidth, y: mergeOffset + cumThick + step + yOffset })
-    line.push({ x: (0.5 * svgWidth) + 1, y: mergeOffset + cumThick + step + yOffset })
+      line.push({ x: triangleWidth, y: height })
+      line.push({ x: triangleWidth + (0.25 * svgWidth), y: height })
+      line.push({ x: 0.425 * svgWidth, y: mergeOffset + cumThick + step + yOffset })
+      line.push({ x: (0.5 * svgWidth) + 1, y: mergeOffset + cumThick + step + yOffset })
 
-    const dy = line[1].y - line[2].y
-    const dx = line[2].x - line[1].x
-    const miterOffset = getMiterOffset(weight, dy, dx)
-    xOffset -= miterOffset
-    line[1].x -= xOffset
-    line[2].x -= xOffset
-    xOffset -= miterOffset
+      const dy = line[1].y - line[2].y
+      const dx = line[2].x - line[1].x
+      const miterOffset = getMiterOffset(weight, dy, dx)
+      xOffset += miterOffset
+      line[1].x += xOffset
+      line[2].x += xOffset
+      xOffset += miterOffset
+      maxXOffset = Math.max(xOffset, maxXOffset)
 
-    // inLines.push({ line, weight })
-    // inLines.push({ line: [{x: line[1].x + miterOffset, y: line[1].y - (weight / 2)}, {x: line[2].x + miterOffset, y: line[2].y - (weight / 2)}], weight: 1})
+      // inLines.push({ line, weight })
+      // inLines.push({ line: [{x: line[1].x + miterOffset, y: line[1].y - (weight / 2)}, {x: line[2].x + miterOffset, y: line[2].y - (weight / 2)}], weight: 1})
 
-    cumThick += weight
+      cumThick += weight
 
-    return { line, weight, index, total: inputs.length, in: true }
+      return { line, weight, index, total: inputs.length, in: true }
+    }
   })
   inLines.forEach(line => {
-    line.line[1].x += xOffset
-    line.line[2].x += xOffset
+    if (line.line.length) {
+      line.line[1].x -= maxXOffset
+      line.line[2].x -= maxXOffset
+    }
   })
 
   cumThick = 0
   xOffset = 0
+  maxXOffset = 0
 
   const outLines = outputs.map((output, index) => {
     const weight = (output.value / total) * flowWeight
@@ -151,17 +177,18 @@ function calcSankeyLines(inputs, outputs, fee, value, totalHeight, svgWidth, flo
     const yOffset = 0.5
 
     line.push({ x: (0.5 * svgWidth) - 1, y: mergeOffset + cumThick + step + yOffset })
-    line.push({ x: 0.625 * svgWidth, y: mergeOffset + cumThick + step + yOffset })
+    line.push({ x: 0.575 * svgWidth, y: mergeOffset + cumThick + step + yOffset })
     line.push({ x: svgWidth - triangleWidth - (0.25 * svgWidth), y: height })
     line.push({ x: svgWidth - triangleWidth, y: height })
 
     const dy = line[2].y - line[1].y
     const dx = line[2].x - line[1].x
     const miterOffset = getMiterOffset(weight, dy, dx)
-    xOffset -= miterOffset
-    line[1].x += xOffset
-    line[2].x += xOffset
-    xOffset -= miterOffset
+    xOffset += miterOffset
+    line[1].x -= xOffset
+    line[2].x -= xOffset
+    xOffset += miterOffset
+    maxXOffset = Math.max(xOffset, maxXOffset)
 
     // outLines.push({ line, weight })
     // outLines.push({ line: [{x: line[1].x + miterOffset, y: line[1].y - (weight / 2)}, {x: line[2].x + miterOffset, y: line[2].y - (weight / 2)}], weight: 1})
@@ -171,8 +198,8 @@ function calcSankeyLines(inputs, outputs, fee, value, totalHeight, svgWidth, flo
     return { line, weight, index, total: outputs.length }
   })
   outLines.forEach(line => {
-    line.line[1].x -= xOffset
-    line.line[2].x -= xOffset
+    line.line[1].x += maxXOffset
+    line.line[2].x += maxXOffset
   })
 
   return [...inLines, ...outLines].map(line => {
@@ -198,6 +225,12 @@ function getMiterOffset (weight, dy, dx) {
     const d = -u * (Math.cos(angle) + (b * Math.sin(angle)))
     return (d - c) / (a - b)
   } else return 0
+}
+
+function clickItem (item) {
+  if (item.rest) {
+    truncate = false
+  }
 }
 </script>
 
@@ -278,6 +311,7 @@ function getMiterOffset (weight, dy, dx) {
     .flow-diagram {
       display: grid;
       grid-template-columns: minmax(0px, 1fr) 380px minmax(0px, 1fr);
+      padding: 16px 0;
 
       .header {
         height: 60px;
@@ -302,6 +336,8 @@ function getMiterOffset (weight, dy, dx) {
           text-align: right;
           width: 100%;
           overflow: hidden;
+          transition: background 300ms;
+
           &:last-child {
             border-bottom: solid 1px var(--grey);
           }
@@ -326,13 +362,30 @@ function getMiterOffset (weight, dy, dx) {
               max-width: calc(100% - 4em);
             }
           }
+
+          &.clickable {
+            cursor: pointer;
+          }
         }
 
         &.inputs {
           .entry {
             align-items: flex-start;
+            padding-left: 10px;
+            &:hover {
+              background: linear-gradient(90deg, var(--palette-e), transparent);
+            }
             .address {
               text-align: left;
+            }
+          }
+        }
+
+        &.outputs {
+          .entry {
+            padding-right: 10px;
+            &:hover {
+              background: linear-gradient(-90deg, var(--palette-e), transparent);
             }
           }
         }
@@ -407,22 +460,31 @@ function getMiterOffset (weight, dy, dx) {
         </div>
       {:else}
         <h2>Transaction <span class="tx-id">{ $detailTx.id }</span></h2>
-        <div class="pane fee-calc">
-          <div class="field">
-            <span class="label">fee</span>
-            <span class="value" style="color: {feeColor};">{ numberFormat.format($detailTx.fee) } sats</span>
+        {#if $detailTx.is_inflated && $detailTx.fee != null && $detailTx.feerate != null}
+          <div class="pane fee-calc">
+            <div class="field">
+              <span class="label">fee</span>
+              <span class="value" style="color: {feeColor};">{ numberFormat.format($detailTx.fee) } sats</span>
+            </div>
+            <span class="operator">/</span>
+            <div class="field">
+              <span class="label">size</span>
+              <span class="value" style="color: {feeColor};">{ numberFormat.format($detailTx.vbytes) } vbytes</span>
+            </div>
+            <span class="operator">=</span>
+            <div class="field">
+              <span class="label">fee rate</span>
+              <span class="value" style="color: {feeColor};">{ numberFormat.format($detailTx.feerate.toFixed(2)) } sats/vbyte</span>
+            </div>
           </div>
-          <span class="operator">/</span>
+        {:else}
+        <div class="pane fee-calc">
           <div class="field">
             <span class="label">size</span>
             <span class="value" style="color: {feeColor};">{ numberFormat.format($detailTx.vbytes) } vbytes</span>
           </div>
-          <span class="operator">=</span>
-          <div class="field">
-            <span class="label">fee rate</span>
-            <span class="value" style="color: {feeColor};">{ numberFormat.format($detailTx.feerate.toFixed(2)) } sats/vbyte</span>
-          </div>
         </div>
+        {/if}
 
         <div class="pane total-value">
           <div class="field">
@@ -437,9 +499,9 @@ function getMiterOffset (weight, dy, dx) {
         <div class="column inputs">
           <p class="header">{$detailTx.inputs.length} input{$detailTx.inputs.length > 1 ? 's' : ''}</p>
           {#each inputs as input}
-            <div class="entry">
+            <div class="entry" class:clickable={input.rest} on:click={() => clickItem(input)}>
               <p class="address" title={input.address}><span class="truncatable">{input.address.slice(0,-6)}</span><span class="suffix">{input.address.slice(-6)}</span></p>
-              <p class="amount">{ formatBTC(input.value) }</p>
+              <p class="amount">{ input.value == null ? '???' : formatBTC(input.value) }</p>
             </div>
           {/each}
         </div>
@@ -471,11 +533,11 @@ function getMiterOffset (weight, dy, dx) {
           {/if}
         </div>
         <div class="column outputs">
-          <p class="header">{$detailTx.outputs.length} output{$detailTx.outputs.length > 1 ? 's' : ''} {#if !$detailTx.isCoinbase}+ fee{/if}</p>
+          <p class="header">{$detailTx.outputs.length} output{$detailTx.outputs.length > 1 ? 's' : ''} {#if $detailTx.fee != null}+ fee{/if}</p>
           {#each outputs as output}
-            <div class="entry">
+            <div class="entry" class:clickable={output.rest} on:click={() => clickItem(output)}>
               <p class="address" title={output.title || output.address}><span class="truncatable">{output.address.slice(0,-6)}</span><span class="suffix">{output.address.slice(-6)}</span></p>
-              <p class="amount">{ formatBTC(output.value) }</p>
+              <p class="amount">{ output.value == null ? '???' : formatBTC(output.value) }</p>
             </div>
           {/each}
         </div>

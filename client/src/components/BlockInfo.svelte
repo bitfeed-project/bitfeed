@@ -6,7 +6,7 @@
   import Icon from '../components/Icon.svelte'
   import closeIcon from '../assets/icon/cil-x-circle.svg'
   import { shortBtcFormat, longBtcFormat, timeFormat, numberFormat } from '../utils/format.js'
-  import { exchangeRates, settings } from '../stores.js'
+  import { exchangeRates, settings, blocksEnabled } from '../stores.js'
   import { formatCurrency } from '../utils/fx.js'
 
 	const dispatch = createEventDispatcher()
@@ -228,7 +228,7 @@
 </style>
 
 {#each [block] as block (block)}
-  {#if block != null && visible }
+  {#if block != null && visible && $blocksEnabled }
     <div class="block-info" out:fly="{{ y: -50, duration: 2000, easing: linear }}" in:fly="{{ y: (restoring ? -50 : 50), duration: (restoring ? 500 : 1000), easing: linear, delay: (restoring ? 0 : newBlockDelay) }}">
         <!-- <span class="data-field">Hash: { block.id }</span> -->
         <div class="full-size">
