@@ -110,6 +110,7 @@ const defaultSettings = {
 	fancyGraphics: true,
 	showMessages: true,
 	noTrack: false,
+	blocksEnabled: true
 }
 
 const searchParams = URL ? (new URL(document.location)).searchParams : {}
@@ -123,6 +124,7 @@ const urlSettings = Object.keys(defaultSettings).reduce((map, key) => {
 	return map
 }, {})
 if (urlSettings.showMessages == null) urlSettings.showMessages = true
+if (urlSettings.blocksEnabled == null) urlSettings.blocksEnabled = true
 
 export const settings = createCachedDict('settings', urlSettings, defaultSettings)
 
@@ -152,3 +154,7 @@ let isTinyScreen = (window.innerWidth < 480 && window.innerHeight < 480)
 export const tinyScreen = writable(isTinyScreen)
 
 export const pageWidth = writable(window.innerWidth)
+
+export const blocksEnabled = derived([settings], ([$settings]) => {
+	return !!$settings.blocksEnabled
+})
