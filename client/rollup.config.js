@@ -13,6 +13,7 @@ import html from '@rollup/plugin-html';
 import copy from 'rollup-plugin-copy'
 import babel from '@rollup/plugin-babel';
 import fs from 'fs'
+import json from "@rollup/plugin-json";
 
 configDotenv();
 
@@ -123,7 +124,8 @@ export default {
 		// If we're building for production (npm run build
 		// instead of npm run dev), minify
 		production && terser(),
-		glslify()
+                glslify(),
+                json()
 	],
 	watch: {
 		clearScreen: false

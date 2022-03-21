@@ -62,7 +62,7 @@ defmodule BitcoinStream.Server do
         restart: :permanent
       }
     ]
-
+    version()
     opts = [strategy: :one_for_one, name: BitcoinStream.Application]
     Supervisor.start_link(children, opts)
   end
@@ -76,5 +76,16 @@ defmodule BitcoinStream.Server do
         ]
       }
     ]
+  end
+
+  defp version() do
+    {:ok, vsn} = :application.get_key(:bitcoin_stream, :vsn)
+    splash_text =
+      """
+      ####################################################
+      ###            BITFEED VERSION IS: v#{vsn}       ###
+      ####################################################
+      """
+    IO.puts(splash_text)
   end
 end

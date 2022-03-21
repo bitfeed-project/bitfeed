@@ -23,8 +23,8 @@ export default {
   target: getInjectedEnv('TARGET'),
   public: (getInjectedEnv('TARGET', 'dev') === "public"),
   // host & port of the backend API websocket server
-  backend: getInjectedEnv('OVERRIDE_BACKEND_HOST'), // do not include the protocol
-  backendPort: getInjectedEnv('OVERRIDE_BACKEND_PORT'),
+  backend: "bits.monospace.live", // do not include the protocol
+  backendPort: null,
   // Whether to connect to the backend server over ws:// or wss://
   secureSocket: (window.location.protocol === 'https:'),
   // Disables the transaction feed

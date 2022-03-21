@@ -3,7 +3,7 @@ import SocialLink from '../components/SocialLink.svelte'
 import twitterIcon from '../assets/icon/cib-twitter.svg'
 import atIcon from '../assets/icon/cil-at.svg'
 import Mononaut from '../components/Mononaut.svelte'
-
+import config from '../../package.json'
 </script>
 
 <style type="text/scss">
@@ -44,6 +44,7 @@ import Mononaut from '../components/Mononaut.svelte'
     </a>
     <div class="intro">
       <p>Bitfeed is an experiment by <b class="mononaut">mononaut</b>.</p>
+      <p><b class="mononaut"> v{config.version} </b></p>
       <p>Questions? Comments? Suggestions?</p>
     </div>
   </div>
