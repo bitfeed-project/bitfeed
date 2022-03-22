@@ -36,5 +36,8 @@
     "svelte": "^3.44.3",
     "svelte-preprocess": "^4.10.1",
     "svelte-select": "^4.4.7"
+  },
+  "devDependencies": {
+    "@rollup/plugin-json": "^4.1.0"
   }
 }

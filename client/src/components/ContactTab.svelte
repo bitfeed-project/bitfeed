@@ -3,7 +3,7 @@ import SocialLink from '../components/SocialLink.svelte'
 import twitterIcon from '../assets/icon/cib-twitter.svg'
 import atIcon from '../assets/icon/cil-at.svg'
 import Mononaut from '../components/Mononaut.svelte'
-
+import config from '../../package.json'
 </script>
 
 <style type="text/scss">
@@ -53,4 +53,5 @@ import Mononaut from '../components/Mononaut.svelte'
   <p>Or email any recipient at
     <SocialLink icon={atIcon} href="mailto:bitfeed@monospace.live" color="var(--monospace-purple)">monospace.live</SocialLink>
   </p>
+  <p><b class="mononaut"> v{config.version} </b></p>
 </div>
