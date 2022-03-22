@@ -44,7 +44,6 @@ import config from '../../package.json'
     </a>
     <div class="intro">
       <p>Bitfeed is an experiment by <b class="mononaut">mononaut</b>.</p>
-      <p><b class="mononaut"> v{config.version} </b></p>
       <p>Questions? Comments? Suggestions?</p>
     </div>
   </div>
@@ -54,4 +53,5 @@ import config from '../../package.json'
   <p>Or email any recipient at
     <SocialLink icon={atIcon} href="mailto:bitfeed@monospace.live" color="var(--monospace-purple)">monospace.live</SocialLink>
   </p>
+  <p><b class="mononaut"> v{config.version} </b></p>
 </div>
