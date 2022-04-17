@@ -15,12 +15,14 @@ export default class BitcoinTx {
     // number of bytes encoding the block height
     const height_bytes = parseInt(cbInfo.substring(0,2), 16)
     // extract the specified number of bytes, reverse the endianness (reverse pairs of hex characters), parse as a hex string
-    const height = parseInt(cbInfo.substring(2,2 + (height_bytes * 2)).match(/../g).reverse().join(''),16)
+    const parsed_height = parseInt(cbInfo.substring(2,2 + (height_bytes * 2)).match(/../g).reverse().join(''),16)
     // save remaining bytes as free data
     const sig = cbInfo.substring(2 + (height_bytes * 2))
     const sigAscii = sig.match(/../g).reduce((parsed, hexChar) => {
       return parsed + String.fromCharCode(parseInt(hexChar, 16))
     }, "")
+
+    const height = block.height == null ? parsed_height : block.height
 
     const subsidy = subsidyAt(height)
 

@@ -9,7 +9,7 @@ import AddressIcon from '../assets/icon/cil-wallet.svg'
 import TxIcon from '../assets/icon/cil-arrow-circle-right.svg'
 import { fly } from 'svelte/transition'
 import { matchQuery, searchTx, searchBlock } from '../utils/search.js'
-import { selectedTx, detailTx, overlay } from '../stores.js'
+import { selectedTx, detailTx, overlay, loading } from '../stores.js'
 
 let query
 let matchedQuery
@@ -26,19 +26,21 @@ async function searchSubmit (e) {
   e.preventDefault()
 
   if (matchedQuery) {
+    $loading++
     switch(matchedQuery.query) {
       case 'txid':
-        searchTx(matchedQuery.txid)
+        await searchTx(matchedQuery.txid)
         break;
 
       case 'input':
-        searchTx(matchedQuery.txid, matchedQuery.input, null)
+        await searchTx(matchedQuery.txid, matchedQuery.input, null)
         break;
 
       case 'output':
-        searchTx(matchedQuery.txid, null, matchedQuery.output)
+        await searchTx(matchedQuery.txid, null, matchedQuery.output)
         break;
     }
+    $loading--
   }
 
   return false

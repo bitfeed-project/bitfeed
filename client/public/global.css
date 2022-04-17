@@ -48,6 +48,8 @@
 
   --twitter-blue: #1da1f2;
   --monospace-purple: darkviolet;
+
+  --loading-color: var(--palette-x);
 }
 
 .light-mode {

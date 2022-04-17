@@ -3,7 +3,7 @@ import Overlay from '../components/Overlay.svelte'
 import Icon from './Icon.svelte'
 import BookmarkIcon from '../assets/icon/cil-bookmark.svg'
 import { longBtcFormat, numberFormat, feeRateFormat, dateFormat } from '../utils/format.js'
-import { exchangeRates, settings, sidebarToggle, newHighlightQuery, highlightingFull, detailTx, pageWidth, latestBlockHeight, highlightInOut } from '../stores.js'
+import { exchangeRates, settings, sidebarToggle, newHighlightQuery, highlightingFull, detailTx, pageWidth, latestBlockHeight, highlightInOut, loading } from '../stores.js'
 import { formatCurrency } from '../utils/fx.js'
 import { hlToHex, mixColor, teal, purple } from '../utils/color.js'
 import { SPKToAddress } from '../utils/encodings.js'
@@ -249,11 +249,17 @@ function getMiterOffset (weight, dy, dx) {
   } else return 0
 }
 
-function clickItem (item) {
+async function clickItem (item) {
   if (item.rest) {
     truncate = false
   } else if (item.prev_txid && item.prev_vout != null) {
-    searchTx(item.prev_txid, null, item.prev_vout)
+    $loading++
+    await searchTx(item.prev_txid, null, item.prev_vout)
+    $loading--
+  } else if (item.spend && item.spend.txid && item.spend.vin) {
+    $loading++
+    await searchTx(item.spend.txid, item.spend.vin)
+    $loading--
   }
 }
 </script>
@@ -265,8 +271,14 @@ function clickItem (item) {
     text-align: left;
 
     h2 {
+      margin: 0 0 1em;
       font-size: 1.2em;
       word-break: break-word;
+
+      .title {
+        font-size: 1.25em;
+        white-space: nowrap;
+      }
     }
 
     .tx-id {
@@ -277,7 +289,7 @@ function clickItem (item) {
 
     .icon-button {
       float: right;
-      font-size: 24px;
+      font-size: 1.1em;
       margin: 0;
       transition: opacity 300ms, color 300ms, background 300ms;
       background: var(--palette-d);
@@ -299,7 +311,7 @@ function clickItem (item) {
       padding: 4px 8px;
       border-radius: 8px;
       float: right;
-      margin: 5px;
+      margin: 0 5px;
       color: white;
       font-weight: bold;
 
@@ -413,7 +425,7 @@ function clickItem (item) {
             &.highlight {
               background: linear-gradient(90deg, var(--bold-a) -100%, transparent 100%);
             }
-            &:hover {
+            &.clickable:hover {
               background: linear-gradient(90deg, var(--palette-e), transparent);
             }
             .address {
@@ -425,10 +437,14 @@ function clickItem (item) {
         &.outputs {
           .entry {
             padding-right: 10px;
+            border-right: solid 1px transparent;
+            &.unspent {
+              border-right: solid 1px var(--grey);
+            }
             &.highlight {
               background: linear-gradient(90deg, transparent 0%, var(--bold-a) 200%);
             }
-            &:hover {
+            &.clickable:hover {
               background: linear-gradient(-90deg, var(--palette-e), transparent);
             }
           }
@@ -486,7 +502,7 @@ function clickItem (item) {
           unconfirmed
         </span>
       {/if}
-      <h2>{#if $detailTx.isCoinbase }Coinbase{:else}Transaction{/if} <span class="tx-id">{ $detailTx.id }</span></h2>
+      <h2><span class="title">{#if $detailTx.isCoinbase }Coinbase{:else}Transaction{/if}</span> <span class="tx-id">{ $detailTx.id }</span></h2>
       {#if $detailTx.block}
         <div class="pane fields">
           <div class="field">
@@ -599,7 +615,7 @@ function clickItem (item) {
         <div class="column outputs">
           <p class="header">{$detailTx.outputs.length} output{$detailTx.outputs.length > 1 ? 's' : ''} {#if $detailTx.fee != null}+ fee{/if}</p>
           {#each outputs as output}
-            <div class="entry" class:clickable={output.rest} class:highlight={highlight.out != null && highlight.out === output.index} on:click={() => clickItem(output)}>
+            <div class="entry" class:clickable={output.rest || output.spend} class:unspent={!output.spend && !output.fee} class:highlight={highlight.out != null && highlight.out === output.index} on:click={() => clickItem(output)}>
               <p class="address" title={output.title || output.address}><span class="truncatable">{output.address.slice(0,-6)}</span><span class="suffix">{output.address.slice(-6)}</span></p>
               <p class="amount">{ output.value == null ? '???' : formatBTC(output.value) }</p>
             </div>

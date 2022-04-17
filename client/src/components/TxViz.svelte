@@ -3,7 +3,10 @@
   import TxController from '../controllers/TxController.js'
   import TxRender from './TxRender.svelte'
   import getTxStream from '../controllers/TxStream.js'
-  import { settings, overlay, serverConnected, serverDelay, txCount, mempoolCount, mempoolScreenHeight, frameRate, avgFrameRate, blockVisible, tinyScreen, compactScreen, currentBlock, selectedTx, blockAreaSize, devEvents, devSettings, pageWidth, pageHeight } from '../stores.js'
+  import { settings, overlay, serverConnected, serverDelay, txCount, mempoolCount,
+           mempoolScreenHeight, frameRate, avgFrameRate, blockVisible, tinyScreen,
+           compactScreen, currentBlock, selectedTx, blockAreaSize, devEvents,
+           devSettings, pageWidth, pageHeight, loading } from '../stores.js'
   import BlockInfo from '../components/BlockInfo.svelte'
   import SearchBar from '../components/SearchBar.svelte'
   import TxInfo from '../components/TxInfo.svelte'
@@ -12,10 +15,12 @@
   import AboutOverlay from '../components/AboutOverlay.svelte'
   import DonationOverlay from '../components/DonationOverlay.svelte'
   import SupportersOverlay from '../components/SupportersOverlay.svelte'
+  import LoadingAnimation from '../components/util/LoadingAnimation.svelte'
   import Alerts from '../components/alert/Alerts.svelte'
   import { numberFormat } from '../utils/format.js'
   import { exchangeRates, lastBlockId, haveSupporters, sidebarToggle } from '../stores.js'
   import { formatCurrency } from '../utils/fx.js'
+  import { fade } from 'svelte/transition'
   import config from '../config.js'
 
   let width = window.innerWidth - 20
@@ -426,6 +431,34 @@
     }
   }
 
+  .loading-overlay {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 999;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    .loading-wrapper {
+      width: 100px;
+    }
+
+    .loading-msg {
+      margin: .4em 0 0;
+      font-size: 1em;
+      font-weight: bold;
+      color: white;
+      text-shadow: 0 0 10px black;
+    }
+  }
+
   @media screen and (max-width: 640px) {
     .search-bar-wrapper {
       position: fixed;
@@ -513,6 +546,15 @@
     {#if $haveSupporters}
       <SupportersOverlay />
     {/if}
+  {/if}
+
+  {#if $loading}
+    <div class="loading-overlay" in:fade={{ delay: 100, duration: 500 }} out:fade={{ duration: 200 }}>
+      <div class="loading-wrapper">
+        <LoadingAnimation />
+        <p class="loading-msg">loading</p>
+      </div>
+    </div>
   {/if}
 
   {#if config.dev && config.debug && $devSettings.guides }

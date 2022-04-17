@@ -167,3 +167,4 @@ export const blocksEnabled = derived([settings], ([$settings]) => {
 
 export const latestBlockHeight = writable(null)
 export const highlightInOut = writable(null)
+export const loading = writable(0)
