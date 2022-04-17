@@ -4,7 +4,7 @@ import { fade } from 'svelte/transition'
 import { flip } from 'svelte/animate'
 import Icon from './Icon.svelte'
 import SearchIcon from '../assets/icon/cil-search.svg'
-import CrossIcon from '../assets/icon/cil-x.svg'
+import CrossIcon from '../assets/icon/cil-x-circle.svg'
 import AddressIcon from '../assets/icon/cil-wallet.svg'
 import TxIcon from '../assets/icon/cil-arrow-circle-right.svg'
 import { fly } from 'svelte/transition'
@@ -20,6 +20,10 @@ $: {
   } else {
     matchedQuery = null
   }
+}
+
+function clearInput () {
+  query = null
 }
 
 async function searchSubmit (e) {
@@ -57,6 +61,22 @@ async function searchSubmit (e) {
   width: 100%;
   max-width: 600px;
   margin: 0 1em;
+
+  .clear-button {
+    position: absolute;
+    right: 0;
+    bottom: .3em;
+    margin: 0;
+    color: var(--palette-bad);
+    font-size: 1.2em;
+    cursor: pointer;
+    opacity: 1;
+    transition: opacity 300ms;
+
+    &.disabled {
+      opacity: 0;
+    }
+  }
 
   .input-icon {
     font-size: 24px;
@@ -130,6 +150,7 @@ async function searchSubmit (e) {
     margin: 0;
     color: var(--input-color);
     width: 100%;
+    padding-right: 1.5em;
 
     &.disabled {
       color: var(--palette-e);
@@ -143,6 +164,9 @@ async function searchSubmit (e) {
 <div class="input-wrapper" transition:fly={{ y: -25 }}>
   <form class="search-form" action="" on:submit={searchSubmit}>
     <input class="search-input" type="text" bind:value={query} placeholder="Enter a txid">
+    <div class="clear-button" class:disabled={query == null || query === ''} on:click={clearInput} title="Clear">
+      <Icon icon={CrossIcon}/>
+    </div>
     <div class="underline" />
     <div class="underline active" />
     <button type="submit" class="search-submit" />
