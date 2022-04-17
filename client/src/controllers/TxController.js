@@ -5,7 +5,7 @@ import BitcoinTx from '../models/BitcoinTx.js'
 import BitcoinBlock from '../models/BitcoinBlock.js'
 import TxSprite from '../models/TxSprite.js'
 import { FastVertexArray } from '../utils/memory.js'
-import { overlay, txCount, mempoolCount, mempoolScreenHeight, blockVisible, currentBlock, selectedTx, detailTx, blockAreaSize, highlight, colorMode, blocksEnabled } from '../stores.js'
+import { overlay, txCount, mempoolCount, mempoolScreenHeight, blockVisible, currentBlock, selectedTx, detailTx, blockAreaSize, highlight, colorMode, blocksEnabled, latestBlockHeight } from '../stores.js'
 import config from "../config.js"
 
 export default class TxController {
@@ -15,7 +15,7 @@ export default class TxController {
     this.txs = {}
     this.expiredTxs = {}
     this.poolScene = new TxMondrianPoolScene({ width, height, controller: this, heightStore: mempoolScreenHeight })
-    this.blockAreaSize = Math.min(window.innerWidth * 0.75, window.innerHeight / 2.5)
+    this.blockAreaSize = (width <= 620) ? Math.min(window.innerWidth * 0.7, window.innerHeight / 2.75) : Math.min(window.innerWidth * 0.75, window.innerHeight / 2.5)
     blockAreaSize.set(this.blockAreaSize)
     this.blockScene = null
     this.clearBlockTimeout = null
@@ -66,7 +66,7 @@ export default class TxController {
   }
 
   resize ({ width, height }) {
-    this.blockAreaSize = Math.min(window.innerWidth * 0.75, window.innerHeight / 2.5)
+    this.blockAreaSize = (width <= 620) ? Math.min(window.innerWidth * 0.7, window.innerHeight / 2.75) : Math.min(window.innerWidth * 0.75, window.innerHeight / 2.5)
     blockAreaSize.set(this.blockAreaSize)
     this.redoLayout({ width, height })
   }
@@ -135,6 +135,7 @@ export default class TxController {
     }
 
     const block = new BitcoinBlock(blockData)
+    latestBlockHeight.set(block.height)
     this.knownBlocks[block.id] = true
     if (this.clearBlockTimeout) clearTimeout(this.clearBlockTimeout)
 

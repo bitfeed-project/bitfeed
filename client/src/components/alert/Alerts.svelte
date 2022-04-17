@@ -62,7 +62,7 @@ function processAlert (alert) {
   } else return null
 }
 
-let activeAlerts = [{ key: 'null1' }, { key: 'null2' }]
+let alert
 let lastIndex = -1
 
 onMount(() => {
@@ -72,9 +72,8 @@ onMount(() => {
 function startAlerts () {
   if (!rotating && processedAlerts && processedAlerts.length) {
     rotating = true
-    activeAlerts[0] = processedAlerts[0] || { key: 'null1' }
-    activeAlerts[1] = processedAlerts[1] || { key: 'null2' }
-    lastIndex = processedAlerts[1] ? 1 : 0
+    alert = processedAlerts[0] || { key: 'null1' }
+    lastIndex = 0
     if (rotateTimer) clearTimeout(rotateTimer)
     rotateTimer = setTimeout(rotateAlerts, config.alertDuration)
   }
@@ -84,40 +83,21 @@ let rotateTimer
 function rotateAlerts () {
   if (rotateTimer) clearTimeout(rotateTimer)
 
-  if (processedAlerts && processedAlerts.length > 2) {
+  if (processedAlerts && processedAlerts.length > 1) {
     // find the next alert in the queue
-    let currentIndex = -1
-    if (activeAlerts[1]) {
-      currentIndex = processedAlerts.findIndex(alert => { alert.key === activeAlerts[1].key})
-    }
-    if (currentIndex < 0) currentIndex = lastIndex
-    currentIndex = (currentIndex + 1) % processedAlerts.length
-    // roll over to the next alert if there's a key clash
-    if (processedAlerts[currentIndex].key === activeAlerts[1].key) {
-      currentIndex = (currentIndex + 1) % processedAlerts.length
-    }
+    let currentIndex = (lastIndex + 1) % processedAlerts.length
 
     lastIndex = currentIndex
-    let nextAlert = processedAlerts[currentIndex]
-    if (nextAlert)
-    activeAlerts[0] = activeAlerts[1]
-    activeAlerts[1] = { key: 'temp' }
-    setTimeout(() => {
-      activeAlerts[1] = nextAlert
-      sequences[alert.key]++
-    }, 1000)
-  } else if (processedAlerts) {
-    activeAlerts[0] = processedAlerts[0] || { key: 'null1' }
-    activeAlerts[1] = processedAlerts[1] || { key: 'null2' }
+    alert = processedAlerts[currentIndex]
   }
 
   rotateTimer = setTimeout(rotateAlerts, config.alertDuration)
 }
 </script>
 
-<div class="alert-bar" transition:fly={{ y: -100 }}>
-  {#each activeAlerts as alert (alert.key)}
-    <div class="alert-wrapper" in:fly|local={{ y: -100 }} out:fly|local={{ x: 400}}>
+<div class="alert-bar">
+  {#key alert && alert.key}
+    <div class="alert-wrapper" in:fly={{ y: -100, delay: 400 }} out:fly={{ x: 400}}>
       {#if alert && alert.component }
         {#if alert.href}
           <a class="alert link" target="_blank" rel="noopener" href={alert.href}>
@@ -134,15 +114,13 @@ function rotateAlerts () {
         {/if}
       {/if}
     </div>
-  {/each}
+  {/key}
 </div>
 
 <style type="text/scss">
 .alert-bar {
   position: relative;
   width: 100%;
-  flex-grow: 1;
-  flex-shrink: 1;
   height: 3.5em;
 
   .alert-wrapper {
@@ -151,7 +129,6 @@ function rotateAlerts () {
     bottom: 0;
     right: 0;
     width: 20em;
-    transform: translateX(-110%);
     transition: transform 500ms ease-in-out;
 
     .alert {
@@ -183,27 +160,13 @@ function rotateAlerts () {
         color: var(--palette-x);
       }
     }
-
-    &:first-child {
-      transform: translateX(0%);
-    }
-  }
-
-  @media screen and (max-width: 850px) {
-    .alert-wrapper {
-      transform: translateX(0);
-
-      &:first-child {
-        transform: translateX(110%);
-      }
-    }
   }
 
   @media screen and (max-width: 480px) {
     height: 3em;
-
+    font-size: 0.8em;
+    width: 16em;
     .alert-wrapper {
-      font-size: 0.8em;
       width: 16em;
     }
   }

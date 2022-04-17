@@ -36,7 +36,7 @@ export default class TxBlockScene extends TxMondrianPoolScene {
 
       this.scene.offset = {
         x: (window.innerWidth - this.width) / 2,
-        y: 2 * (window.innerHeight - this.height) / 3
+        y: 2 * (window.innerHeight - this.height) / ((window.innerWidth <= 640) ? 3.5 : 3)
       }
       this.scene.scroll = 0
     } else {

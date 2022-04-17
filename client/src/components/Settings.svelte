@@ -52,6 +52,10 @@ let settingConfig = {
     falseLabel: 'age',
     trueLabel: 'fee rate',
     valueType: 'bool'
+  },
+  showSearch: {
+    label: 'Search Bar',
+    valueType: 'bool'
   }
 }
 $: {

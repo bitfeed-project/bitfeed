@@ -3,8 +3,9 @@
   import TxController from '../controllers/TxController.js'
   import TxRender from './TxRender.svelte'
   import getTxStream from '../controllers/TxStream.js'
-  import { settings, overlay, serverConnected, serverDelay, txCount, mempoolCount, mempoolScreenHeight, frameRate, avgFrameRate, blockVisible, tinyScreen, currentBlock, selectedTx, blockAreaSize, devEvents, devSettings, pageWidth } from '../stores.js'
+  import { settings, overlay, serverConnected, serverDelay, txCount, mempoolCount, mempoolScreenHeight, frameRate, avgFrameRate, blockVisible, tinyScreen, compactScreen, currentBlock, selectedTx, blockAreaSize, devEvents, devSettings, pageWidth, pageHeight } from '../stores.js'
   import BlockInfo from '../components/BlockInfo.svelte'
+  import SearchBar from '../components/SearchBar.svelte'
   import TxInfo from '../components/TxInfo.svelte'
   import Sidebar from '../components/Sidebar.svelte'
   import TransactionOverlay from '../components/TransactionOverlay.svelte'
@@ -79,6 +80,7 @@
 
   function resize () {
     $pageWidth = window.innerWidth
+    $pageHeight = window.innerHeight
     if (width !== window.innerWidth - 20 || height !== window.innerHeight - 20) {
       // don't force resize unless the viewport has actually changed
       width = window.innerWidth - 20
@@ -87,12 +89,6 @@
         width,
         height
       })
-    }
-    const aspectRatio = window.innerWidth / window.innerHeight
-    if ((aspectRatio >= 1 && window.innerWidth < 480) || (aspectRatio <= 1 && window.innerHeight < 480)) {
-      $tinyScreen = true
-    } else {
-      $tinyScreen = false
     }
   }
 
@@ -284,7 +280,9 @@
     .status {
       text-align: left;
       padding: 1rem;
-      flex-shrink: 0;
+      width: 20em;
+      min-width: 7.5em;
+      flex-shrink: 3;
       box-sizing: border-box;
 
       .row {
@@ -340,7 +338,19 @@
     }
   }
 
+  .search-bar-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    height: 3.5em;
+    flex-grow: 1;
+  }
 
+  .alert-bar-wrapper {
+    width: 20em;
+    flex-shrink: 0;
+  }
 
   .block-area-wrapper {
     height: 100%;
@@ -415,6 +425,15 @@
       margin: auto;
     }
   }
+
+  @media screen and (max-width: 640px) {
+    .search-bar-wrapper {
+      position: fixed;
+      top: 3.5em;
+      left: 0;
+      right: 0;
+    }
+  }
 </style>
 
 <svelte:window on:resize={resize} on:load={resize} on:click={pointerLeave} />
@@ -437,7 +456,7 @@
     </div>
 
     <div class="block-area-wrapper">
-      <div class="spacer"></div>
+      <div class="spacer" style="flex: {$pageWidth <= 640 ? '1.5' : '1'}"></div>
       <div class="block-area-outer" style="width: {$blockAreaSize}px; height: {$blockAreaSize}px">
         <div class="block-area">
           <BlockInfo block={$currentBlock} visible={$blockVisible && !$tinyScreen} on:hideBlock={hideBlock} />
@@ -471,10 +490,18 @@
         {/if}
       </div>
     </div>
-    <div class="spacer" />
-    {#if config.messagesEnabled && $settings.showMessages && !$tinyScreen }
-      <Alerts />
+    {#if $settings.showSearch && !$tinyScreen && !$compactScreen }
+      <div class="search-bar-wrapper">
+        <SearchBar />
+      </div>
     {/if}
+    <div class="alert-bar-wrapper">
+      {#if config.messagesEnabled && $settings.showMessages && !$tinyScreen }
+        <Alerts />
+      {:else}
+        <div class="spacer"></div>
+      {/if}
+    </div>
   </div>
 
   <Sidebar />

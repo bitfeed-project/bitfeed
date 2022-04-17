@@ -1,5 +1,6 @@
 import TxView from './TxView.js'
 import config from '../config.js'
+import { subsidyAt } from '../utils/bitcoin.js'
 import { mixColor, pink, bluegreen, orange, teal, green, purple  } from '../utils/color.js'
 
 export default class BitcoinTx {
@@ -21,12 +22,14 @@ export default class BitcoinTx {
       return parsed + String.fromCharCode(parseInt(hexChar, 16))
     }, "")
 
+    const subsidy = subsidyAt(height)
+
     this.coinbase = {
       height,
       sig,
       sigAscii,
-      fees: block.fees,
-      subsidy: this.value - (block.fees || 0)
+      fees: this.value - subsidy,
+      subsidy
     }
   }
 
@@ -92,7 +95,7 @@ export default class BitcoinTx {
   setBlock (block) {
     this.block = block
     this.state = this.block ? 'block' : 'pool'
-    if (this.block && this.block.coinbase && this.id == this.block.coinbase.id) {
+    if (this.block && (this.isCoinbase || (this.block.coinbase && this.id == this.block.coinbase.id))) {
       this.isCoinbase = true
       this.setCoinbaseData(this.block)
     }
