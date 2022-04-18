@@ -7,12 +7,23 @@ import SearchIcon from '../assets/icon/cil-search.svg'
 import CrossIcon from '../assets/icon/cil-x-circle.svg'
 import AddressIcon from '../assets/icon/cil-wallet.svg'
 import TxIcon from '../assets/icon/cil-arrow-circle-right.svg'
+import BlockIcon from '../assets/icon/grid-icon.svg'
 import { fly } from 'svelte/transition'
 import { matchQuery, searchTx, searchBlock } from '../utils/search.js'
 import { selectedTx, detailTx, overlay, loading } from '../stores.js'
 
+const queryIcons = {
+  txid: TxIcon,
+  input: TxIcon,
+  output: TxIcon,
+  // address: AddressIcon,
+  blockhash: BlockIcon,
+  blockheight: BlockIcon,
+}
+
 let query
 let matchedQuery
+let errorMessage
 
 $: {
   if (query) {
@@ -20,31 +31,48 @@ $: {
   } else {
     matchedQuery = null
   }
+  errorMessage = null
 }
 
 function clearInput () {
   query = null
 }
 
+function handleSearchError (err) {
+  switch (err) {
+    case '404':
+      if (matchedQuery && matchedQuery.label) {
+        errorMessage = `${matchedQuery.label} not found`
+      }
+      break;
+    default:
+      errorMessage = 'server error'
+  }
+}
+
 async function searchSubmit (e) {
   e.preventDefault()
 
-  if (matchedQuery) {
+  if (matchedQuery && matchedQuery.query !== 'address') {
     $loading++
+    let searchErr
     switch(matchedQuery.query) {
       case 'txid':
-        await searchTx(matchedQuery.txid)
+        searchErr = await searchTx(matchedQuery.txid)
         break;
 
       case 'input':
-        await searchTx(matchedQuery.txid, matchedQuery.input, null)
+        searchErr = await searchTx(matchedQuery.txid, matchedQuery.input, null)
         break;
 
       case 'output':
-        await searchTx(matchedQuery.txid, null, matchedQuery.output)
+        searchErr = await searchTx(matchedQuery.txid, null, matchedQuery.output)
         break;
     }
+    if (searchErr != null) handleSearchError(searchErr)
     $loading--
+  } else {
+    errorMessage = 'enter a transaction id, block hash or block height'
   }
 
   return false
@@ -65,7 +93,7 @@ async function searchSubmit (e) {
   .clear-button {
     position: absolute;
     right: 0;
-    bottom: .3em;
+    bottom: .4em;
     margin: 0;
     color: var(--palette-bad);
     font-size: 1.2em;
@@ -135,10 +163,28 @@ async function searchSubmit (e) {
         transition: width 300ms;
       }
     }
+
+    .error-msg {
+      position: absolute;
+      left: 0;
+      top: 100%;
+      margin: 0;
+      font-size: 0.9em;
+      color: var(--palette-bad);
+    }
+
+    .input-icon.query-type {
+      position: absolute;
+      left: 0;
+      bottom: .4em;
+      margin: 0;
+      color: var(--palette-x);
+      font-size: 1.2em;
+    }
   }
 
-  &:hover, &:active, &:focus {
-    .underline.active {
+  .search-input:active, .search-input:focus {
+    & ~ .underline.active {
       width: 100%;
     }
   }
@@ -150,6 +196,7 @@ async function searchSubmit (e) {
     margin: 0;
     color: var(--input-color);
     width: 100%;
+    padding-left: 1.5em;
     padding-right: 1.5em;
 
     &.disabled {
@@ -170,6 +217,14 @@ async function searchSubmit (e) {
     <div class="underline" />
     <div class="underline active" />
     <button type="submit" class="search-submit" />
+    {#if matchedQuery && matchedQuery.query && queryIcons[matchedQuery.query]}
+      <div class="input-icon query-type" transition:fade={{ duration: 300 }} title={matchedQuery.label}>
+        <Icon icon={queryIcons[matchedQuery.query]} />
+      </div>
+    {/if}
+    {#if errorMessage }
+      <p class="error-msg" transition:fade={{ duration: 300 }}>{ errorMessage }</p>
+    {/if}
   </form>
   <div class="input-icon search icon-button" on:click={searchSubmit} title="Search">
     <Icon icon={SearchIcon}/>

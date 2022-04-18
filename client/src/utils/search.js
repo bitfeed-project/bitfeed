@@ -14,20 +14,22 @@ function matchQuery (query) {
   const asInt = parseInt(q)
   // Remember to update the bounds in
   if (!isNaN(asInt) && asInt >= 0 && `${asInt}` === q) {
-    return null /*{
+    return {
       query: 'blockheight',
+      label: 'block height',
       height: asInt,
       value: asInt
-    }*/
+    }
   }
 
   // Looks like a block hash?
   if (/^0{8}[a-f0-9]{56}$/.test(q)) {
-    return null /* {
+    return {
       query: 'blockhash',
+      label: 'block hash',
       hash: query,
       value: query,
-    }*/
+    }
   }
 
   // Looks like a transaction input?
@@ -35,6 +37,7 @@ function matchQuery (query) {
     const parts = q.split(':')
     return {
       query: 'input',
+      label: 'transaction input',
       txid: parts[1],
       output: parts[0],
       value: q
@@ -46,6 +49,7 @@ function matchQuery (query) {
     const parts = q.split(':')
     return {
       query: 'output',
+      label: 'transaction output',
       txid: parts[0],
       output: parts[1],
       value: q
@@ -56,6 +60,7 @@ function matchQuery (query) {
   if (/^[a-f0-9]{64}$/.test(q)) {
     return {
       query: 'txid',
+      label: 'transaction',
       txid: q,
       value: q
     }
@@ -72,6 +77,7 @@ function matchQuery (query) {
 
       return {
         query: 'address',
+        label: 'address',
         encoding: 'base58',
         addressType,
         address: query,
@@ -93,6 +99,7 @@ function matchQuery (query) {
 
       return {
         query: 'address',
+        label: 'address',
         encoding: 'bech32',
         addressType,
         address: query,
@@ -108,30 +115,37 @@ export {matchQuery as matchQuery}
 
 async function fetchTx (txid) {
   if (!txid) return
-  try {
-    const response = await fetch(`${api.uri}/api/tx/${txid}`, {
-      method: 'GET'
-    })
+  const response = await fetch(`${api.uri}/api/tx/${txid}`, {
+    method: 'GET'
+  })
+  if (!response) throw new Error('null response')
+  if (response.status == 200) {
     const result = await response.json()
     const txData = result.tx
-    txData.block = { height: result.blockheight, hash: result.blockhash, time: result.time * 1000 }
+    if (result.blockheight != null && result.blockhash != null) {
+      txData.block = { height: result.blockheight, hash: result.blockhash, time: result.time * 1000 }
+    }
     return new BitcoinTx(txData, null, (txData.inputs && txData.inputs[0] && txData.inputs[0].prev_txid === "0000000000000000000000000000000000000000000000000000000000000000"))
-  } catch (err) {
-    console.log("failed to fetch tx ", txid)
-    return null
+  } else {
+    throw new Error(response.status)
   }
 }
 
 export async function searchTx(txid, input, output) {
-  const searchResult = await fetchTx(txid)
-  if (searchResult) {
-    selectedTx.set(searchResult)
-    detailTx.set(searchResult)
-    overlay.set('tx')
-    if (input != null || output != null) highlightInOut.set({txid, input, output})
-    return true
-  } else {
-    return false
+  try {
+    const searchResult = await fetchTx(txid)
+    if (searchResult) {
+      selectedTx.set(searchResult)
+      detailTx.set(searchResult)
+      overlay.set('tx')
+      if (input != null || output != null) highlightInOut.set({txid, input, output})
+      return null
+    } else {
+      return '500'
+    }
+  } catch (err) {
+    console.log('error fetching tx ', err)
+    return err.message
   }
 }
 

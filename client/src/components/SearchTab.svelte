@@ -42,6 +42,7 @@ setNextColor()
 $: {
   if ($newHighlightQuery) {
     matchedQuery = matchQuery($newHighlightQuery)
+    if (matchedQuery && (matchedQuery.query === 'blockhash' || matchedQuery.query === 'blockheight')) matchedQuery = null
     if (matchedQuery) {
       matchedQuery.colorIndex = queryColorIndex
       matchedQuery.color = highlightColors[queryColorIndex]
@@ -61,6 +62,7 @@ $: {
 $: {
   if (query) {
     matchedQuery = matchQuery(query.trim())
+    if (matchedQuery && (matchedQuery.query === 'blockhash' || matchedQuery.query === 'blockheight')) matchedQuery = null
     if (matchedQuery) {
       matchedQuery.colorIndex = queryColorIndex
       matchedQuery.color = highlightColors[queryColorIndex]
@@ -113,7 +115,7 @@ function clearUsedColor (colorIndex) {
 }
 
 async function add () {
-  if (matchedQuery && !$highlightingFull) {
+  if (matchedQuery && matchedQuery.query !== 'blockhash' && matchedQuery.query !== 'blockheight' && !$highlightingFull) {
     watchlist.push({
       ...matchedQuery
     })
