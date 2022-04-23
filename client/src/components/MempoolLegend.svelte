@@ -5,10 +5,11 @@ import { numberFormat } from '../utils/format.js'
 import { logTxSize, byteTxSize } from '../utils/misc.js'
 import { interpolateHcl } from 'd3-interpolate'
 import { color, hcl } from 'd3-color'
-import { hlToHex, orange, teal, green, purple } from '../utils/color.js'
+import { hlToHex, orange, teal, blue, green, purple } from '../utils/color.js'
 
 const orangeHex = hlToHex(orange)
 const tealHex = hlToHex(teal)
+const blueHex = hlToHex(blue)
 const greenHex = hlToHex(green)
 const purpleHex = hlToHex(purple)
 
@@ -42,7 +43,7 @@ resize()
 
 onMount(() => {
   resize()
-  colorScale = generateColorScale(orangeHex, tealHex)
+  colorScale = generateColorScale(orangeHex, blueHex)
   feeColorScale = generateColorScale(tealHex, purpleHex)
 })
 

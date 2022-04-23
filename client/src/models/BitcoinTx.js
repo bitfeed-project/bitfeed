@@ -1,7 +1,7 @@
 import TxView from './TxView.js'
 import config from '../config.js'
 import { subsidyAt } from '../utils/bitcoin.js'
-import { mixColor, pink, bluegreen, orange, teal, green, purple  } from '../utils/color.js'
+import { mixColor, pink, bluegreen, orange, teal, blue, green, purple  } from '../utils/color.js'
 
 export default class BitcoinTx {
   constructor (data, vertexArray, isCoinbase = false) {
@@ -89,7 +89,7 @@ export default class BitcoinTx {
     this.colors = {
       age: {
         block: { color: orange },
-        pool: { color: orange, endColor: teal, duration: 60000 },
+        pool: { color: orange, endColor: blue, duration: 60000 },
       },
       fee: {
         block: { color: feeColor },
