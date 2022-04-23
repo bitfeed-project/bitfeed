@@ -339,7 +339,7 @@ class MondrianLayout {
     while (this.txMap.length <= offsetY) {
       this.txMap.push(new Array(this.width).fill(null))
     }
-    this.txMap[offsetY][coord.x] = null
+    if (this.txMap[offsetY]) this.txMap[offsetY][coord.x] = null
   }
 
   getTxInGridCell(coord) {

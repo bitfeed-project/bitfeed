@@ -31,4 +31,8 @@ bitcoin_stream-*.tar
 !log/.gitkeep
 *.log
 
+# Blocks
+!data/block/.gitkeep
+/data/block/**
+
 .envrc

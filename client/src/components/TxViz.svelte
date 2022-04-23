@@ -110,6 +110,10 @@
     $blockVisible = false
   }
 
+  function quitExploring () {
+    if (txController) txController.resumeLatest()
+  }
+
   function fakeBlock () {
     const block = txController.simulateBlock()
     // txController.addBlock(new BitcoinBlock({
@@ -492,7 +496,7 @@
       <div class="spacer" style="flex: {$pageWidth <= 640 ? '1.5' : '1'}"></div>
       <div class="block-area-outer" style="width: {$blockAreaSize}px; height: {$blockAreaSize}px">
         <div class="block-area">
-          <BlockInfo block={$currentBlock} visible={$blockVisible && !$tinyScreen} on:hideBlock={hideBlock} />
+          <BlockInfo block={$currentBlock} visible={$blockVisible && !$tinyScreen} on:hideBlock={hideBlock} on:quitExploring={quitExploring} />
         </div>
         {#if config.dev && config.debug && $devSettings.guides }
           <div class="guide-area" />

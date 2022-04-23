@@ -1,10 +1,11 @@
 import BitcoinTx from '../models/BitcoinTx.js'
 
 export default class BitcoinBlock {
-  constructor ({ version, id, value, prev_block, merkle_root, timestamp, bits, bytes, txn_count, txns, fees }) {
+  constructor ({ version, id, height, value, prev_block, merkle_root, timestamp, bits, bytes, txn_count, txns, fees }) {
     this.isBlock = true
     this.version = version
     this.id = id
+    this.height = height
     this.value = value
     this.prev_block = prev_block
     this.merkle_root = merkle_root
@@ -14,13 +15,9 @@ export default class BitcoinBlock {
     this.txnCount = txn_count
     this.txns = txns
     this.coinbase = new BitcoinTx(this.txns[0], true)
-    if (fees) {
-      this.fees = fees
-    } else {
-      this.fees = null
-    }
+    this.fees = fees
     this.coinbase.setBlock(this)
-    this.height = this.coinbase.coinbase.height
+    this.height = this.height || this.coinbase.coinbase.height
     this.miner_sig = this.coinbase.coinbase.sigAscii
 
     this.total_vbytes = 0
@@ -39,6 +36,51 @@ export default class BitcoinBlock {
         this.total_vbytes += txn.vbytes
       })
       this.avgFeerate = this.fees / this.total_vbytes
+    }
+  }
+
+  setVertexArray (vertexArray) {
+    if (this.txns) {
+      this.txns.forEach(txn => {
+        txn.setVertexArray(vertexArray)
+      })
+    }
+  }
+
+  static fromRPCData (data) {
+    const txns = data.tx.map((tx, index) => { return BitcoinTx.fromRPCData(tx, index == 0) })
+    const value = txns.reduce((acc, tx) => { return acc + tx.fee + tx.value }, 0)
+    const fees = txns.reduce((acc, tx) => { return acc + tx.fee }, 0)
+
+    return {
+      version: data.version,
+      id: data.hash,
+      height: data.height,
+      value: value,
+      prev_block: data.previousblockhash,
+      merkle_root: data.merkleroot,
+      timestamp: data.time,
+      bits: data.bits,
+      bytes: data.size,
+      txn_count: txns.length,
+      txns,
+      fees
+    }
+  }
+
+  static decompress (data) {
+    return {
+      version: data[0],
+      id: data[1],
+      height: data[2],
+      value: data[3],
+      prev_block: data[4],
+      timestamp: data[5],
+      bits: data[6],
+      bytes: data[7],
+      txn_count: data[8].length,
+      txns: data[8].map(txData => BitcoinTx.decompress(txData)),
+      fees: data[9]
     }
   }
 }

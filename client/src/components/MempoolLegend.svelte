@@ -207,7 +207,7 @@ function generateColorScale (colorA, colorB) {
     {:else}
       <span class="value left">1</span>
       <img src={feeColorScale} alt="" class="color-scale-img" width="200" height="15">
-      <span class="value right">64+</span>
+      <span class="value right">128+</span>
     {/if}
   </div>
 </div>

@@ -5,8 +5,8 @@
   import { createEventDispatcher } from 'svelte'
   import Icon from '../components/Icon.svelte'
   import closeIcon from '../assets/icon/cil-x-circle.svg'
-  import { shortBtcFormat, longBtcFormat, timeFormat, numberFormat } from '../utils/format.js'
-  import { exchangeRates, settings, blocksEnabled } from '../stores.js'
+  import { shortBtcFormat, longBtcFormat, dateFormat, numberFormat } from '../utils/format.js'
+  import { exchangeRates, settings, blocksEnabled, latestBlockHeight, blockTransitionDirection } from '../stores.js'
   import { formatCurrency } from '../utils/fx.js'
 
 	const dispatch = createEventDispatcher()
@@ -47,8 +47,23 @@
     }
   }
 
-  function formatTime (time) {
-    return timeFormat.format(time)
+  let flyIn
+  let flyOut
+  $: {
+    if ($blockTransitionDirection && $blockTransitionDirection === 'right') {
+      flyIn = { x: 100, easing: linear, delay: 1000, duration: 1000 }
+      flyOut = { x: -100, easing: linear, delay: 0, duration: 1000  }
+    } else if ($blockTransitionDirection && $blockTransitionDirection === 'left') {
+      flyIn = { x: -100, easing: linear, delay: 1000, duration: 1000  }
+      flyOut = { x: 100, easing: linear, delay: 0, duration: 1000  }
+    } else {
+      flyIn = { y: (restoring ? -50 : 50), duration: (restoring ? 500 : 1000), easing: linear, delay: (restoring ? 0 : newBlockDelay) }
+      flyOut = { y: -50, duration: 2000, easing: linear }
+    }
+  }
+
+  function formatDateTime (time) {
+    return dateFormat.format(time)
   }
 
   function formatBTC (sats) {
@@ -74,8 +89,12 @@
   }
 
   function hideBlock () {
-    analytics.trackEvent('viz', 'block', 'hide')
-    dispatch('hideBlock')
+    if (block && block.height != $latestBlockHeight) {
+      dispatch('quitExploring')
+    } else {
+      analytics.trackEvent('viz', 'block', 'hide')
+      dispatch('hideBlock')
+    }
   }
 </script>
 
@@ -229,15 +248,15 @@
 
 {#each [block] as block (block)}
   {#if block != null && visible && $blocksEnabled }
-    <div class="block-info" out:fly="{{ y: -50, duration: 2000, easing: linear }}" in:fly="{{ y: (restoring ? -50 : 50), duration: (restoring ? 500 : 1000), easing: linear, delay: (restoring ? 0 : newBlockDelay) }}">
+    <div class="block-info" out:fly={flyOut} in:fly={flyIn}>
         <!-- <span class="data-field">Hash: { block.id }</span> -->
         <div class="full-size">
           <div class="data-row">
-            <span class="data-field title-field" title="{block.miner_sig}"><b>Latest Block: </b>{ numberFormat.format(block.height) }</span>
+            <span class="data-field title-field" title="{block.miner_sig}"><b>{#if block.height == $latestBlockHeight}Latest {/if}Block: </b>{ numberFormat.format(block.height) }</span>
             <button class="data-field close-button" on:click={hideBlock}><Icon icon={closeIcon} color="var(--palette-x)" /></button>
           </div>
           <div class="data-row">
-            <span class="data-field">Mined { formatTime(block.time) }</span>
+            <span class="data-field" title="block timestamp">{ formatDateTime(block.time) }</span>
             <span class="data-field">{ formattedBlockValue }</span>
           </div>
           <div class="data-row">
@@ -260,7 +279,7 @@
             <button class="data-field close-button" on:click={hideBlock}><Icon icon={closeIcon} color="var(--palette-x)" /></button>
           </div>
           <div class="data-row">
-            <span class="data-field">Mined { formatTime(block.time) }</span>
+            <span class="data-field">{ formatDateTime(block.time) }</span>
             <span class="data-field">{ formattedBlockValue }</span>
           </div>
           <div class="data-row">
@@ -273,7 +292,7 @@
           </div>
         </div>
     </div>
-    <button class="close-button standalone" on:click={hideBlock} out:fly="{{ y: -50, duration: 2000, easing: linear }}" in:fly="{{ y: (restoring ? -50 : 50), duration: (restoring ? 500 : 1000), easing: linear, delay: (restoring ? 0 : newBlockDelay) }}" >
+    <button class="close-button standalone" on:click={hideBlock} out:fly={flyOut} in:fly={flyIn} >
       <Icon icon={closeIcon} color="var(--palette-x)" />
     </button>
   {/if}

@@ -5,7 +5,8 @@ import BitcoinTx from '../models/BitcoinTx.js'
 import BitcoinBlock from '../models/BitcoinBlock.js'
 import TxSprite from '../models/TxSprite.js'
 import { FastVertexArray } from '../utils/memory.js'
-import { overlay, txCount, mempoolCount, mempoolScreenHeight, blockVisible, currentBlock, selectedTx, detailTx, blockAreaSize, highlight, colorMode, blocksEnabled, latestBlockHeight } from '../stores.js'
+import { searchTx } from '../utils/search.js'
+import { overlay, txCount, mempoolCount, mempoolScreenHeight, blockVisible, currentBlock, selectedTx, detailTx, blockAreaSize, highlight, colorMode, blocksEnabled, latestBlockHeight, explorerBlockData, blockTransitionDirection, loading } from '../stores.js'
 import config from "../config.js"
 
 export default class TxController {
@@ -18,6 +19,9 @@ export default class TxController {
     this.blockAreaSize = (width <= 620) ? Math.min(window.innerWidth * 0.7, window.innerHeight / 2.75) : Math.min(window.innerWidth * 0.75, window.innerHeight / 2.5)
     blockAreaSize.set(this.blockAreaSize)
     this.blockScene = null
+    this.block = null
+    this.explorerBlockScene = null
+    this.explorerBlock = null
     this.clearBlockTimeout = null
     this.txDelay = 0 //config.txDelay
     this.maxTxDelay = config.txDelay
@@ -43,6 +47,15 @@ export default class TxController {
     colorMode.subscribe(mode => {
       this.setColorMode(mode)
     })
+    explorerBlockData.subscribe(blockData => {
+      console.log('explorerBlock changed: ', blockData)
+      if (blockData) {
+        this.exploreBlock(blockData)
+      } else {
+        this.resumeLatest()
+      }
+    })
+
   }
 
   getVertexData () {
@@ -54,7 +67,8 @@ export default class TxController {
   }
 
   getScenes () {
-    if (this.blockScene) return [this.poolScene, this.blockScene]
+    if (this.blockScene && this.explorerBlockScene) return [this.poolScene, this.blockScene, this.explorerBlockScene]
+    else if (this.blockScene) return [this.poolScene, this.blockScene]
     else return [this.poolScene]
   }
 
@@ -62,6 +76,9 @@ export default class TxController {
     this.poolScene.layoutAll({ width, height })
     if (this.blockScene) {
       this.blockScene.layoutAll({ width: this.blockAreaSize, height: this.blockAreaSize })
+    }
+    if (this.explorerBlockScene) {
+      this.explorerBlockScene.layoutAll({ width: this.blockAreaSize, height: this.blockAreaSize })
     }
   }
 
@@ -77,12 +94,18 @@ export default class TxController {
     if (this.blockScene) {
       this.blockScene.setColorMode(mode)
     }
+    if (this.explorerBlockScene) {
+      this.explorerBlockScene.setColorMode(mode)
+    }
   }
 
   applyHighlighting () {
     this.poolScene.applyHighlighting(this.highlightCriteria)
     if (this.blockScene) {
       this.blockScene.applyHighlighting(this.highlightCriteria)
+    }
+    if (this.explorerBlockScene) {
+      this.explorerBlockScene.applyHighlighting(this.highlightCriteria)
     }
   }
 
@@ -125,20 +148,49 @@ export default class TxController {
     }
   }
 
+  simulateBlock () {
+    const time = Date.now() / 1000
+    console.log('sim time ', time)
+    this.addBlock({
+      version: 'fake',
+      id: Math.random(),
+      value: 10000,
+      prev_block: 'also_fake',
+      merkle_root: 'merkle',
+      timestamp: time,
+      bits: 'none',
+      txn_count: 20,
+      fees: 100,
+      txns: [{ version: 'fake', inflated: false, id: 'coinbase', value: 625000100, fee: 100, vbytes: 500, inputs:[{ prev_txid: '00000000000000000000000000000', prev_vout: 0, script_sig: '03e0170b04efb72c622f466f756e6472792055534120506f6f6c202364726f70676f6c642f0eb5059f0000000000000000',
+        sequence_no: 0, value: 625000100, script_pub_key: "76a9145e9b23809261178723055968d134a947f47e799f88ac" }], outputs: [{ prev_txid: '00000000000000000000000000000', prev_vout: 0, script_sig: '03e0170b04efb72c622f466f756e6472792055534120506f6f6c202364726f70676f6c642f0eb5059f0000000000000000',
+          sequence_no: 0, value: 625000100, script_pub_key: "76a9145e9b23809261178723055968d134a947f47e799f88ac" }], time: Date.now()
+      }, ...Object.keys(this.txs).filter(() => {
+        return (Math.random() < 0.5)
+      }).map(key => {
+        return {
+          ...this.txs[key],
+          inputs: this.txs[key].inputs.map(input => { return {...input, script_pub_key: null, value: null }}),
+        }
+      })]
+    })
+  }
+
   addBlock (blockData, realtime=true) {
     // discard duplicate blocks
     if (!blockData || !blockData.id || this.knownBlocks[blockData.id]) {
       return
     }
 
-    const block = new BitcoinBlock(blockData)
+    let block
+    block = new BitcoinBlock(blockData)
+
     latestBlockHeight.set(block.height)
-    this.knownBlocks[block.id] = true
+    // this.knownBlocks[block.id] = true
     if (this.clearBlockTimeout) clearTimeout(this.clearBlockTimeout)
 
     this.expiredTxs = {}
 
-    this.clearBlock()
+    if (!this.explorerBlockScene) this.clearBlock()
 
     if (this.blocksEnabled) {
       this.blockScene = new TxBlockScene({ width: this.blockAreaSize, height: this.blockAreaSize, blockId: block.id, controller: this, colorMode: this.colorMode })
@@ -163,10 +215,15 @@ export default class TxController {
         this.expiredTxs[block.txns[i].id] = true
       }
       console.log(`New block with ${knownCount} known transactions and ${unknownCount} unknown transactions`)
-      this.blockScene.initialLayout()
+      this.blockScene.initialLayout(!!this.explorerBlockScene)
       setTimeout(() => { this.poolScene.scrollLock = false; this.poolScene.layoutAll() }, 4000)
 
       blockVisible.set(true)
+
+      if (!this.explorerBlockScene) {
+        blockTransitionDirection.set(null)
+        currentBlock.set(block)
+      }
     } else {
       this.poolScene.scrollLock = true
       for (let i = 0; i < block.txns.length; i++) {
@@ -205,21 +262,87 @@ export default class TxController {
         this.poolScene.scrollLock = false
         this.poolScene.layoutAll()
       }, 5500)
+
+      blockTransitionDirection.set(null)
+      currentBlock.set(block)
     }
 
-    currentBlock.set(block)
+    this.block = block
 
     return block
   }
 
+  exploreBlock (blockData) {
+    const block = new BitcoinBlock(blockData)
+    let enterFromRight = false
+
+    // clean up previous block
+    if (this.explorerBlock && this.explorerBlockScene) {
+      const prevBlock = this.explorerBlock
+      const prevBlockScene = this.explorerBlockScene
+      if (prevBlock.height < block.height) {
+        prevBlockScene.exitLeft()
+        enterFromRight = true
+      }
+      else prevBlockScene.exitRight()
+      prevBlockScene.expire(2000)
+    } else if (this.blockScene) {
+      this.blockScene.exitRight()
+    }
+
+    this.explorerBlock = block
+
+    if (this.blocksEnabled) {
+      this.explorerBlockScene = new TxBlockScene({ width: this.blockAreaSize, height: this.blockAreaSize, blockId: block.id, controller: this, colorMode: this.colorMode })
+      for (let i = 0; i < block.txns.length; i++) {
+        const tx = new BitcoinTx({
+          ...block.txns[i],
+          block: block
+        }, this.vertexArray)
+        this.txs[tx.id] = tx
+        this.txs[tx.id].applyHighlighting(this.highlightCriteria)
+        this.explorerBlockScene.insert(tx, 0, false)
+      }
+      this.explorerBlockScene.prepareAll()
+      this.explorerBlockScene.layoutAll()
+      if (enterFromRight) {
+        blockTransitionDirection.set('right')
+        this.explorerBlockScene.enterRight()
+      } else {
+        blockTransitionDirection.set('left')
+        this.explorerBlockScene.enterLeft()
+      }
+    }
+
+    blockVisible.set(true)
+    currentBlock.set(block)
+  }
+
+  resumeLatest () {
+    if (this.explorerBlock && this.explorerBlockScene) {
+      const prevBlock = this.explorerBlock
+      const prevBlockScene = this.explorerBlockScene
+      prevBlockScene.exitLeft()
+      prevBlockScene.expire(2000)
+      this.explorerBlockScene = null
+      this.explorerBlock = null
+    }
+    if (this.blockScene && this.block) {
+      blockTransitionDirection.set('right')
+      this.blockScene.enterRight()
+      currentBlock.set(this.block)
+    }
+  }
+
   hideBlock () {
-    if (this.blockScene) {
+    if (this.blockScene && !this.explorerBlockScene) {
+      blockTransitionDirection.set(null)
       this.blockScene.hide()
     }
   }
 
   showBlock () {
-    if (this.blockScene) {
+    if (this.blockScene && !this.explorerBlockScene) {
       this.blockScene.show()
     }
   }
@@ -228,8 +351,8 @@ export default class TxController {
     if (this.blockScene) {
       this.blockScene.expire()
     }
+    this.block = null
     currentBlock.set(null)
-    if (this.blockVisibleUnsub) this.blockVisibleUnsub()
   }
 
   destroyTx (id) {
@@ -243,7 +366,8 @@ export default class TxController {
   mouseMove (position) {
     if (this.poolScene && !this.selectionLocked) {
       let selected = this.poolScene.selectAt(position)
-      if (!selected && this.blockScene && !this.blockScene.hidden) selected = this.blockScene.selectAt(position)
+      if (!selected && this.blockScene && !this.explorerBlock && !this.blockScene.hidden) selected = this.blockScene.selectAt(position)
+      if (!selected && this.explorerBlockScene && this.explorerBlock && !this.explorerBlockScene.hidden) selected = this.explorerBlockScene.selectAt(position)
 
       if (selected !== this.selectedTx) {
         if (this.selectedTx) this.selectedTx.hoverOff()
@@ -254,10 +378,11 @@ export default class TxController {
     }
   }
 
-  mouseClick (position) {
+  async mouseClick (position) {
     if (this.poolScene) {
       let selected = this.poolScene.selectAt(position)
-      if (!selected && this.blockScene && !this.blockScene.hidden) selected = this.blockScene.selectAt(position)
+      if (!selected && this.blockScene && !this.explorerBlock && !this.blockScene.hidden) selected = this.blockScene.selectAt(position)
+      if (!selected && this.explorerBlockScene && this.explorerBlock && !this.explorerBlockScene.hidden) selected = this.explorerBlockScene.selectAt(position)
 
       let sameTx = true
       if (selected !== this.selectedTx) {
@@ -268,9 +393,16 @@ export default class TxController {
       this.selectedTx = selected
       selectedTx.set(this.selectedTx)
       if (sameTx && this.selectedTx) {
-        detailTx.set(this.selectedTx)
-        overlay.set('tx')
+        if (!this.selectedTx.is_inflated) {
+          loading.increment()
+          await searchTx(this.selectedTx.id)
+          loading.decrement()
+        } else {
+          detailTx.set(this.selectedTx)
+          overlay.set('tx')
+        }
       }
+      console.log(this.selectedTx)
       this.selectionLocked = !!this.selectedTx && !(this.selectionLocked && sameTx)
     }
   }

@@ -119,6 +119,85 @@ export default class TxBlockScene extends TxMondrianPoolScene {
     this.prepareTxOnScreen(tx, this.layoutTx(tx, sequence, 0, false))
   }
 
+  enterTx (tx, right) {
+    tx.view.update({
+      display: {
+        position: {
+          x: tx.screenPosition.x + (right ? window.innerWidth : -window.innerWidth) + ((Math.random()-0.5) * (window.innerHeight/4)),
+          y: tx.screenPosition.y + ((Math.random()-0.5) * (window.innerHeight/4)),
+          r: tx.pixelPosition.r
+        },
+        color: {
+          ...tx.getColor('block', this.colorMode).color,
+          alpha: 0
+        }
+      },
+      delay: 0,
+      state: 'ready'
+    })
+    tx.view.update({
+      display: {
+        position: tx.screenPosition,
+        color: {
+          ...tx.getColor('block', this.colorMode).color,
+          alpha: 1
+        }
+      },
+      duration: 2000,
+      delay: 0
+    })
+  }
+
+  enter (right) {
+    this.hidden = false
+    const ids = this.getActiveTxList()
+    for (let i = 0; i < ids.length; i++) {
+      this.enterTx(this.txs[ids[i]], right)
+    }
+  }
+
+  enterRight () {
+    this.enter(true)
+  }
+
+  enterLeft () {
+    this.enter(false)
+  }
+
+  exitTx (tx, right) {
+    tx.view.update({
+      display: {
+        position: {
+          x: tx.screenPosition.x + (right ? window.innerWidth : -window.innerWidth) + ((Math.random()-0.5) * (window.innerHeight/4)),
+          y: tx.screenPosition.y + ((Math.random()-0.5) * (window.innerHeight/4)),
+          r: tx.pixelPosition.r
+        },
+        color: {
+          ...tx.getColor('block', this.colorMode).color,
+          alpha: 0
+        }
+      },
+      delay: 0,
+      duration: 2000
+    })
+  }
+
+  exit (right) {
+    this.hidden = true
+    const ids = this.getActiveTxList()
+    for (let i = 0; i < ids.length; i++) {
+      this.exitTx(this.txs[ids[i]], right)
+    }
+  }
+
+  exitRight () {
+    this.exit(true)
+  }
+
+  exitLeft () {
+    this.exit(false)
+  }
+
   hideTx (tx) {
     this.savePixelsToScreenPosition(tx)
     tx.view.update({
@@ -174,10 +253,11 @@ export default class TxBlockScene extends TxMondrianPoolScene {
     // }
   }
 
-  initialLayout () {
+  initialLayout (exited) {
     this.prepareAll()
     setTimeout(() => {
       this.layoutAll()
+      if (exited) this.exitRight()
     }, 3000)
   }
 
@@ -199,7 +279,7 @@ export default class TxBlockScene extends TxMondrianPoolScene {
     }
   }
 
-  expire () {
+  expire (delay=3000) {
     this.expired = true
     this.hide()
     setTimeout(() => {
@@ -208,6 +288,13 @@ export default class TxBlockScene extends TxMondrianPoolScene {
         if (this.txs[txIds[i]]) this.controller.destroyTx(txIds[i])
       }
       this.layout.destroy()
-    }, 3000)
+    }, delay)
+  }
+
+  selectAt (position) {
+    if (this.layout) {
+      const gridPosition = this.screenToGrid({ x: position.x + (this.gridSize/4), y: position.y - (this.gridSize/2) })
+      return this.layout.getTxInGridCell(gridPosition)
+    } else return null
   }
 }

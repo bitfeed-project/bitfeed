@@ -1,6 +1,7 @@
 import api from './api.js'
 import BitcoinTx from '../models/BitcoinTx.js'
-import { detailTx, selectedTx, overlay, highlightInOut } from '../stores.js'
+import BitcoinBlock from '../models/BitcoinBlock.js'
+import { detailTx, selectedTx, currentBlock, explorerBlockData, overlay, highlightInOut } from '../stores.js'
 import { addressToSPK } from './encodings.js'
 
 // Quick heuristic matching to guess what kind of search a query is for
@@ -113,6 +114,11 @@ function matchQuery (query) {
 }
 export {matchQuery as matchQuery}
 
+let currentBlockVal
+currentBlock.subscribe(block => {
+  currentBlockVal = block
+})
+
 async function fetchTx (txid) {
   if (!txid) return
   const response = await fetch(`${api.uri}/api/tx/${txid}`, {
@@ -131,7 +137,34 @@ async function fetchTx (txid) {
   }
 }
 
-export async function searchTx(txid, input, output) {
+async function fetchBlockByHash (hash) {
+  if (!hash || (currentBlockVal && hash === currentBlockVal.id)) return true
+  // try to fetch static block
+  let response = await fetch(`${api.uri}/api/block/${hash}`, {
+    method: 'GET'
+  })
+  if (!response) throw new Error('null response')
+  if (response && response.status == 200) {
+    const blockData = await response.json()
+    return BitcoinBlock.decompress(blockData)
+  }
+}
+
+async function fetchBlockByHeight (height) {
+  if (height == null) return
+  const response = await fetch(`${api.uri}/api/block/height/${height}`, {
+    method: 'GET'
+  })
+  if (!response) throw new Error('null response')
+  if (response.status == 200) {
+    const hash = await response.json()
+    return fetchBlockByHash(hash)
+  } else {
+    throw new Error(response.status)
+  }
+}
+
+export async function searchTx (txid, input, output) {
   try {
     const searchResult = await fetchTx(txid)
     if (searchResult) {
@@ -149,6 +182,36 @@ export async function searchTx(txid, input, output) {
   }
 }
 
-export async function searchBlock(hash) {
-  console.log("search block ", hash)
+export async function searchBlockHash (hash) {
+  try {
+    const searchResult = await fetchBlockByHash(hash)
+    if (searchResult) {
+      if (searchResult.id) {
+        explorerBlockData.set(searchResult)
+      }
+      return null
+    } else {
+      return '500'
+    }
+  } catch (err) {
+    console.log('error fetching block ', err)
+    return err.message
+  }
+}
+
+export async function searchBlockHeight (height) {
+  try {
+    const searchResult = await fetchBlockByHeight(height)
+    if (searchResult) {
+      if (searchResult.id) {
+        explorerBlockData.set(searchResult)
+      }
+      return null
+    } else {
+      return '500'
+    }
+  } catch (err) {
+    console.log('error fetching block ', err)
+    return err.message
+  }
 }
