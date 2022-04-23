@@ -471,6 +471,13 @@
       right: 0;
     }
   }
+
+  @media screen and (max-width: 480px) {
+    .alert-bar-wrapper {
+      font-size: 0.8em;
+      width: 18em;
+    }
+  }
 </style>
 
 <svelte:window on:resize={resize} on:load={resize} on:click={pointerLeave} />

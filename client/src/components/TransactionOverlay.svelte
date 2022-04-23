@@ -7,6 +7,7 @@ import { exchangeRates, settings, sidebarToggle, newHighlightQuery, highlighting
 import { formatCurrency } from '../utils/fx.js'
 import { hlToHex, mixColor, teal, purple } from '../utils/color.js'
 import { SPKToAddress } from '../utils/encodings.js'
+import api from '../utils/api.js'
 import { searchTx } from '../utils/search.js'
 
 function onClose () {
@@ -105,6 +106,7 @@ $: {
 
 let inputs = []
 let outputs = []
+let expandedOutputs = []
 $: {
   if ($detailTx && $detailTx.inputs) {
     if ($detailTx.isCoinbase) {
@@ -118,19 +120,49 @@ $: {
   } else inputs = []
   if ($detailTx && $detailTx.outputs) {
     if ($detailTx.isCoinbase || !$detailTx.is_inflated || !$detailTx.fee) {
-      outputs = expandAddresses($detailTx.outputs, truncate)
+      expandedOutputs = expandAddresses($detailTx.outputs, truncate)
     } else {
-      outputs = [{address: 'fee', value: $detailTx.fee, fee: true}, ...expandAddresses($detailTx.outputs, truncate)]
+      expandedOutputs = [{address: 'fee', value: $detailTx.fee, fee: true}, ...expandAddresses($detailTx.outputs, truncate)]
     }
-  } else outputs = []
+  } else expandedOutputs = []
+}
+$: {
+  if (expandedOutputs) {
+    if (spends) {
+      outputs = expandedOutputs.map(output => {
+        if (output.index != null && spends[output.index]) {
+          const spendParts = spends[output.index].split(':')
+          return {
+            ...output,
+            spend: {
+              txid: spendParts[0],
+              vin: spendParts[1]
+            }
+          }
+        } else {
+          return {
+            ...output,
+            spend: false
+          }
+        }
+      })
+    } else outputs = expandedOutputs
+  }
+}
+
+let spends
+$: {
+  if ($detailTx && $detailTx.id) {
+    fetchSpends($detailTx, truncate)
+  } else spends = null
 }
 
 let highlight = {}
 $: {
   if ($highlightInOut && $detailTx && $highlightInOut.txid === $detailTx.id) {
     highlight = {}
-    if ($highlightInOut.input != null) highlight.in = $highlightInOut.input
-    if ($highlightInOut.output != null) highlight.out = $highlightInOut.output
+    if ($highlightInOut.input != null) highlight.in = parseInt($highlightInOut.input)
+    if ($highlightInOut.output != null) highlight.out = parseInt($highlightInOut.output)
   } else {
     highlight = {}
   }
@@ -139,9 +171,9 @@ $: {
 let sankeyLines
 let sankeyHeight
 $: {
-  if ($detailTx && inputs && outputs) {
-    sankeyHeight = Math.max(inputs.length, outputs.length) * rowHeight
-    sankeyLines = calcSankeyLines(inputs, outputs, $detailTx.fee || null, $detailTx.value, sankeyHeight, svgWidth, flowWeight)
+  if ($detailTx && inputs && expandedOutputs) {
+    sankeyHeight = Math.max(inputs.length, expandedOutputs.length) * rowHeight
+    sankeyLines = calcSankeyLines(inputs, expandedOutputs, $detailTx.fee || null, $detailTx.value, sankeyHeight, svgWidth, flowWeight)
   }
 }
 
@@ -253,18 +285,43 @@ function getMiterOffset (weight, dy, dx) {
   } else return 0
 }
 
+async function fetchSpends (tx, truncated) {
+  const response = await fetch(`${api.uri}/api/spends/${tx.id}/0/${truncated ? Math.min(tx.outputs.length, 100) : tx.outputs.length}`, {
+    method: 'GET'
+  })
+  if (!response) throw new Error('null response')
+  if (response.status == 200) {
+    const result = await response.json()
+    spends = result
+  }
+}
+
 async function clickItem (item) {
   if (item.rest) {
     truncate = false
   } else if (item.prev_txid && item.prev_vout != null) {
-    $loading++
-    await searchTx(item.prev_txid, null, item.prev_vout)
-    $loading--
-  } else if (item.spend && item.spend.txid && item.spend.vin) {
-    $loading++
-    await searchTx(item.spend.txid, item.spend.vin)
-    $loading--
+    // $loading++
+    // await searchTx(item.prev_txid, null, item.prev_vout)
+    // $loading--
+  } else if (item.spend) {
+    // $loading++
+    // await searchTx(item.spend.txid, item.spend.vin)
+    // $loading--
   }
+}
+
+async function goToInput(e, input) {
+  e.preventDefault()
+  $loading++
+  await searchTx(input.prev_txid, null, input.prev_vout)
+  $loading--
+}
+
+async function goToOutput(e, output) {
+  e.preventDefault()
+  $loading++
+  await searchTx(output.spend.txid, output.spend.vin)
+  $loading--
 }
 </script>
 
@@ -380,6 +437,7 @@ async function clickItem (item) {
         margin: 0;
 
         .entry {
+          position: relative;
           height: 60px;
           display: flex;
           flex-direction: column;
@@ -390,7 +448,6 @@ async function clickItem (item) {
           text-align: right;
           width: 100%;
           overflow: hidden;
-          transition: background 300ms;
 
           &:last-child {
             border-bottom: solid 1px var(--grey);
@@ -420,12 +477,44 @@ async function clickItem (item) {
           &.clickable {
             cursor: pointer;
           }
+
+          .put-link {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 1.5em;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            .chevron {
+              .outline {
+                stroke: white;
+                stroke-width: 32;
+                stroke-linecap: butt;
+                stroke-linejoin: miter;
+                fill: white;
+                fill-opacity: 0;
+                transition: fill-opacity 300ms;
+              }
+
+              &.right {
+                transform: scaleX(-1);
+              }
+            }
+
+            &:hover {
+              .chevron .outline {
+                fill-opacity: 1;
+              }
+            }
+          }
         }
 
         &.inputs {
           .entry {
             align-items: flex-start;
-            padding-left: 10px;
+            padding-left: 1.5em;
             &.highlight {
               background: linear-gradient(90deg, var(--bold-a) -100%, transparent 100%);
             }
@@ -435,21 +524,26 @@ async function clickItem (item) {
             .address {
               text-align: left;
             }
+
+            .put-link {
+              left: 0;
+            }
           }
         }
 
         &.outputs {
           .entry {
-            padding-right: 10px;
+            padding-right: 1.5em;
             border-right: solid 1px transparent;
-            &.unspent {
-              border-right: solid 1px var(--grey);
-            }
             &.highlight {
               background: linear-gradient(90deg, transparent 0%, var(--bold-a) 200%);
             }
             &.clickable:hover {
               background: linear-gradient(-90deg, var(--palette-e), transparent);
+            }
+
+            .put-link {
+              right: 0;
             }
           }
         }
@@ -582,8 +676,15 @@ async function clickItem (item) {
       <div class="pane flow-diagram" style="grid-template-columns: minmax(0px, 1fr) {svgWidth}px minmax(0px, 1fr);">
         <div class="column inputs">
           <p class="header">{$detailTx.inputs.length} input{$detailTx.inputs.length > 1 ? 's' : ''}</p>
-          {#each inputs as input}
-            <div class="entry clickable" on:click={() => clickItem(input)}>
+          {#each inputs as input, index}
+            <div class="entry" class:clickable={input.rest} class:highlight={highlight.in != null && highlight.in === index} on:click={() => clickItem(input)}>
+              {#if input.prev_txid }
+                <a href="/tx/{input.prev_txid}:{input.prev_vout}" on:click={(e) => goToInput(e, input)} class="put-link">
+                <svg class="chevron left" height="1.2em" width="1.2em" viewBox="0 0 512 512">
+                  <path d="M 107.628,257.54 327.095,38.078 404,114.989 261.506,257.483 404,399.978 327.086,476.89 Z" class="outline" />
+                </svg>
+                </a>
+              {/if}
               <p class="address" title={input.title || input.address}><span class="truncatable">{input.address.slice(0,-6)}</span><span class="suffix">{input.address.slice(-6)}</span></p>
               <p class="amount">{ input.value == null ? '???' : formatBTC(input.value) }</p>
             </div>
@@ -619,7 +720,14 @@ async function clickItem (item) {
         <div class="column outputs">
           <p class="header">{$detailTx.outputs.length} output{$detailTx.outputs.length > 1 ? 's' : ''} {#if $detailTx.fee}+ fee{/if}</p>
           {#each outputs as output}
-            <div class="entry" class:clickable={output.rest || output.spend} class:unspent={!output.spend && !output.fee} class:highlight={highlight.out != null && highlight.out === output.index} on:click={() => clickItem(output)}>
+            <div class="entry" class:clickable={output.rest} class:highlight={highlight.out != null && highlight.out === output.index} on:click={() => clickItem(output)}>
+              {#if output.spend}
+                <a href="/tx/{output.spend.vin}:{output.spend.txid}" on:click={(e) => goToOutput(e, output)} class="put-link">
+                  <svg class="chevron right" height="1.2em" width="1.2em" viewBox="0 0 512 512">
+                    <path d="M 107.628,257.54 327.095,38.078 404,114.989 261.506,257.483 404,399.978 327.086,476.89 Z" class="outline" />
+                  </svg>
+                </a>
+              {/if}
               <p class="address" title={output.title || output.address}><span class="truncatable">{output.address.slice(0,-6)}</span><span class="suffix">{output.address.slice(-6)}</span></p>
               <p class="amount">{ output.value == null ? '???' : formatBTC(output.value) }</p>
             </div>

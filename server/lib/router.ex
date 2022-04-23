@@ -7,6 +7,7 @@ defmodule BitcoinStream.Router do
   alias BitcoinStream.Protocol.Transaction, as: BitcoinTx
   alias BitcoinStream.BlockData, as: BlockData
   alias BitcoinStream.RPC, as: RPC
+  alias BitcoinStream.Index.Spend, as: SpendIndex
 
   plug Corsica, origins: "*", allow_headers: :all
   plug Plug.Static,
@@ -48,6 +49,17 @@ defmodule BitcoinStream.Router do
         |> send_resp(200, tx)
       _ ->
         Logger.debug("Error getting tx hash");
+        send_resp(conn, 404, "Transaction not found")
+    end
+  end
+
+  match "/api/spends/:txid/:from/:to" do
+    case get_tx_spends(txid, from, to) do
+      {:ok, spends} ->
+        put_resp_header(conn, "cache-control", "public, max-age=60, immutable")
+        |> send_resp(200, spends)
+      _ ->
+        Logger.debug("Error getting tx spends");
         send_resp(conn, 404, "Transaction not found")
     end
   end
@@ -98,6 +110,20 @@ defmodule BitcoinStream.Router do
     else
       err ->
         IO.inspect(err);
+        :err
+    end
+  end
+
+  defp get_tx_spends(txid, from_str, to_str) do
+    with {fromIndex, _} <- Integer.parse(from_str),
+         {toIndex, _} <- Integer.parse(to_str),
+         true <- ((toIndex - fromIndex) < 100),
+         {:ok, spends} <- SpendIndex.get_tx_spends(:spends, {txid, fromIndex, toIndex}),
+         {:ok, payload} <- Jason.encode(spends) do
+      {:ok, payload}
+    else
+      err ->
+        IO.inspect(err)
         :err
     end
   end
