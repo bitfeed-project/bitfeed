@@ -5,8 +5,8 @@
   import getTxStream from '../controllers/TxStream.js'
   import { settings, overlay, serverConnected, serverDelay, txCount, mempoolCount,
            mempoolScreenHeight, frameRate, avgFrameRate, blockVisible, tinyScreen,
-           compactScreen, currentBlock, selectedTx, blockAreaSize, devEvents,
-           devSettings, pageWidth, pageHeight, loading } from '../stores.js'
+           compactScreen, currentBlock, latestBlockHeight, selectedTx, blockAreaSize,
+           devEvents, devSettings, pageWidth, pageHeight, loading } from '../stores.js'
   import BlockInfo from '../components/BlockInfo.svelte'
   import SearchBar from '../components/SearchBar.svelte'
   import TxInfo from '../components/TxInfo.svelte'

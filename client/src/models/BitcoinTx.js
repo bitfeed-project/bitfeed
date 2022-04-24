@@ -26,9 +26,9 @@ export default class BitcoinTx {
       const parsed_height = parseInt(cbInfo.substring(2,2 + (height_bytes * 2)).match(/../g).reverse().join(''),16)
       // save remaining bytes as free data
       const sig = cbInfo.substring(2 + (height_bytes * 2))
-      const sigAscii = sig.match(/../g).reduce((parsed, hexChar) => {
+      const sigAscii = (sig && sig.length) ? sig.match(/../g).reduce((parsed, hexChar) => {
         return parsed + String.fromCharCode(parseInt(hexChar, 16))
-      }, "")
+      }, "") : ""
 
       const height = block.height == null ? parsed_height : block.height
 

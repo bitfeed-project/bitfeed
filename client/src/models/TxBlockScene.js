@@ -281,7 +281,6 @@ export default class TxBlockScene extends TxMondrianPoolScene {
 
   expire (delay=3000) {
     this.expired = true
-    this.hide()
     setTimeout(() => {
       const txIds = this.getTxList()
       for (let i = 0; i < txIds.length; i++) {

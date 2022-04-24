@@ -6,8 +6,9 @@
   import Icon from '../components/Icon.svelte'
   import closeIcon from '../assets/icon/cil-x-circle.svg'
   import { shortBtcFormat, longBtcFormat, dateFormat, numberFormat } from '../utils/format.js'
-  import { exchangeRates, settings, blocksEnabled, latestBlockHeight, blockTransitionDirection } from '../stores.js'
+  import { exchangeRates, settings, blocksEnabled, latestBlockHeight, blockTransitionDirection, loading } from '../stores.js'
   import { formatCurrency } from '../utils/fx.js'
+  import { searchBlockHeight } from '../utils/search.js'
 
 	const dispatch = createEventDispatcher()
 
@@ -44,6 +45,20 @@
       restoring = true
     } else {
       restoring = false
+    }
+  }
+
+  let hasPrevBlock
+  let hasNextBlock
+  $: {
+    if (block) {
+      if (block.height > 0) hasPrevBlock = true
+      else hasPrevBlock = false
+      if (block.height < $latestBlockHeight) hasNextBlock = true
+      else hasNextBlock = false
+    } else {
+      hasPrevBlock = false
+      hasNextBlock = false
     }
   }
 
@@ -94,6 +109,28 @@
     } else {
       analytics.trackEvent('viz', 'block', 'hide')
       dispatch('hideBlock')
+    }
+  }
+
+  async function explorePrevBlock (e) {
+    e.preventDefault()
+    if (!$loading && block) {
+      $loading = true
+      await searchBlockHeight(block.height - 1)
+      $loading = false
+    }
+  }
+
+  async function exploreNextBlock (e) {
+    e.preventDefault()
+    if (!$loading && block) {
+      if (block.height + 1 < $latestBlockHeight) {
+        $loading = true
+        await searchBlockHeight(block.height + 1)
+        $loading = false
+      } else {
+        dispatch('quitExploring')
+      }
     }
   }
 </script>
@@ -191,6 +228,42 @@
     }
   }
 
+  .explore-button {
+    position: absolute;
+    bottom: 10%;
+    padding: .75em;
+    pointer-events: all;
+
+    &.prev {
+      right: 100%
+    }
+    &.next {
+      left: 100%;
+    }
+
+    .chevron {
+      .outline {
+        stroke: white;
+        stroke-width: 32;
+        stroke-linecap: butt;
+        stroke-linejoin: miter;
+        fill: white;
+        fill-opacity: 0;
+        transition: fill-opacity 300ms;
+      }
+
+      &.right {
+        transform: scaleX(-1);
+      }
+    }
+
+    &:hover {
+      .chevron .outline {
+        fill-opacity: 1;
+      }
+    }
+  }
+
   @media (min-aspect-ratio: 1/1) {
     .block-info {
       bottom: unset;
@@ -246,7 +319,7 @@
   }
 </style>
 
-{#each [block] as block (block)}
+{#key block}
   {#if block != null && visible && $blocksEnabled }
     <div class="block-info" out:fly={flyOut} in:fly={flyIn}>
         <!-- <span class="data-field">Hash: { block.id }</span> -->
@@ -292,8 +365,22 @@
           </div>
         </div>
     </div>
+    {#if hasPrevBlock }
+      <a href="/block/height/{block.height - 1}" on:click={explorePrevBlock} class="explore-button prev"  out:fly={flyOut} in:fly={flyIn}>
+        <svg class="chevron left" height="1.5em" width="1.5em" viewBox="0 0 512 512">
+          <path d="M 107.628,257.54 327.095,38.078 404,114.989 261.506,257.483 404,399.978 327.086,476.89 Z" class="outline" />
+        </svg>
+      </a>
+    {/if}
+    {#if hasNextBlock }
+      <a href="/block/height/{block.height + 1}" on:click={exploreNextBlock} class="explore-button next"  out:fly={flyOut} in:fly={flyIn}>
+        <svg class="chevron right" height="1.5em" width="1.5em" viewBox="0 0 512 512">
+          <path d="M 107.628,257.54 327.095,38.078 404,114.989 261.506,257.483 404,399.978 327.086,476.89 Z" class="outline" />
+        </svg>
+      </a>
+    {/if}
     <button class="close-button standalone" on:click={hideBlock} out:fly={flyOut} in:fly={flyIn} >
       <Icon icon={closeIcon} color="var(--palette-x)" />
     </button>
   {/if}
-{/each}
+{/key}

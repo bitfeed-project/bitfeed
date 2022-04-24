@@ -146,7 +146,11 @@ async function fetchBlockByHash (hash) {
   if (!response) throw new Error('null response')
   if (response && response.status == 200) {
     const blockData = await response.json()
-    return BitcoinBlock.decompress(blockData)
+    if (blockData) {
+      if (blockData.id) {
+        return new BitcoinBlock(blockData)
+      } else return BitcoinBlock.decompress(blockData)
+    }
   }
 }
 

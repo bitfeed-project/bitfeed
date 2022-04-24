@@ -221,7 +221,6 @@ export default class TxController {
       blockVisible.set(true)
 
       if (!this.explorerBlockScene) {
-        blockTransitionDirection.set(null)
         currentBlock.set(block)
       }
     } else {
@@ -263,7 +262,6 @@ export default class TxController {
         this.poolScene.layoutAll()
       }, 5500)
 
-      blockTransitionDirection.set(null)
       currentBlock.set(block)
     }
 
@@ -273,7 +271,7 @@ export default class TxController {
   }
 
   exploreBlock (blockData) {
-    const block = new BitcoinBlock(blockData)
+    const block = blockData.isBlock ? blockData : new BitcoinBlock(blockData)
     let enterFromRight = false
 
     // clean up previous block
@@ -349,6 +347,7 @@ export default class TxController {
 
   clearBlock () {
     if (this.blockScene) {
+      this.blockScene.exitLeft()
       this.blockScene.expire()
     }
     this.block = null

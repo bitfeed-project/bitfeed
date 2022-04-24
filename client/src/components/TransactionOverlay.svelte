@@ -9,6 +9,7 @@ import { hlToHex, mixColor, teal, purple } from '../utils/color.js'
 import { SPKToAddress } from '../utils/encodings.js'
 import api from '../utils/api.js'
 import { searchTx } from '../utils/search.js'
+import { fade } from 'svelte/transition'
 
 function onClose () {
   $detailTx = null

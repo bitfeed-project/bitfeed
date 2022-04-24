@@ -33,9 +33,14 @@ defmodule BitcoinStream.Router do
 
   match "/api/block/:hash" do
     case get_block(hash) do
-      {:ok, block} ->
-        put_resp_header(conn, "cache-control", "public, max-age=31536000, immutable")
+      {:ok, block, true} ->
+        put_resp_header(conn, "cache-control", "public, max-age=120, immutable")
         |> send_resp(200, block)
+
+        {:ok, block, false} ->
+          put_resp_header(conn, "cache-control", "public, max-age=31536000, immutable")
+          |> send_resp(200, block)
+
       _ ->
         Logger.debug("Error getting block with hash #{hash}");
         send_resp(conn, 404, "Block not found")
@@ -84,12 +89,12 @@ defmodule BitcoinStream.Router do
     last_id = BlockData.get_block_id(:block_data);
     if hash == last_id do
       payload = BlockData.get_json_block(:block_data);
-      {:ok, payload}
+      {:ok, payload, true}
     else
       with  {:ok, 200, block} <- RPC.request(:rpc, "getblock", [hash, 2]),
             {:ok, cleaned} <- BlockData.clean_block(block),
             {:ok, payload} <- Jason.encode(cleaned) do
-        {:ok, payload}
+        {:ok, payload, false}
       else
         err ->
           IO.inspect(err);
