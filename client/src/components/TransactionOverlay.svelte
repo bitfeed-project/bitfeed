@@ -49,7 +49,7 @@ $: {
 
 let confirmations = 0
 $: {
-  if ($detailTx && $detailTx.block && $detailTx.block.height && $latestBlockHeight != null) {
+  if ($detailTx && $detailTx.block && $detailTx.block.height != null && $latestBlockHeight != null) {
     confirmations =  (1 + $latestBlockHeight - $detailTx.block.height)
   }
 }
