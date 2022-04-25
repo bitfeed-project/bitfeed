@@ -5,6 +5,7 @@ defmodule BitcoinStream.Index.Spend do
   use GenServer
 
   alias BitcoinStream.Protocol.Block, as: BitcoinBlock
+  alias BitcoinStream.Protocol.Transaction, as: BitcoinTx
   alias BitcoinStream.RPC, as: RPC
 
   def start_link(opts) do
@@ -15,6 +16,7 @@ defmodule BitcoinStream.Index.Spend do
 
   @impl true
   def init([indexed]) do
+    :ets.new(:spend_cache, [:set, :public, :named_table]);
     if (indexed != nil) do
       {:ok, dbref} = :rocksdb.open(String.to_charlist("data/index/spend"), [create_if_missing: true]);
       Process.send_after(self(), :sync, 2000);
@@ -205,7 +207,7 @@ defmodule BitcoinStream.Index.Spend do
   defp index_block_inputs(dbref, batch, txns) do
     spends = index_txs(txns, %{});
     Enum.each(spends, fn {binid, outputs} ->
-      case get_spends(dbref, binid) do
+      case get_chain_spends(dbref, binid) do
         false ->
           Logger.error("uninitialised tx in input index: #{Base.encode16(binid, [case: :lower])}")
           :ok
@@ -294,13 +296,22 @@ defmodule BitcoinStream.Index.Spend do
     end
   end
 
-  defp get_spends(dbref, binary_txid) do
+  defp get_chain_spends(dbref, binary_txid) do
     case :rocksdb.get(dbref, binary_txid, []) do
       {:ok, spends} ->
         spends
 
       :not_found ->
-        false
+        # uninitialized, try to construct on-the-fly from RPC data
+        txid = Base.encode16(binary_txid);
+        with {:ok, 200, hextx} <- RPC.request(:rpc, "getrawtransaction", [txid]),
+             rawtx <- Base.decode16!(hextx, case: :lower),
+             {:ok, tx } <- BitcoinTx.decode(rawtx) do
+          size = length(tx.outputs) * 35 * 8;
+          <<0::integer-size(size)>>
+        else
+          _ -> false
+        end
 
       _ ->
         Logger.error("unexpected leveldb response");
@@ -308,16 +319,19 @@ defmodule BitcoinStream.Index.Spend do
     end
   end
 
-  defp unpack_spends(<<>>, spend_array) do
-    Enum.reverse(spend_array)
+  defp unpack_spends(<<>>, spend_list) do
+    Enum.reverse(spend_list)
   end
   # unspent outputs are zeroed out
-  defp unpack_spends(<<0::integer-size(280), rest::binary>>, spend_array) do
-    unpack_spends(rest, [false | spend_array])
+  defp unpack_spends(<<0::integer-size(280), rest::binary>>, spend_list) do
+    unpack_spends(rest, [false | spend_list])
   end
-  defp unpack_spends(<<binary_txid::binary-size(32), index::integer-size(24), rest::binary>>, spend_array) do
+  defp unpack_spends(<<binary_txid::binary-size(32), index::integer-size(24), rest::binary>>, spend_list) do
     txid = Base.encode16(binary_txid, [case: :lower]);
-    unpack_spends(rest, [[txid, index] | spend_array])
+    unpack_spends(rest, [[txid, index] | spend_list])
+  end
+  defp unpack_spends(false) do
+    []
   end
   defp unpack_spends(bin) do
     unpack_spends(bin, [])
@@ -325,14 +339,29 @@ defmodule BitcoinStream.Index.Spend do
 
   defp get_transaction_spends(dbref, txid) do
     binary_txid = Base.decode16!(txid, [case: :lower]);
-    case get_spends(dbref, binary_txid) do
-      false ->
-        {:ok, nil}
+    chain_spends = get_chain_spends(dbref, binary_txid);
+    spend_list = unpack_spends(chain_spends);
+    spend_list = add_mempool_spends(txid, spend_list);
+    {:ok, spend_list}
+  end
 
-      spends ->
-        spend_array = unpack_spends(spends);
-        {:ok, spend_array}
+  defp add_mempool_spends(_txid, _index, [],  added) do
+    Enum.reverse(added)
+  end
+  defp add_mempool_spends(txid, index, [false | rest], added) do
+    case :ets.lookup(:spend_cache, [txid, index]) do
+      [] ->
+        add_mempool_spends(txid, index + 1, rest, [false | added])
+
+      [{[_index, _txid], spend}] ->
+        add_mempool_spends(txid, index + 1, rest, [spend | added])
     end
+  end
+  defp add_mempool_spends(txid, index, [spend | rest], added) do
+    add_mempool_spends(txid, index + 1, rest, [spend | added])
+  end
+  defp add_mempool_spends(txid, spend_list) do
+    add_mempool_spends(txid, 0, spend_list, [])
   end
 
   defp stack_dropped_blocks(dbref, hash, undo_stack, min_height) do
@@ -351,7 +380,7 @@ defmodule BitcoinStream.Index.Spend do
   defp drop_block_inputs(dbref, batch, txns) do
     spends = index_txs(txns, %{});
     Enum.each(spends, fn {binid, outputs} ->
-      case get_spends(dbref, binid) do
+      case get_chain_spends(dbref, binid) do
         false ->
           Logger.error("uninitialised tx in input index: #{Base.encode16(binid, [case: :lower])}")
           :ok
