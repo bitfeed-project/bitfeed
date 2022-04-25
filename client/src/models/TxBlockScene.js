@@ -1,4 +1,12 @@
 import TxMondrianPoolScene from './TxMondrianPoolScene.js'
+import { settings } from '../stores.js'
+import { logTxSize, byteTxSize } from '../utils/misc.js'
+import config from '../config.js'
+
+let settingsValue
+settings.subscribe(v => {
+  settingsValue = v
+})
 
 export default class TxBlockScene extends TxMondrianPoolScene {
   constructor ({ width, height, unit = 4, padding = 1, blockId, controller, heightStore, colorMode }) {
@@ -45,6 +53,12 @@ export default class TxBlockScene extends TxMondrianPoolScene {
     }
 
     this.resetLayout()
+  }
+
+  // calculates and returns the size of the tx in multiples of the grid size
+  txSize (tx={ value: 1, vbytes: 1 }) {
+    if (settingsValue.vbytes) return byteTxSize(tx.vbytes, Math.Infinity)
+    else return logTxSize(tx.value, Math.Infinity)
   }
 
   setTxOnScreen (tx, pixelPosition) {

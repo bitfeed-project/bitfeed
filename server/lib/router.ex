@@ -65,7 +65,7 @@ defmodule BitcoinStream.Router do
         |> send_resp(200, spends)
       _ ->
         Logger.debug("Error getting tx spends");
-        send_resp(conn, 404, "Transaction not found")
+        send_resp(conn, 200, "[]")
     end
   end
 

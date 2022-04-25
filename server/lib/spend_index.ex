@@ -22,7 +22,7 @@ defmodule BitcoinStream.Index.Spend do
       Process.send_after(self(), :sync, 2000);
       {:ok, [dbref, indexed, false]}
     else
-      {:ok, nil}
+      {:ok, [nil, indexed, false]}
     end
   end
 
@@ -57,7 +57,7 @@ defmodule BitcoinStream.Index.Spend do
 
   @impl true
   def handle_call({:get_tx_spends, txid}, _from, [dbref, indexed, done]) do
-    case get_transaction_spends(dbref, txid) do
+    case get_transaction_spends(dbref, txid, (indexed != nil)) do
       {:ok, spends} ->
         {:reply, {:ok, spends}, [dbref, indexed, done]}
 
@@ -207,7 +207,7 @@ defmodule BitcoinStream.Index.Spend do
   defp index_block_inputs(dbref, batch, txns) do
     spends = index_txs(txns, %{});
     Enum.each(spends, fn {binid, outputs} ->
-      case get_chain_spends(dbref, binid) do
+      case get_chain_spends(dbref, binid, true) do
         false ->
           Logger.error("uninitialised tx in input index: #{Base.encode16(binid, [case: :lower])}")
           :ok
@@ -296,8 +296,8 @@ defmodule BitcoinStream.Index.Spend do
     end
   end
 
-  defp get_chain_spends(dbref, binary_txid) do
-    case :rocksdb.get(dbref, binary_txid, []) do
+  defp get_chain_spends(dbref, binary_txid, use_index) do
+    case (if use_index do :rocksdb.get(dbref, binary_txid, []) else :not_found end) do
       {:ok, spends} ->
         spends
 
@@ -337,9 +337,9 @@ defmodule BitcoinStream.Index.Spend do
     unpack_spends(bin, [])
   end
 
-  defp get_transaction_spends(dbref, txid) do
+  defp get_transaction_spends(dbref, txid, use_index) do
     binary_txid = Base.decode16!(txid, [case: :lower]);
-    chain_spends = get_chain_spends(dbref, binary_txid);
+    chain_spends = get_chain_spends(dbref, binary_txid, use_index);
     spend_list = unpack_spends(chain_spends);
     spend_list = add_mempool_spends(txid, spend_list);
     {:ok, spend_list}
@@ -380,7 +380,7 @@ defmodule BitcoinStream.Index.Spend do
   defp drop_block_inputs(dbref, batch, txns) do
     spends = index_txs(txns, %{});
     Enum.each(spends, fn {binid, outputs} ->
-      case get_chain_spends(dbref, binid) do
+      case get_chain_spends(dbref, binid, true) do
         false ->
           Logger.error("uninitialised tx in input index: #{Base.encode16(binid, [case: :lower])}")
           :ok

@@ -498,7 +498,6 @@ defmodule BitcoinStream.Mempool do
     end
   end
 
-
   defp cache_spend(txid, index, input) do
     :ets.insert(:spend_cache, {[input.prev_txid, input.prev_vout], [txid, index]})
   end
