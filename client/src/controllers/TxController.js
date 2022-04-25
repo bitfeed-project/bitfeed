@@ -5,7 +5,7 @@ import BitcoinTx from '../models/BitcoinTx.js'
 import BitcoinBlock from '../models/BitcoinBlock.js'
 import TxSprite from '../models/TxSprite.js'
 import { FastVertexArray } from '../utils/memory.js'
-import { searchTx } from '../utils/search.js'
+import { searchTx, fetchSpends, addSpends } from '../utils/search.js'
 import { overlay, txCount, mempoolCount, mempoolScreenHeight, blockVisible, currentBlock, selectedTx, detailTx, blockAreaSize, highlight, colorMode, blocksEnabled, latestBlockHeight, explorerBlockData, blockTransitionDirection, loading } from '../stores.js'
 import config from "../config.js"
 
@@ -48,14 +48,12 @@ export default class TxController {
       this.setColorMode(mode)
     })
     explorerBlockData.subscribe(blockData => {
-      console.log('explorerBlock changed: ', blockData)
       if (blockData) {
         this.exploreBlock(blockData)
       } else {
         this.resumeLatest()
       }
     })
-
   }
 
   getVertexData () {
@@ -390,19 +388,21 @@ export default class TxController {
         if (selected) selected.hoverOn()
       }
       this.selectedTx = selected
-      selectedTx.set(this.selectedTx)
-      if (sameTx && this.selectedTx) {
-        if (!this.selectedTx.is_inflated) {
+      selectedTx.set(selected)
+      if (sameTx && selected) {
+        if (!selected.is_inflated) {
           loading.increment()
-          await searchTx(this.selectedTx.id)
+          await searchTx(selected.id)
           loading.decrement()
         } else {
-          detailTx.set(this.selectedTx)
+          const spendResult = await fetchSpends(selected.id)
+          if (spendResult) selected = addSpends(selected, spendResult)
+          detailTx.set(selected)
           overlay.set('tx')
         }
+        console.log(selected)
       }
-      console.log(this.selectedTx)
-      this.selectionLocked = !!this.selectedTx && !(this.selectionLocked && sameTx)
+      this.selectionLocked = !!selected && !(this.selectionLocked && sameTx)
     }
   }
 

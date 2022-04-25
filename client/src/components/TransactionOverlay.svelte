@@ -107,7 +107,6 @@ $: {
 
 let inputs = []
 let outputs = []
-let expandedOutputs = []
 $: {
   if ($detailTx && $detailTx.inputs) {
     if ($detailTx.isCoinbase) {
@@ -121,41 +120,11 @@ $: {
   } else inputs = []
   if ($detailTx && $detailTx.outputs) {
     if ($detailTx.isCoinbase || !$detailTx.is_inflated || !$detailTx.fee) {
-      expandedOutputs = expandAddresses($detailTx.outputs, truncate)
+      outputs = expandAddresses($detailTx.outputs, truncate)
     } else {
-      expandedOutputs = [{address: 'fee', value: $detailTx.fee, fee: true}, ...expandAddresses($detailTx.outputs, truncate)]
+      outputs = [{address: 'fee', value: $detailTx.fee, fee: true}, ...expandAddresses($detailTx.outputs, truncate)]
     }
-  } else expandedOutputs = []
-}
-$: {
-  if (expandedOutputs) {
-    if (spends) {
-      outputs = expandedOutputs.map(output => {
-        if (output.index != null && spends[output.index]) {
-          const spendParts = spends[output.index].split(':')
-          return {
-            ...output,
-            spend: {
-              txid: spendParts[0],
-              vin: spendParts[1]
-            }
-          }
-        } else {
-          return {
-            ...output,
-            spend: false
-          }
-        }
-      })
-    } else outputs = expandedOutputs
-  }
-}
-
-let spends
-$: {
-  if ($detailTx && $detailTx.id) {
-    fetchSpends($detailTx, truncate)
-  } else spends = null
+  } else outputs = []
 }
 
 let highlight = {}
@@ -172,9 +141,9 @@ $: {
 let sankeyLines
 let sankeyHeight
 $: {
-  if ($detailTx && inputs && expandedOutputs) {
-    sankeyHeight = Math.max(inputs.length, expandedOutputs.length) * rowHeight
-    sankeyLines = calcSankeyLines(inputs, expandedOutputs, $detailTx.fee || null, $detailTx.value, sankeyHeight, svgWidth, flowWeight)
+  if ($detailTx && inputs && outputs) {
+    sankeyHeight = Math.max(inputs.length, outputs.length) * rowHeight
+    sankeyLines = calcSankeyLines(inputs, outputs, $detailTx.fee || null, $detailTx.value, sankeyHeight, svgWidth, flowWeight)
   }
 }
 
@@ -284,17 +253,6 @@ function getMiterOffset (weight, dy, dx) {
     const d = -u * (Math.cos(angle) + (b * Math.sin(angle)))
     return (d - c) / (a - b)
   } else return 0
-}
-
-async function fetchSpends (tx, truncated) {
-  const response = await fetch(`${api.uri}/api/spends/${tx.id}/0/${truncated ? Math.min(tx.outputs.length, 100) : tx.outputs.length}`, {
-    method: 'GET'
-  })
-  if (!response) throw new Error('null response')
-  if (response.status == 200) {
-    const result = await response.json()
-    spends = result
-  }
 }
 
 async function clickItem (item) {
@@ -680,10 +638,10 @@ async function goToOutput(e, output) {
           {#each inputs as input, index}
             <div class="entry" class:clickable={input.rest} class:highlight={highlight.in != null && highlight.in === index} on:click={() => clickItem(input)}>
               {#if input.prev_txid }
-                <a href="/tx/{input.prev_txid}:{input.prev_vout}" on:click={(e) => goToInput(e, input)} class="put-link">
-                <svg class="chevron left" height="1.2em" width="1.2em" viewBox="0 0 512 512">
-                  <path d="M 107.628,257.54 327.095,38.078 404,114.989 261.506,257.483 404,399.978 327.086,476.89 Z" class="outline" />
-                </svg>
+                <a href="/tx/{input.prev_txid}:{input.prev_vout}" on:click={(e) => goToInput(e, input)} class="put-link" transition:fade|local={{ duration: 200 }}>
+                  <svg class="chevron left" height="1.2em" width="1.2em" viewBox="0 0 512 512">
+                    <path d="M 107.628,257.54 327.095,38.078 404,114.989 261.506,257.483 404,399.978 327.086,476.89 Z" class="outline" />
+                  </svg>
                 </a>
               {/if}
               <p class="address" title={input.title || input.address}><span class="truncatable">{input.address.slice(0,-6)}</span><span class="suffix">{input.address.slice(-6)}</span></p>
@@ -723,7 +681,7 @@ async function goToOutput(e, output) {
           {#each outputs as output}
             <div class="entry" class:clickable={output.rest} class:highlight={highlight.out != null && highlight.out === output.index} on:click={() => clickItem(output)}>
               {#if output.spend}
-                <a href="/tx/{output.spend.vin}:{output.spend.txid}" on:click={(e) => goToOutput(e, output)} class="put-link">
+                <a href="/tx/{output.spend.vin}:{output.spend.txid}" on:click={(e) => goToOutput(e, output)} class="put-link" transition:fade|local={{ duration: 200 }}>
                   <svg class="chevron right" height="1.2em" width="1.2em" viewBox="0 0 512 512">
                     <path d="M 107.628,257.54 327.095,38.078 404,114.989 261.506,257.483 404,399.978 327.086,476.89 Z" class="outline" />
                   </svg>

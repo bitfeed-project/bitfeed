@@ -168,10 +168,41 @@ async function fetchBlockByHeight (height) {
   }
 }
 
+async function fetchSpends (txid) {
+  if (txid == null) return
+  const response = await fetch(`${api.uri}/api/spends/${txid}`, {
+    method: 'GET'
+  })
+  if (!response) throw new Error('null response')
+  if (response.status == 200) {
+    return response.json()
+  } else {
+    return null
+  }
+}
+export {fetchSpends as fetchSpends}
+
+function addSpends(tx, spends) {
+  tx.outputs.forEach((output, index) => {
+    if (spends[index]) {
+      output.spend = {
+        txid: spends[index][0],
+        vin: spends[index][1],
+      }
+    } else {
+      output.spend = null
+    }
+  })
+  return tx
+}
+export {addSpends as addSpends}
+
 export async function searchTx (txid, input, output) {
   try {
-    const searchResult = await fetchTx(txid)
+    let searchResult = await fetchTx(txid)
+    const spendResult = await fetchSpends(txid)
     if (searchResult) {
+      if (spendResult) searchResult = addSpends(searchResult, spendResult)
       selectedTx.set(searchResult)
       detailTx.set(searchResult)
       overlay.set('tx')

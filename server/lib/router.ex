@@ -58,10 +58,10 @@ defmodule BitcoinStream.Router do
     end
   end
 
-  match "/api/spends/:txid/:from/:to" do
-    case get_tx_spends(txid, from, to) do
+  match "/api/spends/:txid" do
+    case get_tx_spends(txid) do
       {:ok, spends} ->
-        put_resp_header(conn, "cache-control", "public, max-age=60, immutable")
+        put_resp_header(conn, "cache-control", "public, max-age=10, immutable")
         |> send_resp(200, spends)
       _ ->
         Logger.debug("Error getting tx spends");
@@ -119,11 +119,8 @@ defmodule BitcoinStream.Router do
     end
   end
 
-  defp get_tx_spends(txid, from_str, to_str) do
-    with {fromIndex, _} <- Integer.parse(from_str),
-         {toIndex, _} <- Integer.parse(to_str),
-         true <- ((toIndex - fromIndex) < 100),
-         {:ok, spends} <- SpendIndex.get_tx_spends(:spends, {txid, fromIndex, toIndex}),
+  defp get_tx_spends(txid) do
+    with {:ok, spends} <- SpendIndex.get_tx_spends(:spends, txid),
          {:ok, payload} <- Jason.encode(spends) do
       {:ok, payload}
     else
