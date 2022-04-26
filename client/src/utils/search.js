@@ -226,6 +226,7 @@ export async function searchTx (txid, input, output) {
 
 export async function searchBlockHash (hash) {
   urlPath.set(`/block/${hash}`)
+  overlay.set(null)
   try {
     const searchResult = await fetchBlockByHash(hash)
     if (searchResult) {
@@ -244,6 +245,7 @@ export async function searchBlockHash (hash) {
 
 export async function searchBlockHeight (height) {
   urlPath.set(`/block/height/${height}`)
+  overlay.set(null)
   try {
     const searchResult = await fetchBlockByHeight(height)
     if (searchResult) {

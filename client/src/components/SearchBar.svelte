@@ -219,7 +219,7 @@ async function searchSubmit (e) {
 
 <div class="input-wrapper" transition:fly={{ y: -25 }}>
   <form class="search-form" action="" on:submit={searchSubmit}>
-    <input class="search-input" type="text" bind:value={query} placeholder="Enter a txid">
+    <input class="search-input" type="text" bind:value={query} placeholder="txid, block id or block height">
     <div class="clear-button" class:disabled={query == null || query === ''} on:click={clearInput} title="Clear">
       <Icon icon={CrossIcon}/>
     </div>

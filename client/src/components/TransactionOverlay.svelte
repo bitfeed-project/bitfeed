@@ -3,12 +3,12 @@ import Overlay from '../components/Overlay.svelte'
 import Icon from './Icon.svelte'
 import BookmarkIcon from '../assets/icon/cil-bookmark.svg'
 import { longBtcFormat, numberFormat, feeRateFormat, dateFormat } from '../utils/format.js'
-import { exchangeRates, settings, sidebarToggle, newHighlightQuery, highlightingFull, detailTx, pageWidth, latestBlockHeight, highlightInOut, loading, urlPath } from '../stores.js'
+import { exchangeRates, settings, sidebarToggle, newHighlightQuery, highlightingFull, detailTx, pageWidth, latestBlockHeight, highlightInOut, loading, urlPath, currentBlock, overlay, explorerBlockData } from '../stores.js'
 import { formatCurrency } from '../utils/fx.js'
 import { hlToHex, mixColor, teal, purple } from '../utils/color.js'
 import { SPKToAddress } from '../utils/encodings.js'
 import api from '../utils/api.js'
-import { searchTx } from '../utils/search.js'
+import { searchTx, searchBlockHash, searchBlockHeight } from '../utils/search.js'
 import { fade } from 'svelte/transition'
 
 function onClose () {
@@ -259,14 +259,6 @@ function getMiterOffset (weight, dy, dx) {
 async function clickItem (item) {
   if (item.rest) {
     truncate = false
-  } else if (item.prev_txid && item.prev_vout != null) {
-    // $loading++
-    // await searchTx(item.prev_txid, null, item.prev_vout)
-    // $loading--
-  } else if (item.spend) {
-    // $loading++
-    // await searchTx(item.spend.txid, item.spend.vin)
-    // $loading--
   }
 }
 
@@ -282,6 +274,26 @@ async function goToOutput(e, output) {
   loading.increment()
   await searchTx(output.spend.txid, output.spend.vin)
   loading.decrement()
+}
+
+async function goToBlock(e) {
+  e.preventDefault()
+
+  // ignore click if it was triggered while selecting text, or if we don't have a block to go to
+  if (!$detailTx || !$detailTx.block || !!window.getSelection().toString()) return
+
+  let hash = $detailTx.block.hash || $detailTx.block.id
+  let height = $detailTx.block.height
+  if (hash === $currentBlock.id) {
+    $overlay = null
+  } else if (height == $latestBlockHeight) {
+    $explorerBlockData = null
+    $overlay = null
+  } else if (hash) {
+    loading.increment()
+    await searchBlockHash($detailTx.block.hash || $detailTx.block.id)
+    loading.decrement()
+  }
 }
 </script>
 
@@ -360,6 +372,14 @@ async function goToOutput(e, output) {
 
         .value.coinbase-sig {
           word-break: break-all;
+        }
+      }
+
+      &.clickable {
+        cursor: pointer;
+        user-select: text;
+        &:hover {
+          background: var(--palette-a);
         }
       }
     }
@@ -562,7 +582,7 @@ async function goToOutput(e, output) {
       {/if}
       <h2><span class="title">{#if $detailTx.isCoinbase }Coinbase{:else}Transaction{/if}</span> <span class="tx-id">{ $detailTx.id }</span></h2>
       {#if $detailTx.block}
-        <div class="pane fields">
+        <a class="pane fields clickable" href="/block/{$detailTx.block.hash || $detailTx.block.id}" draggable="false" on:click={goToBlock}>
           <div class="field">
             <span class="label">confirmed</span>
             <span class="value" style="color: {feeColor};">{ dateFormat.format($detailTx.block.time) }</span>
@@ -572,7 +592,7 @@ async function goToOutput(e, output) {
             <span class="label">block height</span>
             <span class="value" style="color: {feeColor};">{ numberFormat.format($detailTx.block.height) }</span>
           </div>
-        </div>
+        </a>
       {/if}
       {#if $detailTx.isCoinbase}
         <div class="pane fields">
