@@ -3,7 +3,7 @@ import Overlay from '../components/Overlay.svelte'
 import Icon from './Icon.svelte'
 import BookmarkIcon from '../assets/icon/cil-bookmark.svg'
 import { longBtcFormat, numberFormat, feeRateFormat, dateFormat } from '../utils/format.js'
-import { exchangeRates, settings, sidebarToggle, newHighlightQuery, highlightingFull, detailTx, pageWidth, latestBlockHeight, highlightInOut, loading } from '../stores.js'
+import { exchangeRates, settings, sidebarToggle, newHighlightQuery, highlightingFull, detailTx, pageWidth, latestBlockHeight, highlightInOut, loading, urlPath } from '../stores.js'
 import { formatCurrency } from '../utils/fx.js'
 import { hlToHex, mixColor, teal, purple } from '../utils/color.js'
 import { SPKToAddress } from '../utils/encodings.js'
@@ -14,6 +14,7 @@ import { fade } from 'svelte/transition'
 function onClose () {
   $detailTx = null
   $highlightInOut = null
+  $urlPath = "/"
 }
 
 function formatBTC (sats) {
@@ -271,16 +272,16 @@ async function clickItem (item) {
 
 async function goToInput(e, input) {
   e.preventDefault()
-  $loading++
+  loading.increment()
   await searchTx(input.prev_txid, null, input.prev_vout)
-  $loading--
+  loading.decrement()
 }
 
 async function goToOutput(e, output) {
   e.preventDefault()
-  $loading++
+  loading.increment()
   await searchTx(output.spend.txid, output.spend.vin)
-  $loading--
+  loading.decrement()
 }
 </script>
 

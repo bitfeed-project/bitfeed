@@ -17,7 +17,7 @@ import clipboardIcon from '../assets/icon/cil-clipboard.svg'
 import twitterIcon from '../assets/icon/cib-twitter.svg'
 import { fade, fly } from 'svelte/transition'
 import { durationFormat } from '../utils/format.js'
-import { overlay, tiers } from '../stores.js'
+import { overlay, tiers, urlPath } from '../stores.js'
 import QRCode from 'qrcode'
 
 let tab = 'form' // form | invoice | success
@@ -164,6 +164,7 @@ $: {
 }
 $: {
   if ($overlay === 'donation') {
+    $urlPath = '/donate'
     startExpiryTimer()
     stopPollingInvoice()
     pollingEnabled = true
@@ -416,9 +417,13 @@ async function copyInvoice () {
   }
   analytics.trackEvent('donations', 'invoice', 'copy')
 }
+
+function onClose () {
+  $urlPath = "/"
+}
 </script>
 
-<Overlay name="donation" fullSize>
+<Overlay name="donation" fullSize on:close={onClose}>
   <section class="donation-modal">
     <div class="tab-nav">
       <button class="to left" class:disabled={!canTabLeft} on:click={tabLeft}>&larr;</button>

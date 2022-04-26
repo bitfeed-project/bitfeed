@@ -85,6 +85,7 @@ defmodule BitcoinStream.Index.Spend do
 
   @impl true
   def handle_cast({:block_disconnected, hash}, [dbref, indexed, done]) do
+    Logger.info("block disconnected: #{hash}");
     if (indexed != nil and done) do
       block_disconnected(dbref, hash)
     end

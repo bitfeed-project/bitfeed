@@ -54,7 +54,7 @@ async function searchSubmit (e) {
   e.preventDefault()
 
   if (matchedQuery && matchedQuery.query !== 'address') {
-    $loading++
+    loading.increment()
     let searchErr
     switch(matchedQuery.query) {
       case 'txid':
@@ -79,7 +79,7 @@ async function searchSubmit (e) {
     }
     if (searchErr == null) errorMessage = null
     else handleSearchError(searchErr)
-    $loading--
+    loading.decrement()
   } else {
     errorMessage = 'enter a transaction id, block hash or block height'
   }

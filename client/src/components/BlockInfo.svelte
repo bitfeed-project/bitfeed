@@ -115,9 +115,9 @@
   async function explorePrevBlock (e) {
     e.preventDefault()
     if (!$loading && block) {
-      $loading = true
+      loading.increment()
       await searchBlockHeight(block.height - 1)
-      $loading = false
+      loading.decrement()
     }
   }
 
@@ -125,9 +125,9 @@
     e.preventDefault()
     if (!$loading && block) {
       if (block.height + 1 < $latestBlockHeight) {
-        $loading = true
+        loading.increment()
         await searchBlockHeight(block.height + 1)
-        $loading = false
+        loading.decrement()
       } else {
         dispatch('quitExploring')
       }

@@ -1,7 +1,7 @@
 import api from './api.js'
 import BitcoinTx from '../models/BitcoinTx.js'
 import BitcoinBlock from '../models/BitcoinBlock.js'
-import { detailTx, selectedTx, currentBlock, explorerBlockData, overlay, highlightInOut } from '../stores.js'
+import { detailTx, selectedTx, currentBlock, explorerBlockData, overlay, highlightInOut, urlPath } from '../stores.js'
 import { addressToSPK } from './encodings.js'
 
 // Quick heuristic matching to guess what kind of search a query is for
@@ -198,6 +198,13 @@ function addSpends(tx, spends) {
 export {addSpends as addSpends}
 
 export async function searchTx (txid, input, output) {
+  if (input != null) {
+    urlPath.set(`/tx/${input}:${txid}`)
+  } else if (output != null) {
+    urlPath.set(`/tx/${txid}:${output}`)
+  } else {
+    urlPath.set(`/tx/${txid}`)
+  }
   try {
     let searchResult = await fetchTx(txid)
     const spendResult = await fetchSpends(txid)
@@ -218,6 +225,7 @@ export async function searchTx (txid, input, output) {
 }
 
 export async function searchBlockHash (hash) {
+  urlPath.set(`/block/${hash}`)
   try {
     const searchResult = await fetchBlockByHash(hash)
     if (searchResult) {
@@ -235,6 +243,7 @@ export async function searchBlockHash (hash) {
 }
 
 export async function searchBlockHeight (height) {
+  urlPath.set(`/block/height/${height}`)
   try {
     const searchResult = await fetchBlockByHeight(height)
     if (searchResult) {

@@ -6,7 +6,7 @@ import BitcoinBlock from '../models/BitcoinBlock.js'
 import TxSprite from '../models/TxSprite.js'
 import { FastVertexArray } from '../utils/memory.js'
 import { searchTx, fetchSpends, addSpends } from '../utils/search.js'
-import { overlay, txCount, mempoolCount, mempoolScreenHeight, blockVisible, currentBlock, selectedTx, detailTx, blockAreaSize, highlight, colorMode, blocksEnabled, latestBlockHeight, explorerBlockData, blockTransitionDirection, loading } from '../stores.js'
+import { overlay, txCount, mempoolCount, mempoolScreenHeight, blockVisible, currentBlock, selectedTx, detailTx, blockAreaSize, highlight, colorMode, blocksEnabled, latestBlockHeight, explorerBlockData, blockTransitionDirection, loading, urlPath } from '../stores.js'
 import config from "../config.js"
 
 export default class TxController {
@@ -322,6 +322,7 @@ export default class TxController {
       prevBlockScene.expire(2000)
       this.explorerBlockScene = null
       this.explorerBlock = null
+      urlPath.set("/")
     }
     if (this.blockScene && this.block) {
       blockTransitionDirection.set('right')
@@ -397,6 +398,7 @@ export default class TxController {
         } else {
           const spendResult = await fetchSpends(selected.id)
           if (spendResult) selected = addSpends(selected, spendResult)
+          urlPath.set(`/tx/${selected.id}`)
           detailTx.set(selected)
           overlay.set('tx')
         }
