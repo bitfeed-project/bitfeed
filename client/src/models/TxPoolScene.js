@@ -277,6 +277,10 @@ export default class TxPoolScene {
     return exists
   }
 
+  drop (id) {
+    return this.remove(id)
+  }
+
   getTxList () {
     return [
       ...this.getActiveTxList(),

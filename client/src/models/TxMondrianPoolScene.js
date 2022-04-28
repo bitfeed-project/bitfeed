@@ -51,6 +51,15 @@ export default class TxMondrianPoolScene extends TxPoolScene {
       return this.layout.getTxInGridCell(gridPosition)
     } else return null
   }
+
+  drop (id) {
+    let tx = this.txs[id]
+    if (tx && tx.gridSquare) {
+      this.layout.remove(tx.gridSquare)
+    }
+    delete this.txs[id]
+    return !!tx
+  }
 }
 
 class MondrianLayout {
@@ -295,6 +304,9 @@ class MondrianLayout {
     }
 
     // update txMap
+
+    tx.gridSquare = square
+
     for (let x = 0; x < square.r; x++) {
       for (let y = 0; y < square.r; y++) {
         this.setTxMapCell({ x: square.x + x, y: square.y + y }, tx)
@@ -302,6 +314,16 @@ class MondrianLayout {
     }
 
     return square
+  }
+
+  remove (square) {
+    for (let x = 0; x < square.r; x++) {
+      for (let y = 0; y < square.r; y++) {
+        this.clearTxMapCell({ x: square.x + x, y: square.y + y })
+        if (x <= y) this.addSlot({ x: square.x + x, y: square.y + y, r: square.r - y })
+      }
+    }
+    // this.addSlot({ x: square.x, y: square.y, r: square.r })
   }
 
   setTxMapCell (coord, tx) {
@@ -312,6 +334,14 @@ class MondrianLayout {
     this.txMap[offsetY][coord.x] = tx
   }
 
+  clearTxMapCell (coord, tx) {
+    const offsetY = coord.y - this.rowOffset
+    while (this.txMap.length <= offsetY) {
+      this.txMap.push(new Array(this.width).fill(null))
+    }
+    this.txMap[offsetY][coord.x] = null
+  }
+
   getTxInGridCell(coord) {
     const offsetY = coord.y - this.rowOffset
     if (this.txMap[offsetY]) return this.txMap[offsetY][coord.x]
@@ -319,11 +349,14 @@ class MondrianLayout {
   }
 
   slotToSprite (slot) {
+    const pos = this.context.pixelsToScreen(this.context.gridToPixels(slot))
     return {
-      position: this.context.pixelsToScreen(this.context.gridToPixels(slot)),
-      palette: 3,
-      color: 0,
-      alpha: 0.1
+      x: pos.x,
+      y: pos.y,
+      r: pos.r,
+      h: 0.5,
+      l: 0.5,
+      alpha: 0.5
     }
   }
 

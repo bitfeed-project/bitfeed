@@ -105,7 +105,27 @@ export default class TxController {
   }
 
   dropTx (txid) {
-    // don't actually need to do anything, just let the tx expire
+    if (this.txs[txid] && this.poolScene.drop(txid)) {
+    console.log('dropping tx', txid)
+      this.txs[txid].view.update({
+        display: {
+          position: {
+            y: -100, //this.txs[txid].screenPosition.y - 100
+          },
+          // color: {
+          //   alpha: 0
+          // }
+        },
+        delay: 0,
+        duration: 2000
+      })
+      setTimeout(() => {
+        this.destroyTx(txid)
+      }, 2000)
+      // this.poolScene.layoutAll()
+    } else {
+      console.log('dropped unknown tx', txid)
+    }
   }
 
   addBlock (blockData, realtime=true) {
