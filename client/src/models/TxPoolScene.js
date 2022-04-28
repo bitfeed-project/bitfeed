@@ -29,8 +29,6 @@ export default class TxPoolScene {
 
     this.scrollRateLimitTimer = null
     this.initialised = true
-
-    if (config.dev) console.log('pool', this)
   }
 
   resize ({ width = this.width, height = this.height }) {

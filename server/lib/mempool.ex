@@ -191,6 +191,7 @@ defmodule BitcoinStream.Mempool do
       :registered ->
         with [] <- :ets.lookup(:block_cache, txid) do # double check tx isn't included in the last block
           :ets.insert(:mempool_cache, {txid, { txn.inputs, txn.value + txn.fee, txn.inflated }, nil});
+          cache_spends(txid, txn.inputs);
           get(pid)
         else
           _ ->
@@ -248,6 +249,7 @@ defmodule BitcoinStream.Mempool do
           [{_txid, _, txn}] when txn != nil ->
             :ets.insert(:mempool_cache, {txid, { txn.inputs, txn.value + txn.fee, txn.inflated }, nil});
             :ets.delete(:sync_cache, txid);
+            cache_spends(txid, txn.inputs);
             if do_count do
               increment(pid);
             end
@@ -295,8 +297,10 @@ defmodule BitcoinStream.Mempool do
         get(pid)
 
       # tx fully processed and not already dropped
-      [{_txid, data, _status}] when data != nil ->
+      [{txid, data, _status}] when data != nil ->
         :ets.delete(:mempool_cache, txid);
+        {inputs, _value, _inflated} = data;
+        uncache_spends(inputs);
         decrement(pid);
         get(pid)
 
@@ -429,6 +433,7 @@ defmodule BitcoinStream.Mempool do
               inflated_txn <- BitcoinTx.inflate(txn, false) do
           if inflated_txn.inflated do
             :ets.insert(:mempool_cache, {txid, { inflated_txn.inputs, inflated_txn.value + inflated_txn.fee, inflated_txn.inflated }, status});
+            cache_spends(txid, inflated_txn.inputs);
             Logger.debug("repaired #{repaired} mempool txns #{txid}");
             repaired + 1
           else
@@ -493,4 +498,31 @@ defmodule BitcoinStream.Mempool do
     end
   end
 
+  defp cache_spend(txid, index, input) do
+    :ets.insert(:spend_cache, {[input.prev_txid, input.prev_vout], [txid, index]})
+  end
+  defp cache_spends(_txid, _index, []) do
+    :ok
+  end
+  defp cache_spends(txid, index, [input | rest]) do
+    cache_spend(txid, index, input);
+    cache_spends(txid, index + 1, rest)
+  end
+  defp cache_spends(txid, inputs) do
+    cache_spends(txid, 0, inputs)
+  end
+
+  defp uncache_spend(input) do
+    :ets.delete(:spend_cache, [input.prev_txid, input.prev_vout])
+  end
+  defp uncache_spends([]) do
+    :ok
+  end
+  defp uncache_spends([input | rest]) do
+    uncache_spend(input);
+    uncache_spends(rest)
+  end
+  defp uncache_spends(inputs) do
+    uncache_spends(inputs)
+  end
 end

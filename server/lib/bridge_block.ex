@@ -13,6 +13,7 @@ defmodule BitcoinStream.Bridge.Block do
   alias BitcoinStream.Mempool, as: Mempool
   alias BitcoinStream.RPC, as: RPC
   alias BitcoinStream.BlockData, as: BlockData
+  alias BitcoinStream.Index.Spend, as: SpendIndex
 
   def child_spec(host: host, port: port) do
     %{

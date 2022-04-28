@@ -9,7 +9,7 @@ import AddressIcon from '../assets/icon/cil-wallet.svg'
 import TxIcon from '../assets/icon/cil-arrow-circle-right.svg'
 import BlockIcon from '../assets/icon/grid-icon.svg'
 import { fly } from 'svelte/transition'
-import { matchQuery, searchTx, searchBlock } from '../utils/search.js'
+import { matchQuery, searchTx, searchBlockHeight, searchBlockHash } from '../utils/search.js'
 import { selectedTx, detailTx, overlay, loading } from '../stores.js'
 
 const queryIcons = {
@@ -68,8 +68,17 @@ async function searchSubmit (e) {
       case 'output':
         searchErr = await searchTx(matchedQuery.txid, null, matchedQuery.output)
         break;
+
+      case 'blockheight':
+        searchErr = await searchBlockHeight(matchedQuery.height)
+        break;
+
+      case 'blockhash':
+        searchErr = await searchBlockHash(matchedQuery.hash)
+        break;
     }
-    if (searchErr != null) handleSearchError(searchErr)
+    if (searchErr == null) errorMessage = null
+    else handleSearchError(searchErr)
     $loading--
   } else {
     errorMessage = 'enter a transaction id, block hash or block height'

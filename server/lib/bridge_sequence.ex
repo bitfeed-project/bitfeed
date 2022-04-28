@@ -9,6 +9,7 @@ defmodule BitcoinStream.Bridge.Sequence do
   """
   use GenServer
 
+  alias BitcoinStream.Index.Spend, as: SpendIndex
   alias BitcoinStream.Mempool, as: Mempool
   alias BitcoinStream.RPC, as: RPC
 
@@ -92,13 +93,14 @@ defmodule BitcoinStream.Bridge.Sequence do
 
   defp loop(socket) do
     with  {:ok, message} <- :chumak.recv_multipart(socket),
-          [_topic, <<hash::binary-size(32), type::binary-size(1), seq::little-size(64)>>, <<_sequence::little-size(32)>>] <- message,
-          txid <- Base.encode16(hash, case: :lower),
+          [_topic, <<id::binary-size(32), type::binary-size(1), rest::binary>>, <<_sequence::little-size(32)>>] <- message,
+          hash <- Base.encode16(id, case: :lower),
           event <- to_charlist(type) do
       case event do
         # Transaction added to mempool
         'A' ->
-          case Mempool.register(:mempool, txid, seq, true) do
+          <<seq::little-size(64)>> = rest;
+          case Mempool.register(:mempool, hash, seq, true) do
             false -> false
 
             { txn, count } ->
@@ -107,16 +109,26 @@ defmodule BitcoinStream.Bridge.Sequence do
 
         # Transaction removed from mempool for non block inclusion reason
         'R' ->
-          case Mempool.drop(:mempool, txid) do
+          <<seq::little-size(64)>> = rest;
+          case Mempool.drop(:mempool, hash) do
             count when is_integer(count) ->
-              send_drop_tx(txid, count);
+              send_drop_tx(hash, count);
 
             _ ->
               true
           end
 
+        'D' ->
+          SpendIndex.notify_block_disconnect(:spends, hash);
+          true
+
+        'C' ->
+          SpendIndex.notify_block(:spends, hash);
+          true
+
         # Don't care about other events
-        _ -> true
+        other ->
+          true
       end
     else
       _ -> false

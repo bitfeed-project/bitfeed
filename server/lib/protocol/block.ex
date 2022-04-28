@@ -59,6 +59,36 @@ def decode(block_binary) do
   end
 end
 
+def parse(hex) do
+  with  block_binary <- Base.decode16!(hex, [case: :lower]),
+        bytes <- byte_size(block_binary),
+        {:ok, raw_block} <- Bitcoinex.Block.decode(hex),
+        id <- Bitcoinex.Block.block_id(block_binary),
+        {summarised_txns, total_value, total_fees} <- summarise_txns(raw_block.txns)
+  do
+    {:ok, %__MODULE__{
+      version: raw_block.version,
+      prev_block: raw_block.prev_block,
+      merkle_root: raw_block.merkle_root,
+      timestamp: raw_block.timestamp,
+      bits: raw_block.bits,
+      bytes: bytes,
+      txn_count: raw_block.txn_count,
+      txns: summarised_txns,
+      fees: total_fees,
+      value: total_value,
+      id: id
+    }}
+  else
+    {:error, reason} ->
+      Logger.error("Error decoding data for BitcoinBlock: #{reason}")
+      :error
+    _ ->
+      Logger.error("Error decoding data for BitcoinBlock: (unknown reason)")
+      :error
+  end
+end
+
 defp summarise_txns([coinbase | txns]) do
   # Mempool.is_done returns false while the mempool is still syncing
   with extended_coinbase <- BitcoinTx.extend(coinbase),
@@ -87,7 +117,7 @@ defp summarise_txns([next | rest], summarised, total, fees, do_inflate) do
   if do_inflate do
     inflated_txn = BitcoinTx.inflate(extended_txn, false)
     if (inflated_txn.inflated) do
-      Logger.debug("Processing block tx #{length(summarised)}/#{length(summarised) + length(rest) + 1} | #{extended_txn.id}");
+      # Logger.debug("Processing block tx #{length(summarised)}/#{length(summarised) + length(rest) + 1} | #{extended_txn.id}");
       summarise_txns(rest, [inflated_txn | summarised], total + inflated_txn.value, fees + inflated_txn.fee, true)
     else
       summarise_txns(rest, [inflated_txn | summarised], total + inflated_txn.value, nil, false)

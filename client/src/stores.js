@@ -167,4 +167,6 @@ export const blocksEnabled = derived([settings], ([$settings]) => {
 
 export const latestBlockHeight = writable(null)
 export const highlightInOut = writable(null)
-export const loading = writable(0)
+export const loading = createCounter()
+export const explorerBlockData = writable(null)
+export const blockTransitionDirection = writable(null)

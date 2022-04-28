@@ -31,6 +31,17 @@ $: {
   }
 }
 
+let inputCount
+let outputCount
+$: {
+  if (tx) {
+    if (tx.inputs) inputCount = tx.inputs.length
+    else inputCount = tx.numInputs || 0
+    if (tx.outputs) outputCount = tx.outputs.length
+    else outputCount = tx.numOutputs || 0
+  }
+}
+
 function formatBTC (sats) {
   return `₿ ${longBtcFormat.format(sats/100000000)}`
 }
@@ -137,14 +148,18 @@ function highlight () {
   <p class="field hash">
     TxID: { tx.id }
   </p>
-  {#if tx.inputs && tx.outputs && !tx.coinbase }
+  {#if inputCount && outputCount && !tx.coinbase }
     <p class="field inputs">
-      <span>{ tx.inputs.length } input{#if tx.inputs.length != 1}s{/if}</span>
+      <span>{ inputCount } input{#if inputCount != 1}s{/if}</span>
       <span class="arrow"> &#10230; </span>
-      <span>{ tx.outputs.length } output{#if tx.outputs.length != 1}s{/if}</span>
+      <span>{ outputCount } output{#if outputCount != 1}s{/if}</span>
     </p>
   {:else if tx.coinbase }
-    <p class="field coinbase">Coinbase: { tx.coinbase.sigAscii }</p>
+    {#if tx.coinbase.sigAscii }
+      <p class="field coinbase">Coinbase: { tx.coinbase.sigAscii }</p>
+    {:else}
+      <p class="field coinbase">Coinbase</p>
+    {/if}
     <p class="field inputs">{ tx.outputs.length } output{#if tx.outputs.length != 1}s{/if}</p>
   {/if}
   <p class="field vbytes">Size: { numberFormat.format(tx.vbytes) } vbytes</p>

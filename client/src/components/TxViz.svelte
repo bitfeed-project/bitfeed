@@ -5,8 +5,8 @@
   import getTxStream from '../controllers/TxStream.js'
   import { settings, overlay, serverConnected, serverDelay, txCount, mempoolCount,
            mempoolScreenHeight, frameRate, avgFrameRate, blockVisible, tinyScreen,
-           compactScreen, currentBlock, selectedTx, blockAreaSize, devEvents,
-           devSettings, pageWidth, pageHeight, loading } from '../stores.js'
+           compactScreen, currentBlock, latestBlockHeight, selectedTx, blockAreaSize,
+           devEvents, devSettings, pageWidth, pageHeight, loading } from '../stores.js'
   import BlockInfo from '../components/BlockInfo.svelte'
   import SearchBar from '../components/SearchBar.svelte'
   import TxInfo from '../components/TxInfo.svelte'
@@ -108,6 +108,10 @@
 
   function hideBlock () {
     $blockVisible = false
+  }
+
+  function quitExploring () {
+    if (txController) txController.resumeLatest()
   }
 
   function fakeBlock () {
@@ -467,6 +471,13 @@
       right: 0;
     }
   }
+
+  @media screen and (max-width: 480px) {
+    .alert-bar-wrapper {
+      font-size: 0.8em;
+      width: 18em;
+    }
+  }
 </style>
 
 <svelte:window on:resize={resize} on:load={resize} on:click={pointerLeave} />
@@ -492,7 +503,7 @@
       <div class="spacer" style="flex: {$pageWidth <= 640 ? '1.5' : '1'}"></div>
       <div class="block-area-outer" style="width: {$blockAreaSize}px; height: {$blockAreaSize}px">
         <div class="block-area">
-          <BlockInfo block={$currentBlock} visible={$blockVisible && !$tinyScreen} on:hideBlock={hideBlock} />
+          <BlockInfo block={$currentBlock} visible={$blockVisible && !$tinyScreen} on:hideBlock={hideBlock} on:quitExploring={quitExploring} />
         </div>
         {#if config.dev && config.debug && $devSettings.guides }
           <div class="guide-area" />

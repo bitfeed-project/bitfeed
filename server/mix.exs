@@ -41,7 +41,8 @@ defmodule BitcoinStream.MixProject do
       {:plug, "~> 1.13"},
       {:corsica, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
-      {:jason, "~> 1.1"}
+      {:jason, "~> 1.1"},
+      {:rocksdb, "~> 1.6"}
     ]
   end
 end

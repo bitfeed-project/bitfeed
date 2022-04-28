@@ -16,6 +16,7 @@ export const pink = { h: 0.03, l: 0.35 }
 export const bluegreen = { h: 0.45, l: 0.4 }
 export const orange = { h: 0.181, l: 0.472 }
 export const teal = { h: 0.475, l: 0.55 }
+export const blue = { h: 0.5, l: 0.55 }
 export const green = { h: 0.37, l: 0.35 }
 export const purple = { h: 0.95, l: 0.35 }
 

@@ -164,10 +164,9 @@ function rotateAlerts () {
 
   @media screen and (max-width: 480px) {
     height: 3em;
-    font-size: 0.8em;
-    width: 16em;
+    width: 18em;
     .alert-wrapper {
-      width: 16em;
+      width: 18em;
     }
   }
 }

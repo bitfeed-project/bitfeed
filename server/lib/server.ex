@@ -13,6 +13,7 @@ defmodule BitcoinStream.Server do
     { rpc_pool_size, "" } = Integer.parse(System.get_env("RPC_POOL_SIZE"));
     log_level = System.get_env("LOG_LEVEL");
     btc_host = System.get_env("BITCOIN_HOST");
+    indexed = System.get_env("INDEXED")
 
     case log_level do
       "debug" ->
@@ -38,6 +39,7 @@ defmodule BitcoinStream.Server do
        }},
       { BitcoinStream.RPC, [host: btc_host, port: rpc_port, name: :rpc] },
       { BitcoinStream.BlockData, [name: :block_data] },
+      { BitcoinStream.Index.Spend, [name: :spends, indexed: indexed]},
       Plug.Cowboy.child_spec(
         scheme: :http,
         plug: BitcoinStream.Router,
