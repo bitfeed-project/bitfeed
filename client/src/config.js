@@ -14,7 +14,7 @@ function getInjectedEnv (key, fallback) {
 export default {
   dev: ENVIRONMENT === 'development',
   // external API for processing donations, retrieving donor info & message bar content
-  donationRoot: 'https://donate.monospace.live',
+  donationRoot: 'https://donate.bitfeed.live',
   // enables some additional logging & debugging tools
   debug: false,
   // enables an additional square packing algorithm debugging tool
