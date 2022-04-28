@@ -77,7 +77,7 @@ export default class TxBlockScene extends TxMondrianPoolScene {
       })
     }
 
-    this.savePixelsToScreenPosition(tx, 0, this.hidden ? 50 : 0)
+    this.savePixelsToScreenPosition(tx, 0, (this.hidden && !this.exited) ? 50 : 0)
     if (this.hidden) {
       tx.view.update({
         display: {
@@ -164,6 +164,7 @@ export default class TxBlockScene extends TxMondrianPoolScene {
 
   enter (right) {
     this.hidden = false
+    this.exited = false
     const ids = this.getActiveTxList()
     for (let i = 0; i < ids.length; i++) {
       this.enterTx(this.txs[ids[i]], right)
@@ -198,6 +199,7 @@ export default class TxBlockScene extends TxMondrianPoolScene {
 
   exit (right) {
     this.hidden = true
+    this.exited = true
     const ids = this.getActiveTxList()
     for (let i = 0; i < ids.length; i++) {
       this.exitTx(this.txs[ids[i]], right)

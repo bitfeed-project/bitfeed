@@ -6,8 +6,9 @@ import BitcoinBlock from '../models/BitcoinBlock.js'
 import TxSprite from '../models/TxSprite.js'
 import { FastVertexArray } from '../utils/memory.js'
 import { searchTx, fetchSpends, addSpends } from '../utils/search.js'
-import { overlay, txCount, mempoolCount, mempoolScreenHeight, blockVisible, currentBlock, selectedTx, detailTx, blockAreaSize, highlight, colorMode, blocksEnabled, latestBlockHeight, explorerBlockData, blockTransitionDirection, loading } from '../stores.js'
+import { overlay, txCount, mempoolCount, mempoolScreenHeight, blockVisible, currentBlock, selectedTx, detailTx, blockAreaSize, highlight, colorMode, blocksEnabled, latestBlockHeight, explorerBlockData, blockTransitionDirection, loading, urlPath } from '../stores.js'
 import config from "../config.js"
+import { tick } from 'svelte';
 
 export default class TxController {
   constructor ({ width, height }) {
@@ -188,6 +189,22 @@ export default class TxController {
 
     this.expiredTxs = {}
 
+    if (this.explorerBlockScene && this.explorerBlock && this.explorerBlock.id === block.id) {
+      this.block = this.explorerBlock
+      this.blockScene = this.explorerBlockScene
+      this.explorerBlockScene = null
+      this.explorerBlock = null
+      urlPath.set("/")
+
+      for (let i = 0; i < block.txns.length; i++) {
+        this.txs[block.txns[i].id].setData(block.txns[i])
+        this.poolScene.remove(block.txns[i].id)
+      }
+      this.poolScene.layoutAll()
+
+      return
+    }
+
     if (!this.explorerBlockScene) this.clearBlock()
 
     if (this.blocksEnabled) {
@@ -268,8 +285,14 @@ export default class TxController {
     return block
   }
 
-  exploreBlock (blockData) {
+  async exploreBlock (blockData) {
     const block = blockData.isBlock ? blockData : new BitcoinBlock(blockData)
+
+    if (this.block && this.block.id === block.id) {
+      this.showBlock()
+      return
+    }
+
     let enterFromRight = false
 
     // clean up previous block
@@ -311,10 +334,11 @@ export default class TxController {
     }
 
     blockVisible.set(true)
+    await tick()
     currentBlock.set(block)
   }
 
-  resumeLatest () {
+  async resumeLatest () {
     if (this.explorerBlock && this.explorerBlockScene) {
       const prevBlock = this.explorerBlock
       const prevBlockScene = this.explorerBlockScene
@@ -322,17 +346,20 @@ export default class TxController {
       prevBlockScene.expire(2000)
       this.explorerBlockScene = null
       this.explorerBlock = null
+      urlPath.set("/")
     }
     if (this.blockScene && this.block) {
       blockTransitionDirection.set('right')
+      await tick()
       this.blockScene.enterRight()
       currentBlock.set(this.block)
     }
   }
 
-  hideBlock () {
+  async hideBlock () {
     if (this.blockScene && !this.explorerBlockScene) {
       blockTransitionDirection.set(null)
+      await tick()
       this.blockScene.hide()
     }
   }
@@ -397,6 +424,7 @@ export default class TxController {
         } else {
           const spendResult = await fetchSpends(selected.id)
           if (spendResult) selected = addSpends(selected, spendResult)
+          urlPath.set(`/tx/${selected.id}`)
           detailTx.set(selected)
           overlay.set('tx')
         }

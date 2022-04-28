@@ -62,18 +62,24 @@
     }
   }
 
+  let transitionDirection
   let flyIn
   let flyOut
   $: {
-    if ($blockTransitionDirection && $blockTransitionDirection === 'right') {
+    if (!$blockTransitionDirection || !visible || !block || !$blocksEnabled) {
+      transitionDirection = 'up'
+      flyIn = { y: (restoring ? -50 : 50), duration: (restoring ? 500 : 1000), easing: linear, delay: (restoring ? 0 : newBlockDelay) }
+      flyOut = { y: -50, duration: 2000, easing: linear }
+    } else if ($blockTransitionDirection && $blockTransitionDirection === 'right') {
+      transitionDirection = 'right'
       flyIn = { x: 100, easing: linear, delay: 1000, duration: 1000 }
       flyOut = { x: -100, easing: linear, delay: 0, duration: 1000  }
     } else if ($blockTransitionDirection && $blockTransitionDirection === 'left') {
+      transitionDirection = 'left'
       flyIn = { x: -100, easing: linear, delay: 1000, duration: 1000  }
       flyOut = { x: 100, easing: linear, delay: 0, duration: 1000  }
     } else {
-      flyIn = { y: (restoring ? -50 : 50), duration: (restoring ? 500 : 1000), easing: linear, delay: (restoring ? 0 : newBlockDelay) }
-      flyOut = { y: -50, duration: 2000, easing: linear }
+      transitionDirection = 'down'
     }
   }
 
@@ -115,9 +121,9 @@
   async function explorePrevBlock (e) {
     e.preventDefault()
     if (!$loading && block) {
-      $loading = true
+      loading.increment()
       await searchBlockHeight(block.height - 1)
-      $loading = false
+      loading.decrement()
     }
   }
 
@@ -125,9 +131,9 @@
     e.preventDefault()
     if (!$loading && block) {
       if (block.height + 1 < $latestBlockHeight) {
-        $loading = true
+        loading.increment()
         await searchBlockHeight(block.height + 1)
-        $loading = false
+        loading.decrement()
       } else {
         dispatch('quitExploring')
       }
@@ -153,6 +159,14 @@
     &.standalone {
       display: none;
     }
+  }
+
+  .block-info-container {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
   }
 
   .block-info {
@@ -319,68 +333,71 @@
   }
 </style>
 
-{#key block}
-  {#if block != null && visible && $blocksEnabled }
-    <div class="block-info" out:fly={flyOut} in:fly={flyIn}>
-        <!-- <span class="data-field">Hash: { block.id }</span> -->
-        <div class="full-size">
-          <div class="data-row">
-            <span class="data-field title-field" title="{block.miner_sig}"><b>{#if block.height == $latestBlockHeight}Latest {/if}Block: </b>{ numberFormat.format(block.height) }</span>
-            <button class="data-field close-button" on:click={hideBlock}><Icon icon={closeIcon} color="var(--palette-x)" /></button>
-          </div>
-          <div class="data-row">
-            <span class="data-field" title="block timestamp">{ formatDateTime(block.time) }</span>
-            <span class="data-field">{ formattedBlockValue }</span>
-          </div>
-          <div class="data-row">
-            <span class="data-field">{ formatBytes(block.bytes) }</span>
-            <span class="data-field">{ formatCount(block.txnCount) } transactions</span>
-          </div>
-          <div class="data-row spacer">&nbsp;</div>
-          <div class="data-row">
-            <span class="data-field">Avg fee rate</span>
-            {#if block.fees != null}
-              <span class="data-field">{ formatFee(block.avgFeerate) } sats/vbyte</span>
-            {:else}
-              <span class="data-field">unavailable</span>
-            {/if}
-          </div>
-        </div>
-        <div class="compact">
-          <div class="data-row">
-            <span class="data-field title-field" title="{block.miner_sig}"><b>Latest Block: </b>{ numberFormat.format(block.height) }</span>
-            <button class="data-field close-button" on:click={hideBlock}><Icon icon={closeIcon} color="var(--palette-x)" /></button>
-          </div>
-          <div class="data-row">
-            <span class="data-field">{ formatDateTime(block.time) }</span>
-            <span class="data-field">{ formattedBlockValue }</span>
-          </div>
-          <div class="data-row">
-            <span class="data-field">{ formatCount(block.txnCount) } transactions</span>
-            {#if block.fees != null}
-              <span class="data-field">{ formatFee(block.avgFeerate) } sats/vb</span>
-            {:else}
+{#key transitionDirection}
+  {#each ((block != null && visible && $blocksEnabled) ? [block] : []) as block (block.id)}
+    <div class="block-info-container" out:fly|local={flyOut} in:fly|local={flyIn}>
+      <div class="block-info">
+          <!-- <span class="data-field">Hash: { block.id }</span> -->
+          <div class="full-size">
+            <div class="data-row">
+              <span class="data-field title-field" title="{block.miner_sig}"><b>{#if block.height == $latestBlockHeight}Latest {/if}Block: </b>{ numberFormat.format(block.height) }</span>
+              <button class="data-field close-button" on:click={hideBlock}><Icon icon={closeIcon} color="var(--palette-x)" /></button>
+            </div>
+            <div class="data-row">
+              <span class="data-field" title="block timestamp">{ formatDateTime(block.time) }</span>
+              <span class="data-field">{ formattedBlockValue }</span>
+            </div>
+            <div class="data-row">
               <span class="data-field">{ formatBytes(block.bytes) }</span>
-            {/if}
+              <span class="data-field">{ formatCount(block.txnCount) } transaction{block.txnCount == 1 ? '' : 's'}</span>
+            </div>
+            <div class="data-row spacer">&nbsp;</div>
+            <div class="data-row">
+              <span class="data-field">Avg fee rate</span>
+              {#if block.fees != null}
+                <span class="data-field">{ formatFee(block.avgFeerate) } sats/vbyte</span>
+              {:else}
+                <span class="data-field">unavailable</span>
+              {/if}
+            </div>
           </div>
-        </div>
+          <div class="compact">
+            <div class="data-row">
+              <span class="data-field title-field" title="{block.miner_sig}"><b>Latest Block: </b>{ numberFormat.format(block.height) }</span>
+              <button class="data-field close-button" on:click={hideBlock}><Icon icon={closeIcon} color="var(--palette-x)" /></button>
+            </div>
+            <div class="data-row">
+              <span class="data-field">{ formatDateTime(block.time) }</span>
+              <span class="data-field">{ formattedBlockValue }</span>
+            </div>
+            <div class="data-row">
+              <span class="data-field">{ formatCount(block.txnCount) } transactions</span>
+              {#if block.fees != null}
+                <span class="data-field">{ formatFee(block.avgFeerate) } sats/vb</span>
+              {:else}
+                <span class="data-field">{ formatBytes(block.bytes) }</span>
+              {/if}
+            </div>
+          </div>
+      </div>
+
+      {#if hasPrevBlock }
+        <a href="/block/height/{block.height - 1}" on:click={explorePrevBlock} class="explore-button prev">
+          <svg class="chevron left" height="1.5em" width="1.5em" viewBox="0 0 512 512">
+            <path d="M 107.628,257.54 327.095,38.078 404,114.989 261.506,257.483 404,399.978 327.086,476.89 Z" class="outline" />
+          </svg>
+        </a>
+      {/if}
+      {#if hasNextBlock }
+        <a href="/block/height/{block.height + 1}" on:click={exploreNextBlock} class="explore-button next">
+          <svg class="chevron right" height="1.5em" width="1.5em" viewBox="0 0 512 512">
+            <path d="M 107.628,257.54 327.095,38.078 404,114.989 261.506,257.483 404,399.978 327.086,476.89 Z" class="outline" />
+          </svg>
+        </a>
+      {/if}
+      <button class="close-button standalone" on:click={hideBlock}>
+        <Icon icon={closeIcon} color="var(--palette-x)" />
+      </button>
     </div>
-    {#if hasPrevBlock }
-      <a href="/block/height/{block.height - 1}" on:click={explorePrevBlock} class="explore-button prev"  out:fly={flyOut} in:fly={flyIn}>
-        <svg class="chevron left" height="1.5em" width="1.5em" viewBox="0 0 512 512">
-          <path d="M 107.628,257.54 327.095,38.078 404,114.989 261.506,257.483 404,399.978 327.086,476.89 Z" class="outline" />
-        </svg>
-      </a>
-    {/if}
-    {#if hasNextBlock }
-      <a href="/block/height/{block.height + 1}" on:click={exploreNextBlock} class="explore-button next"  out:fly={flyOut} in:fly={flyIn}>
-        <svg class="chevron right" height="1.5em" width="1.5em" viewBox="0 0 512 512">
-          <path d="M 107.628,257.54 327.095,38.078 404,114.989 261.506,257.483 404,399.978 327.086,476.89 Z" class="outline" />
-        </svg>
-      </a>
-    {/if}
-    <button class="close-button standalone" on:click={hideBlock} out:fly={flyOut} in:fly={flyIn} >
-      <Icon icon={closeIcon} color="var(--palette-x)" />
-    </button>
-  {/if}
+  {/each}
 {/key}

@@ -1,6 +1,7 @@
 map $sent_http_content_type $expires {
     default                 off;
     text/css                max;
+    text/json               max;
     application/javascript  max;
 }
 
@@ -14,13 +15,8 @@ server {
 
     server_name client;
 
-    location = / {
+    location ~* \.(html)$ {
             add_header Cache-Control 'no-cache';
-    }
-
-    location / {
-            try_files $uri $uri/ =404;
-            expires $expires;
     }
 
     location /api {
@@ -41,6 +37,11 @@ server {
             proxy_set_header        Connection "upgrade";
             proxy_set_header        Host $http_host;
             proxy_set_header        X-Real-IP $remote_addr;
+    }
+
+    location / {
+            try_files $uri $uri/ /index.html;
+            expires $expires;
     }
 }
 
