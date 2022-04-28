@@ -55,8 +55,9 @@ defmodule BitcoinStream.Router do
   end
 
   defp get_tx(txid) do
-    with  {:ok, 200, %{"hex" => hex, "blockhash" => blockhash}} <- RPC.request(:rpc, "getrawtransaction", [txid, true]),
-          {:ok, 200, %{"height" => height, "time" => time}} <- RPC.request(:rpc, "getblockheader", [blockhash, true]),
+    with  {:ok, 200, verbosetx} <- RPC.request(:rpc, "getrawtransaction", [txid, true]),
+          %{"hex" => hex, "blockhash" => blockhash} <- Map.merge(%{"blockhash" => nil}, verbosetx),
+          {:ok, 200, %{"height" => height, "time" => time}} <- (if blockhash != nil do RPC.request(:rpc, "getblockheader", [blockhash, true]) else {:ok, 200, %{"height" => nil, "time" => nil}} end),
           rawtx <- Base.decode16!(hex, case: :lower),
           {:ok, txn } <- BitcoinTx.decode(rawtx),
           inflated_txn <- BitcoinTx.inflate(txn, false),

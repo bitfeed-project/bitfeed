@@ -11,6 +11,7 @@ import { searchTx } from '../utils/search.js'
 
 function onClose () {
   $detailTx = null
+  $highlightInOut = null
 }
 
 function formatBTC (sats) {
@@ -69,9 +70,12 @@ function expandAddresses(items, truncate) {
     if (item.script_pub_key) {
       address = SPKToAddress(item.script_pub_key) || "unknown"
       if (address === 'OP_RETURN') {
-        title = item.script_pub_key.substring(2).match(/../g).reduce((parsed, hexChar) => {
+        title = item.script_pub_key.substring(4).match(/../g).reduce((parsed, hexChar) => {
           return parsed + String.fromCharCode(parseInt(hexChar, 16))
         }, "")
+      } else if (address === 'P2PK') {
+        if (item.script_pub_key.length === 70) title = 'compressed pubkey: ' + item.script_pub_key.substring(2,68)
+        else title = 'pubkey: ' + item.script_pub_key.substring(2,132)
       }
     }
     return {
@@ -113,7 +117,7 @@ $: {
     }
   } else inputs = []
   if ($detailTx && $detailTx.outputs) {
-    if ($detailTx.isCoinbase || !$detailTx.is_inflated || $detailTx.fee == null) {
+    if ($detailTx.isCoinbase || !$detailTx.is_inflated || !$detailTx.fee) {
       outputs = expandAddresses($detailTx.outputs, truncate)
     } else {
       outputs = [{address: 'fee', value: $detailTx.fee, fee: true}, ...expandAddresses($detailTx.outputs, truncate)]
@@ -580,7 +584,7 @@ async function clickItem (item) {
           <p class="header">{$detailTx.inputs.length} input{$detailTx.inputs.length > 1 ? 's' : ''}</p>
           {#each inputs as input}
             <div class="entry clickable" on:click={() => clickItem(input)}>
-              <p class="address" title={input.address}><span class="truncatable">{input.address.slice(0,-6)}</span><span class="suffix">{input.address.slice(-6)}</span></p>
+              <p class="address" title={input.title || input.address}><span class="truncatable">{input.address.slice(0,-6)}</span><span class="suffix">{input.address.slice(-6)}</span></p>
               <p class="amount">{ input.value == null ? '???' : formatBTC(input.value) }</p>
             </div>
           {/each}
@@ -613,7 +617,7 @@ async function clickItem (item) {
           {/if}
         </div>
         <div class="column outputs">
-          <p class="header">{$detailTx.outputs.length} output{$detailTx.outputs.length > 1 ? 's' : ''} {#if $detailTx.fee != null}+ fee{/if}</p>
+          <p class="header">{$detailTx.outputs.length} output{$detailTx.outputs.length > 1 ? 's' : ''} {#if $detailTx.fee}+ fee{/if}</p>
           {#each outputs as output}
             <div class="entry" class:clickable={output.rest || output.spend} class:unspent={!output.spend && !output.fee} class:highlight={highlight.out != null && highlight.out === output.index} on:click={() => clickItem(output)}>
               <p class="address" title={output.title || output.address}><span class="truncatable">{output.address.slice(0,-6)}</span><span class="suffix">{output.address.slice(-6)}</span></p>

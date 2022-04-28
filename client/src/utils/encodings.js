@@ -48,6 +48,24 @@ export function SPKToAddress (spk) {
   } else if (spk.startsWith('6a')) {
     // OP_RETURN
     return 'OP_RETURN'
+  } else if (spk.length == 134 && spk.startsWith('41') && spk.endsWith('ac')) {
+    // uncompressed p2pk
+    return 'P2PK'
+  } else if (spk.length == 70 && spk.startsWith('21') && spk.endsWith('ac')) {
+    // compressed p2pk
+    return 'P2PK'
+  } else if (spk.endsWith('51ae') && spk.startsWith('51')) {
+    // possible p2ms (raw multisig)
+    return '1-of-1 P2MS'
+  } else if (spk.endsWith('52ae')) {
+    // possible p2ms (raw multisig)
+    if (spk.startsWith(51)) return '1-of-2 P2MS'
+    if (spk.startsWith(52)) return '2-of-2 P2MS'
+  } else if (spk.endsWith('53ae')) {
+    // possible p2ms (raw multisig)
+    if (spk.startsWith(51)) return '1-of-3 P2MS'
+    if (spk.startsWith(52)) return '2-of-3 P2MS'
+    if (spk.startsWith(53)) return '3-of-3 P2MS'
   }
 }
 

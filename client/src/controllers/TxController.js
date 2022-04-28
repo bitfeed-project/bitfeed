@@ -106,7 +106,6 @@ export default class TxController {
 
   dropTx (txid) {
     if (this.txs[txid] && this.poolScene.drop(txid)) {
-    console.log('dropping tx', txid)
       this.txs[txid].view.update({
         display: {
           position: {
@@ -123,8 +122,6 @@ export default class TxController {
         this.destroyTx(txid)
       }, 2000)
       // this.poolScene.layoutAll()
-    } else {
-      console.log('dropped unknown tx', txid)
     }
   }
 

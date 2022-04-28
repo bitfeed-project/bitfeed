@@ -6,6 +6,7 @@
   box-sizing: border-box;
   border-radius: 50%;
   border: solid 2px var(--palette-x);
+  pointer-events: none;
 
   .sizer {
     width: 100%;
