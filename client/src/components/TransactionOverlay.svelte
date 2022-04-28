@@ -2,11 +2,12 @@
 import Overlay from '../components/Overlay.svelte'
 import Icon from './Icon.svelte'
 import BookmarkIcon from '../assets/icon/cil-bookmark.svg'
-import { longBtcFormat, numberFormat, feeRateFormat } from '../utils/format.js'
-import { exchangeRates, settings, sidebarToggle, newHighlightQuery, highlightingFull, detailTx, pageWidth } from '../stores.js'
+import { longBtcFormat, numberFormat, feeRateFormat, dateFormat } from '../utils/format.js'
+import { exchangeRates, settings, sidebarToggle, newHighlightQuery, highlightingFull, detailTx, pageWidth, latestBlockHeight, highlightInOut, loading } from '../stores.js'
 import { formatCurrency } from '../utils/fx.js'
 import { hlToHex, mixColor, teal, purple } from '../utils/color.js'
 import { SPKToAddress } from '../utils/encodings.js'
+import { searchTx } from '../utils/search.js'
 
 function onClose () {
   $detailTx = null
@@ -16,7 +17,7 @@ function formatBTC (sats) {
   return `₿ ${(sats/100000000).toFixed(8)}`
 }
 
-function highlight (query) {
+function addToWatchlist (query) {
   if (!$highlightingFull && query) {
     $newHighlightQuery = query
     $sidebarToggle = 'search'
@@ -43,17 +44,26 @@ $: {
   }
 }
 
+let confirmations = 0
+$: {
+  if ($detailTx && $detailTx.block && $detailTx.block.height && $latestBlockHeight != null) {
+    confirmations =  (1 + $latestBlockHeight - $detailTx.block.height)
+  }
+}
+
 const midColor = hlToHex(mixColor(teal, purple, 1, 3, 2))
 let feeColor
 $: {
   if ($detailTx && $detailTx.feerate != null) {
     feeColor = hlToHex(mixColor(teal, purple, 1, Math.log2(64), Math.log2($detailTx.feerate)))
+  } else {
+    feeColor = null
   }
 }
 
 function expandAddresses(items, truncate) {
   let truncated = truncate ? items.slice(0,100) : items
-  const expanded = truncated.map(item => {
+  const expanded = truncated.map((item, index) => {
     let address = 'unknown'
     let title = null
     if (item.script_pub_key) {
@@ -68,6 +78,7 @@ function expandAddresses(items, truncate) {
       ...item,
       address,
       title,
+      index,
       opreturn: (address === 'OP_RETURN')
     }
   })
@@ -108,6 +119,17 @@ $: {
       outputs = [{address: 'fee', value: $detailTx.fee, fee: true}, ...expandAddresses($detailTx.outputs, truncate)]
     }
   } else outputs = []
+}
+
+let highlight = {}
+$: {
+  if ($highlightInOut && $detailTx && $highlightInOut.txid === $detailTx.id) {
+    highlight = {}
+    if ($highlightInOut.input != null) highlight.in = $highlightInOut.input
+    if ($highlightInOut.output != null) highlight.out = $highlightInOut.output
+  } else {
+    highlight = {}
+  }
 }
 
 let sankeyLines
@@ -227,9 +249,17 @@ function getMiterOffset (weight, dy, dx) {
   } else return 0
 }
 
-function clickItem (item) {
+async function clickItem (item) {
   if (item.rest) {
     truncate = false
+  } else if (item.prev_txid && item.prev_vout != null) {
+    $loading++
+    await searchTx(item.prev_txid, null, item.prev_vout)
+    $loading--
+  } else if (item.spend && item.spend.txid && item.spend.vin) {
+    $loading++
+    await searchTx(item.spend.txid, item.spend.vin)
+    $loading--
   }
 }
 </script>
@@ -241,8 +271,14 @@ function clickItem (item) {
     text-align: left;
 
     h2 {
+      margin: 0 0 1em;
       font-size: 1.2em;
       word-break: break-word;
+
+      .title {
+        font-size: 1.25em;
+        white-space: nowrap;
+      }
     }
 
     .tx-id {
@@ -253,7 +289,7 @@ function clickItem (item) {
 
     .icon-button {
       float: right;
-      font-size: 24px;
+      font-size: 1.1em;
       margin: 0;
       transition: opacity 300ms, color 300ms, background 300ms;
       background: var(--palette-d);
@@ -267,6 +303,20 @@ function clickItem (item) {
       &.disabled {
         color: var(--palette-e);
         background: none;
+      }
+    }
+
+    .confirmation-badge {
+      background: var(--light-good);
+      padding: 4px 8px;
+      border-radius: 8px;
+      float: right;
+      margin: 0 5px;
+      color: white;
+      font-weight: bold;
+
+      &.unconfirmed {
+        background: var(--light-ok);
       }
     }
 
@@ -293,7 +343,7 @@ function clickItem (item) {
       }
     }
 
-    .fee-calc {
+    .fields {
       align-items: center;
       display: flex;
       flex-direction: row;
@@ -372,7 +422,10 @@ function clickItem (item) {
           .entry {
             align-items: flex-start;
             padding-left: 10px;
-            &:hover {
+            &.highlight {
+              background: linear-gradient(90deg, var(--bold-a) -100%, transparent 100%);
+            }
+            &.clickable:hover {
               background: linear-gradient(90deg, var(--palette-e), transparent);
             }
             .address {
@@ -384,7 +437,14 @@ function clickItem (item) {
         &.outputs {
           .entry {
             padding-right: 10px;
-            &:hover {
+            border-right: solid 1px transparent;
+            &.unspent {
+              border-right: solid 1px var(--grey);
+            }
+            &.highlight {
+              background: linear-gradient(90deg, transparent 0%, var(--bold-a) 200%);
+            }
+            &.clickable:hover {
               background: linear-gradient(-90deg, var(--palette-e), transparent);
             }
           }
@@ -403,7 +463,7 @@ function clickItem (item) {
     }
 
     @media (max-width: 679px) {
-      .fee-calc {
+      .fields {
         flex-direction: column;
       }
     }
@@ -430,12 +490,34 @@ function clickItem (item) {
 <Overlay name="tx" on:close={onClose}>
   {#if $detailTx}
     <section class="tx-detail">
-      <div class="icon-button" class:disabled={$highlightingFull} on:click={() => highlight($detailTx.id)} title="Add transaction to watchlist">
+      <div class="icon-button" class:disabled={$highlightingFull} on:click={() => addToWatchlist($detailTx.id)} title="Add transaction to watchlist">
         <Icon icon={BookmarkIcon}/>
       </div>
-      {#if $detailTx.isCoinbase }
-        <h2>Coinbase <span class="tx-id">{ $detailTx.id }</span></h2>
-        <div class="pane fee-calc">
+      {#if $detailTx.block && $latestBlockHeight != null}
+        <span class="confirmation-badge">
+          {numberFormat.format(confirmations)} confirmation{confirmations == 1 ? '' : 's'}
+        </span>
+      {:else}
+        <span class="confirmation-badge unconfirmed">
+          unconfirmed
+        </span>
+      {/if}
+      <h2><span class="title">{#if $detailTx.isCoinbase }Coinbase{:else}Transaction{/if}</span> <span class="tx-id">{ $detailTx.id }</span></h2>
+      {#if $detailTx.block}
+        <div class="pane fields">
+          <div class="field">
+            <span class="label">confirmed</span>
+            <span class="value" style="color: {feeColor};">{ dateFormat.format($detailTx.block.time) }</span>
+          </div>
+          <span class="operator"></span>
+          <div class="field">
+            <span class="label">block height</span>
+            <span class="value" style="color: {feeColor};">{ numberFormat.format($detailTx.block.height) }</span>
+          </div>
+        </div>
+      {/if}
+      {#if $detailTx.isCoinbase}
+        <div class="pane fields">
           <div class="field">
             <span class="label">block subsidy</span>
             <span class="value">{ formatBTC($detailTx.coinbase.subsidy) }</span>
@@ -452,16 +534,15 @@ function clickItem (item) {
           </div>
         </div>
 
-        <div class="pane fee-calc">
+        <div class="pane fields">
           <div class="field">
             <span class="label">coinbase</span>
             <span class="value coinbase-sig">{ $detailTx.coinbase.sigAscii }</span>
           </div>
         </div>
       {:else}
-        <h2>Transaction <span class="tx-id">{ $detailTx.id }</span></h2>
         {#if $detailTx.is_inflated && $detailTx.fee != null && $detailTx.feerate != null}
-          <div class="pane fee-calc">
+          <div class="pane fields">
             <div class="field">
               <span class="label">fee</span>
               <span class="value" style="color: {feeColor};">{ numberFormat.format($detailTx.fee) } sats</span>
@@ -478,7 +559,7 @@ function clickItem (item) {
             </div>
           </div>
         {:else}
-        <div class="pane fee-calc">
+        <div class="pane fields">
           <div class="field">
             <span class="label">size</span>
             <span class="value" style="color: {feeColor};">{ numberFormat.format($detailTx.vbytes) } vbytes</span>
@@ -494,12 +575,11 @@ function clickItem (item) {
         </div>
       {/if}
 
-      <h2>Inputs &amp; Outputs</h2>
       <div class="pane flow-diagram" style="grid-template-columns: minmax(0px, 1fr) {svgWidth}px minmax(0px, 1fr);">
         <div class="column inputs">
           <p class="header">{$detailTx.inputs.length} input{$detailTx.inputs.length > 1 ? 's' : ''}</p>
           {#each inputs as input}
-            <div class="entry" class:clickable={input.rest} on:click={() => clickItem(input)}>
+            <div class="entry clickable" on:click={() => clickItem(input)}>
               <p class="address" title={input.address}><span class="truncatable">{input.address.slice(0,-6)}</span><span class="suffix">{input.address.slice(-6)}</span></p>
               <p class="amount">{ input.value == null ? '???' : formatBTC(input.value) }</p>
             </div>
@@ -535,7 +615,7 @@ function clickItem (item) {
         <div class="column outputs">
           <p class="header">{$detailTx.outputs.length} output{$detailTx.outputs.length > 1 ? 's' : ''} {#if $detailTx.fee != null}+ fee{/if}</p>
           {#each outputs as output}
-            <div class="entry" class:clickable={output.rest} on:click={() => clickItem(output)}>
+            <div class="entry" class:clickable={output.rest || output.spend} class:unspent={!output.spend && !output.fee} class:highlight={highlight.out != null && highlight.out === output.index} on:click={() => clickItem(output)}>
               <p class="address" title={output.title || output.address}><span class="truncatable">{output.address.slice(0,-6)}</span><span class="suffix">{output.address.slice(-6)}</span></p>
               <p class="amount">{ output.value == null ? '???' : formatBTC(output.value) }</p>
             </div>

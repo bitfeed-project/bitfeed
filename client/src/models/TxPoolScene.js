@@ -36,7 +36,7 @@ export default class TxPoolScene {
   resize ({ width = this.width, height = this.height }) {
     this.width = width
     this.height = height
-    this.heightLimit =  height / 4
+    this.heightLimit =  (width <= 620) ? (height / 4.5) : (height / 4)
     this.unitWidth = Math.floor(Math.max(4, width / 250))
     this.unitPadding =  Math.floor(Math.max(1, width / 1000))
     this.gridSize = this.unitWidth + (this.unitPadding * 2)

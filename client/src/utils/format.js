@@ -21,6 +21,12 @@ export const timeFormat = (Intl && Intl.DateTimeFormat) ? new Intl.DateTimeForma
     return `${('' + d.getHours()).padStart(2, '0')}:${('' + d.getMinutes()).padStart(2, '0')}`
   }
 }
+export const dateFormat = {
+  format (date) {
+    const d = new Date(date)
+    return `${d.getFullYear()}-${('' + (d.getMonth() + 1)).padStart(2, '0')}-${('' + d.getDate()).padStart(2, '0')} ${('' + d.getHours()).padStart(2, '0')}:${('' + d.getMinutes()).padStart(2, '0')}`
+  }
+}
 export const numberFormat = (Intl && Intl.NumberFormat) ? new Intl.NumberFormat(undefined) : {
   format (number) {
     return Number(number).toLocaleString()

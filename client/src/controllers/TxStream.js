@@ -1,5 +1,6 @@
 import { serverConnected, serverDelay, lastBlockId } from '../stores.js'
 import config from '../config.js'
+import api from '../utils/api.js'
 
 let mempoolTimer
 let lastBlockSeen
@@ -8,10 +9,7 @@ lastBlockId.subscribe(val => { lastBlockSeen = val })
 
 class TxStream {
   constructor () {
-    this.apiRoot = `${config.backend ? config.backend : window.location.host }${config.backendPort ? ':' + config.backendPort : ''}`
-    this.websocketUri = `${config.secureSocket ? 'wss://' : 'ws://'}${this.apiRoot}/ws/txs`
-    this.apiUri = `${config.secureSocket ? 'https://' : 'http://'}${this.apiRoot}`
-    console.log('connecting to ', this.websocketUri)
+    console.log('connecting to ', api.uri)
     this.reconnectBackoff = 250
     this.websocket = null
     this.setConnected(false)
@@ -46,7 +44,7 @@ class TxStream {
       if (this.websocket) this.disconnect()
       else {
         try {
-          this.websocket = new WebSocket(this.websocketUri)
+          this.websocket = new WebSocket(api.websocketUri)
           this.websocket.onopen = (evt) => { this.onopen(evt) }
           this.websocket.onclose = (evt) => { this.onclose(evt) }
           this.websocket.onmessage = (evt) => { this.onmessage(evt) }
@@ -125,7 +123,7 @@ class TxStream {
     if (id !== lastBlockSeen) {
       try {
         console.log('downloading block', id)
-        const response = await fetch(`${this.apiUri}/api/block/${id}`, {
+        const response = await fetch(`${api.uri}/api/block/${id}`, {
           method: 'GET'
         })
         let blockData = await response.json()

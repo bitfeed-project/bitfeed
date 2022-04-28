@@ -109,6 +109,7 @@ const defaultSettings = {
 	colorByFee: false,
 	fancyGraphics: true,
 	showMessages: true,
+	showSearch: true,
 	noTrack: false,
 	blocksEnabled: true
 }
@@ -149,12 +150,21 @@ export const highlight = writable([])
 export const newHighlightQuery = writable(null)
 export const highlightingFull = writable(false)
 
-const aspectRatio = window.innerWidth / window.innerHeight
-let isTinyScreen = (window.innerWidth < 480 && window.innerHeight < 480)
-export const tinyScreen = writable(isTinyScreen)
-
 export const pageWidth = writable(window.innerWidth)
+export const pageHeight = writable(window.innerHeight)
+
+export const tinyScreen = derived([pageWidth, pageHeight], ([$pageWidth, $pageHeight]) => {
+	const aspectRatio = $pageWidth / $pageHeight
+	return (aspectRatio >= 1 && pageWidth < 480) || (aspectRatio <= 1 && $pageHeight < 480)
+})
+export const compactScreen = derived([pageWidth, pageHeight], ([$pageWidth, $pageHeight]) => {
+	return ($pageWidth <= 640 && $pageHeight <= 550)
+})
 
 export const blocksEnabled = derived([settings], ([$settings]) => {
 	return !!$settings.blocksEnabled
 })
+
+export const latestBlockHeight = writable(null)
+export const highlightInOut = writable(null)
+export const loading = writable(0)

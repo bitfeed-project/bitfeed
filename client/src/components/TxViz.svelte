@@ -3,18 +3,24 @@
   import TxController from '../controllers/TxController.js'
   import TxRender from './TxRender.svelte'
   import getTxStream from '../controllers/TxStream.js'
-  import { settings, overlay, serverConnected, serverDelay, txCount, mempoolCount, mempoolScreenHeight, frameRate, avgFrameRate, blockVisible, tinyScreen, currentBlock, selectedTx, blockAreaSize, devEvents, devSettings, pageWidth } from '../stores.js'
+  import { settings, overlay, serverConnected, serverDelay, txCount, mempoolCount,
+           mempoolScreenHeight, frameRate, avgFrameRate, blockVisible, tinyScreen,
+           compactScreen, currentBlock, selectedTx, blockAreaSize, devEvents,
+           devSettings, pageWidth, pageHeight, loading } from '../stores.js'
   import BlockInfo from '../components/BlockInfo.svelte'
+  import SearchBar from '../components/SearchBar.svelte'
   import TxInfo from '../components/TxInfo.svelte'
   import Sidebar from '../components/Sidebar.svelte'
   import TransactionOverlay from '../components/TransactionOverlay.svelte'
   import AboutOverlay from '../components/AboutOverlay.svelte'
   import DonationOverlay from '../components/DonationOverlay.svelte'
   import SupportersOverlay from '../components/SupportersOverlay.svelte'
+  import LoadingAnimation from '../components/util/LoadingAnimation.svelte'
   import Alerts from '../components/alert/Alerts.svelte'
   import { numberFormat } from '../utils/format.js'
   import { exchangeRates, lastBlockId, haveSupporters, sidebarToggle } from '../stores.js'
   import { formatCurrency } from '../utils/fx.js'
+  import { fade } from 'svelte/transition'
   import config from '../config.js'
 
   let width = window.innerWidth - 20
@@ -79,6 +85,7 @@
 
   function resize () {
     $pageWidth = window.innerWidth
+    $pageHeight = window.innerHeight
     if (width !== window.innerWidth - 20 || height !== window.innerHeight - 20) {
       // don't force resize unless the viewport has actually changed
       width = window.innerWidth - 20
@@ -87,12 +94,6 @@
         width,
         height
       })
-    }
-    const aspectRatio = window.innerWidth / window.innerHeight
-    if ((aspectRatio >= 1 && window.innerWidth < 480) || (aspectRatio <= 1 && window.innerHeight < 480)) {
-      $tinyScreen = true
-    } else {
-      $tinyScreen = false
     }
   }
 
@@ -284,7 +285,9 @@
     .status {
       text-align: left;
       padding: 1rem;
-      flex-shrink: 0;
+      width: 20em;
+      min-width: 7.5em;
+      flex-shrink: 3;
       box-sizing: border-box;
 
       .row {
@@ -340,7 +343,19 @@
     }
   }
 
+  .search-bar-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    height: 3.5em;
+    flex-grow: 1;
+  }
 
+  .alert-bar-wrapper {
+    width: 20em;
+    flex-shrink: 0;
+  }
 
   .block-area-wrapper {
     height: 100%;
@@ -415,6 +430,43 @@
       margin: auto;
     }
   }
+
+  .loading-overlay {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 999;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    .loading-wrapper {
+      width: 100px;
+    }
+
+    .loading-msg {
+      margin: .4em 0 0;
+      font-size: 1em;
+      font-weight: bold;
+      color: white;
+      text-shadow: 0 0 10px black;
+    }
+  }
+
+  @media screen and (max-width: 640px) {
+    .search-bar-wrapper {
+      position: fixed;
+      top: 3.5em;
+      left: 0;
+      right: 0;
+    }
+  }
 </style>
 
 <svelte:window on:resize={resize} on:load={resize} on:click={pointerLeave} />
@@ -437,7 +489,7 @@
     </div>
 
     <div class="block-area-wrapper">
-      <div class="spacer"></div>
+      <div class="spacer" style="flex: {$pageWidth <= 640 ? '1.5' : '1'}"></div>
       <div class="block-area-outer" style="width: {$blockAreaSize}px; height: {$blockAreaSize}px">
         <div class="block-area">
           <BlockInfo block={$currentBlock} visible={$blockVisible && !$tinyScreen} on:hideBlock={hideBlock} />
@@ -471,10 +523,18 @@
         {/if}
       </div>
     </div>
-    <div class="spacer" />
-    {#if config.messagesEnabled && $settings.showMessages && !$tinyScreen }
-      <Alerts />
+    {#if $settings.showSearch && !$tinyScreen && !$compactScreen }
+      <div class="search-bar-wrapper">
+        <SearchBar />
+      </div>
     {/if}
+    <div class="alert-bar-wrapper">
+      {#if config.messagesEnabled && $settings.showMessages && !$tinyScreen }
+        <Alerts />
+      {:else}
+        <div class="spacer"></div>
+      {/if}
+    </div>
   </div>
 
   <Sidebar />
@@ -486,6 +546,15 @@
     {#if $haveSupporters}
       <SupportersOverlay />
     {/if}
+  {/if}
+
+  {#if $loading}
+    <div class="loading-overlay" in:fade={{ delay: 100, duration: 500 }} out:fade={{ duration: 200 }}>
+      <div class="loading-wrapper">
+        <LoadingAnimation />
+        <p class="loading-msg">loading</p>
+      </div>
+    </div>
   {/if}
 
   {#if config.dev && config.debug && $devSettings.guides }

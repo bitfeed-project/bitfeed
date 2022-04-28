@@ -1,8 +1,11 @@
+import api from './api.js'
+import BitcoinTx from '../models/BitcoinTx.js'
+import { detailTx, selectedTx, overlay, highlightInOut } from '../stores.js'
 import { addressToSPK } from './encodings.js'
 
 // Quick heuristic matching to guess what kind of search a query is for
 // ***does not validate that a given address/txid/block is valid***
-export function matchQuery (query) {
+function matchQuery (query) {
   if (!query || !query.length) return
 
   const q = query.toLowerCase()
@@ -25,6 +28,28 @@ export function matchQuery (query) {
       hash: query,
       value: query,
     }*/
+  }
+
+  // Looks like a transaction input?
+  if (/^[0-9]+:[a-f0-9]{64}$/.test(q)) {
+    const parts = q.split(':')
+    return {
+      query: 'input',
+      txid: parts[1],
+      output: parts[0],
+      value: q
+    }
+  }
+
+  // Looks like a transaction output?
+  if (/^[a-f0-9]{64}:[0-9]+$/.test(q)) {
+    const parts = q.split(':')
+    return {
+      query: 'output',
+      txid: parts[0],
+      output: parts[1],
+      value: q
+    }
   }
 
   // Looks like a transaction id?
@@ -78,4 +103,38 @@ export function matchQuery (query) {
   }
 
   return null
+}
+export {matchQuery as matchQuery}
+
+async function fetchTx (txid) {
+  if (!txid) return
+  try {
+    const response = await fetch(`${api.uri}/api/tx/${txid}`, {
+      method: 'GET'
+    })
+    const result = await response.json()
+    const txData = result.tx
+    txData.block = { height: result.blockheight, hash: result.blockhash, time: result.time * 1000 }
+    return new BitcoinTx(txData, null, (txData.inputs && txData.inputs[0] && txData.inputs[0].prev_txid === "0000000000000000000000000000000000000000000000000000000000000000"))
+  } catch (err) {
+    console.log("failed to fetch tx ", txid)
+    return null
+  }
+}
+
+export async function searchTx(txid, input, output) {
+  const searchResult = await fetchTx(txid)
+  if (searchResult) {
+    selectedTx.set(searchResult)
+    detailTx.set(searchResult)
+    overlay.set('tx')
+    if (input != null || output != null) highlightInOut.set({txid, input, output})
+    return true
+  } else {
+    return false
+  }
+}
+
+export async function searchBlock(hash) {
+  console.log("search block ", hash)
 }

@@ -1,5 +1,6 @@
 import TxView from './TxView.js'
 import config from '../config.js'
+import { subsidyAt } from '../utils/bitcoin.js'
 import { mixColor, pink, bluegreen, orange, teal, green, purple  } from '../utils/color.js'
 
 export default class BitcoinTx {
@@ -14,19 +15,23 @@ export default class BitcoinTx {
     // number of bytes encoding the block height
     const height_bytes = parseInt(cbInfo.substring(0,2), 16)
     // extract the specified number of bytes, reverse the endianness (reverse pairs of hex characters), parse as a hex string
-    const height = parseInt(cbInfo.substring(2,2 + (height_bytes * 2)).match(/../g).reverse().join(''),16)
+    const parsed_height = parseInt(cbInfo.substring(2,2 + (height_bytes * 2)).match(/../g).reverse().join(''),16)
     // save remaining bytes as free data
     const sig = cbInfo.substring(2 + (height_bytes * 2))
     const sigAscii = sig.match(/../g).reduce((parsed, hexChar) => {
       return parsed + String.fromCharCode(parseInt(hexChar, 16))
     }, "")
 
+    const height = block.height == null ? parsed_height : block.height
+
+    const subsidy = subsidyAt(height)
+
     this.coinbase = {
       height,
       sig,
       sigAscii,
-      fees: block.fees,
-      subsidy: this.value - (block.fees || 0)
+      fees: this.value - subsidy,
+      subsidy
     }
   }
 
@@ -92,7 +97,7 @@ export default class BitcoinTx {
   setBlock (block) {
     this.block = block
     this.state = this.block ? 'block' : 'pool'
-    if (this.block && this.block.coinbase && this.id == this.block.coinbase.id) {
+    if (this.block && (this.isCoinbase || (this.block.coinbase && this.id == this.block.coinbase.id))) {
       this.isCoinbase = true
       this.setCoinbaseData(this.block)
     }
