@@ -50,7 +50,7 @@ defmodule BitcoinStream.Router do
   match "/api/tx/:hash" do
     case get_tx(hash) do
       {:ok, tx} ->
-        put_resp_header(conn, "cache-control", "public, max-age=60, immutable")
+        put_resp_header(conn, "cache-control", "public, max-age=300, immutable")
         |> send_resp(200, tx)
       _ ->
         Logger.debug("Error getting tx hash");

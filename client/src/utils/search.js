@@ -175,7 +175,17 @@ async function fetchSpends (txid) {
   })
   if (!response) throw new Error('null response')
   if (response.status == 200) {
-    return response.json()
+    const result = await response.json()
+    return result.map(output => {
+      if (output) {
+        return {
+          txid: output[0],
+          vin: output[1],
+        }
+      } else {
+        return null
+      }
+    })
   } else {
     return null
   }
@@ -207,9 +217,7 @@ export async function searchTx (txid, input, output) {
   }
   try {
     let searchResult = await fetchTx(txid)
-    const spendResult = await fetchSpends(txid)
     if (searchResult) {
-      if (spendResult) searchResult = addSpends(searchResult, spendResult)
       selectedTx.set(searchResult)
       detailTx.set(searchResult)
       overlay.set('tx')

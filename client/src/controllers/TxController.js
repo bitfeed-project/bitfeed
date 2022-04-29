@@ -422,8 +422,6 @@ export default class TxController {
           await searchTx(selected.id)
           loading.decrement()
         } else {
-          const spendResult = await fetchSpends(selected.id)
-          if (spendResult) selected = addSpends(selected, spendResult)
           urlPath.set(`/tx/${selected.id}`)
           detailTx.set(selected)
           overlay.set('tx')

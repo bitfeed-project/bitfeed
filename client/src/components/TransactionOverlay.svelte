@@ -8,7 +8,7 @@ import { formatCurrency } from '../utils/fx.js'
 import { hlToHex, mixColor, teal, purple } from '../utils/color.js'
 import { SPKToAddress } from '../utils/encodings.js'
 import api from '../utils/api.js'
-import { searchTx, searchBlockHash, searchBlockHeight } from '../utils/search.js'
+import { searchTx, searchBlockHash, searchBlockHeight, fetchSpends } from '../utils/search.js'
 import { fade } from 'svelte/transition'
 
 function onClose () {
@@ -148,6 +148,23 @@ $: {
   }
 }
 
+let spends
+let loadingSpends = false
+$: {
+  if ($detailTx && $detailTx.id) {
+    spends = null
+    loadSpends($detailTx.id)
+  } else {
+    spends = null
+  }
+}
+
+async function loadSpends(txid, reload = false) {
+  if (!reload) loadingSpends = true
+  spends = await fetchSpends(txid)
+  loadingSpends = false
+}
+
 function calcSankeyLines(inputs, outputs, fee, value, totalHeight, svgWidth, flowWeight) {
   const total = fee + value
   const mergeOffset = (totalHeight - flowWeight) / 2
@@ -269,10 +286,10 @@ async function goToInput(e, input) {
   loading.decrement()
 }
 
-async function goToOutput(e, output) {
+async function goToSpend(e, spend) {
   e.preventDefault()
   loading.increment()
-  await searchTx(output.spend.txid, output.spend.vin)
+  await searchTx(spend.txid, spend.vin)
   loading.decrement()
 }
 
@@ -475,7 +492,7 @@ async function goToBlock(e) {
                 stroke-linejoin: miter;
                 fill: white;
                 fill-opacity: 0;
-                transition: fill-opacity 300ms;
+                transition: fill-opacity 300ms, stroke-opacity 300ms;
               }
 
               &.right {
@@ -486,6 +503,16 @@ async function goToBlock(e) {
             &:hover {
               .chevron .outline {
                 fill-opacity: 1;
+              }
+            }
+
+            &.loading {
+              .chevron .outline {
+                stroke-opacity: 0;
+                animation-name: svgpulse;
+                animation-delay: 500ms;
+                animation-duration: 2s;
+                animation-iteration-count: infinite;
               }
             }
           }
@@ -561,6 +588,20 @@ async function goToBlock(e) {
           margin: 30px 0;
         }
       }
+    }
+  }
+
+  @keyframes svgpulse {
+    0% {
+      fill-opacity: 0;
+    }
+
+    50% {
+      fill-opacity: 30%
+    }
+
+    100% {
+      fill-opacity: 0;
     }
   }
 </style>
@@ -701,8 +742,14 @@ async function goToBlock(e) {
           <p class="header">{$detailTx.outputs.length} output{$detailTx.outputs.length > 1 ? 's' : ''} {#if $detailTx.fee}+ fee{/if}</p>
           {#each outputs as output}
             <div class="entry" class:clickable={output.rest} class:highlight={highlight.out != null && highlight.out === output.index} on:click={() => clickItem(output)}>
-              {#if output.spend}
-                <a href="/tx/{output.spend.vin}:{output.spend.txid}" on:click={(e) => goToOutput(e, output)} class="put-link" transition:fade|local={{ duration: 200 }}>
+              {#if loadingSpends}
+                <span class="put-link loading" out:fade|local={{ duration: 500 }}>
+                  <svg class="chevron right" height="1.2em" width="1.2em" viewBox="0 0 512 512">
+                    <path d="M 107.628,257.54 327.095,38.078 404,114.989 261.506,257.483 404,399.978 327.086,476.89 Z" class="outline" />
+                  </svg>
+                </span>
+              {:else if spends[output.index]}
+                <a href="/tx/{spends[output.index].vin}:{spends[output.index].txid}" on:click={(e) => goToSpend(e, spends[output.index])} class="put-link" in:fade|local={{ duration: 200 }}>
                   <svg class="chevron right" height="1.2em" width="1.2em" viewBox="0 0 512 512">
                     <path d="M 107.628,257.54 327.095,38.078 404,114.989 261.506,257.483 404,399.978 327.086,476.89 Z" class="outline" />
                   </svg>
