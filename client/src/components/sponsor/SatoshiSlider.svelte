@@ -110,7 +110,7 @@ function cancelDrag (e) {
         </div>
       {/each}
     </div>
-    <span class="handle" style={handleStyle} on:pointerdown={startDrag}/>
+    <span class="handle" style={handleStyle} on:pointerdown={startDrag} draggable={false}/>
   </div>
 </div>
 
@@ -118,6 +118,7 @@ function cancelDrag (e) {
   .satoshi-slider {
     width: 100%;
     position: relative;
+    touch-action: none;
 
     .track {
       position: relative;

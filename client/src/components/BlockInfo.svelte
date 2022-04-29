@@ -282,6 +282,12 @@
     }
   }
 
+  @media screen and (max-height: 760px) {
+    .explore-button {
+      bottom: -1em;
+    }
+  }
+
   .block-info.landscape {
     bottom: unset;
     left: unset;

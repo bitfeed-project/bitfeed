@@ -575,7 +575,7 @@
   {/if}
 
   {#if $loading}
-    <div class="loading-overlay" in:fade={{ delay: 100, duration: 500 }} out:fade={{ duration: 200 }}>
+    <div class="loading-overlay" in:fade={{ delay: 500, duration: 500 }} out:fade={{ duration: 200 }}>
       <div class="loading-wrapper">
         <LoadingAnimation />
         <p class="loading-msg">loading</p>
