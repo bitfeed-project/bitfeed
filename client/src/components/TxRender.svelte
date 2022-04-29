@@ -4,7 +4,7 @@
   import fragShaderSrc from '../shaders/tx.frag'
   import TxSprite from '../models/TxSprite.js'
   import { color, hcl } from 'd3-color'
-  import { darkMode, frameRate, avgFrameRate, nativeAntialias, settings, devSettings } from '../stores.js'
+  import { darkMode, frameRate, avgFrameRate, nativeAntialias, settings, devSettings, freezeResize } from '../stores.js'
   import config from '../config.js'
 
   let canvas
@@ -31,6 +31,11 @@
   // Props
   export let controller
   export let running = false
+
+  let sizeFrozen
+  freezeResize.subscribe(val => {
+    sizeFrozen = val
+  })
 
   // Shader attributes
   // each attribute (except index) contains [x: startValue, y: endValue, z: startTime, w: rate]
@@ -72,9 +77,12 @@
     resizeCanvas()
   }
 
+  let resizeTimer
   function resizeCanvas () {
+    if (resizeTimer) clearTimeout(resizeTimer)
+    resizeTimer = null
     // var rect = canvas.parentNode.getBoundingClientRect()
-    if (canvas) {
+    if (canvas && !sizeFrozen) {
       displayWidth = window.innerWidth
       displayHeight = window.innerHeight
       if (simulateAntialiasing) {
@@ -86,7 +94,7 @@
       }
       if (gl) gl.viewport(0, 0, canvas.width, canvas.height)
     } else {
-      setTimeout(resizeCanvas, 500)
+      resizeTimer = setTimeout(resizeCanvas, 500)
     }
   }
 

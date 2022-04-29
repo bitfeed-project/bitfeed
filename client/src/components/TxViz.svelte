@@ -6,7 +6,7 @@
   import { settings, overlay, serverConnected, serverDelay, txCount, mempoolCount,
            mempoolScreenHeight, frameRate, avgFrameRate, blockVisible, tinyScreen,
            compactScreen, currentBlock, latestBlockHeight, selectedTx, blockAreaSize,
-           devEvents, devSettings, pageWidth, pageHeight, loading } from '../stores.js'
+           devEvents, devSettings, pageWidth, pageHeight, loading, freezeResize } from '../stores.js'
   import BlockInfo from '../components/BlockInfo.svelte'
   import SearchBar from '../components/SearchBar.svelte'
   import TxInfo from '../components/TxInfo.svelte'
@@ -53,6 +53,19 @@
     }
   }
 
+  let canvasWidth = '100%'
+  let canvasHeight = '100%'
+  $: {
+    if ($freezeResize) {
+      canvasWidth = `${window.innerWidth}px`
+      canvasHeight = `${window.innerHeight}px`
+    } else {
+      canvasWidth = '100%'
+      canvasHeight = '100%'
+      resize()
+    }
+  }
+
   onMount(() => {
     txController = new TxController({ width, height })
 
@@ -86,7 +99,7 @@
   function resize () {
     $pageWidth = window.innerWidth
     $pageHeight = window.innerHeight
-    if (width !== window.innerWidth - 20 || height !== window.innerHeight - 20) {
+    if ((width !== window.innerWidth - 20 || height !== window.innerHeight - 20) && !$freezeResize) {
       // don't force resize unless the viewport has actually changed
       width = window.innerWidth - 20
       height = window.innerHeight - 20
@@ -483,7 +496,7 @@
 <svelte:window on:resize={resize} on:load={resize} on:click={pointerLeave} />
 <!-- <svelte:window on:resize={resize} on:click={pointerMove} /> -->
 
-<div class="tx-area" class:light-mode={!$settings.darkMode}>
+<div class="tx-area" class:light-mode={!$settings.darkMode} style="width: {canvasWidth}; height: {canvasHeight}">
   <div class="canvas-wrapper" on:pointerleave={pointerLeave} on:pointermove={pointerMove} on:click={onClick}>
     <TxRender controller={txController} />
 
@@ -539,13 +552,15 @@
         <SearchBar />
       </div>
     {/if}
-    <div class="alert-bar-wrapper">
-      {#if config.messagesEnabled && $settings.showMessages && !$tinyScreen }
-        <Alerts />
-      {:else}
-        <div class="spacer"></div>
-      {/if}
-    </div>
+    {#if !$tinyScreen}
+      <div class="alert-bar-wrapper">
+        {#if config.messagesEnabled && $settings.showMessages}
+          <Alerts />
+        {:else}
+          <div class="spacer"></div>
+        {/if}
+      </div>
+    {/if}
   </div>
 
   <Sidebar />

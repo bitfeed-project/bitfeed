@@ -152,13 +152,24 @@ export const highlightingFull = writable(false)
 
 export const pageWidth = writable(window.innerWidth)
 export const pageHeight = writable(window.innerHeight)
+export const freezeResize = writable(false)
 
-export const tinyScreen = derived([pageWidth, pageHeight], ([$pageWidth, $pageHeight]) => {
-	const aspectRatio = $pageWidth / $pageHeight
-	return (aspectRatio >= 1 && pageWidth < 480) || (aspectRatio <= 1 && $pageHeight < 480)
+let lastTinyScreen
+export const tinyScreen = derived([pageWidth, pageHeight, freezeResize], ([$pageWidth, $pageHeight, $freezeResize]) => {
+	if ($freezeResize) return lastTinyScreen
+	else {
+		const aspectRatio = $pageWidth / $pageHeight
+		lastTinyScreen = (aspectRatio >= 1 && $pageWidth < 480) || (aspectRatio <= 1 && $pageHeight < 480)
+		return lastTinyScreen
+	}
 })
-export const compactScreen = derived([pageWidth, pageHeight], ([$pageWidth, $pageHeight]) => {
-	return ($pageWidth <= 640 && $pageHeight <= 550)
+let lastCompactScreen
+export const compactScreen = derived([pageWidth, pageHeight, freezeResize], ([$pageWidth, $pageHeight, $freezeResize]) => {
+	if ($freezeResize) return lastTinyScreen
+	else {
+		lastCompactScreen = ($pageWidth <= 640 && $pageHeight <= 550)
+		return lastCompactScreen
+	}
 })
 
 export const blocksEnabled = derived([settings], ([$settings]) => {

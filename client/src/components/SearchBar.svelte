@@ -10,7 +10,7 @@ import TxIcon from '../assets/icon/cil-arrow-circle-right.svg'
 import BlockIcon from '../assets/icon/grid-icon.svg'
 import { fly } from 'svelte/transition'
 import { matchQuery, searchTx, searchBlockHeight, searchBlockHash } from '../utils/search.js'
-import { selectedTx, detailTx, overlay, loading } from '../stores.js'
+import { selectedTx, detailTx, overlay, loading, freezeResize } from '../stores.js'
 
 const queryIcons = {
   txid: TxIcon,
@@ -53,6 +53,8 @@ function handleSearchError (err) {
 async function searchSubmit (e) {
   e.preventDefault()
 
+  if (document.activeElement) document.activeElement.blur()
+
   if (matchedQuery && matchedQuery.query !== 'address') {
     loading.increment()
     let searchErr
@@ -85,6 +87,17 @@ async function searchSubmit (e) {
   }
 
   return false
+}
+
+let freezeTimeout
+function focusIn(e) {
+  if (freezeTimeout) clearTimeout(freezeTimeout)
+  $freezeResize = true
+}
+async function focusOut(e) {
+  freezeTimeout = setTimeout(() => {
+    $freezeResize = false
+  }, 500)
 }
 
 </script>
@@ -219,7 +232,7 @@ async function searchSubmit (e) {
 
 <div class="input-wrapper" transition:fly={{ y: -25 }}>
   <form class="search-form" action="" on:submit={searchSubmit}>
-    <input class="search-input" type="text" bind:value={query} placeholder="txid, block id or block height">
+    <input class="search-input" type="text" bind:value={query} placeholder="txid, block id or block height" on:focusin={focusIn} on:focusout={focusOut}>
     <div class="clear-button" class:disabled={query == null || query === ''} on:click={clearInput} title="Clear">
       <Icon icon={CrossIcon}/>
     </div>

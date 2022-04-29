@@ -6,7 +6,7 @@
   import Icon from '../components/Icon.svelte'
   import closeIcon from '../assets/icon/cil-x-circle.svg'
   import { shortBtcFormat, longBtcFormat, dateFormat, numberFormat } from '../utils/format.js'
-  import { exchangeRates, settings, blocksEnabled, latestBlockHeight, blockTransitionDirection, loading } from '../stores.js'
+  import { exchangeRates, settings, blocksEnabled, latestBlockHeight, blockTransitionDirection, loading, freezeResize, pageWidth, pageHeight } from '../stores.js'
   import { formatCurrency } from '../utils/fx.js'
   import { searchBlockHeight } from '../utils/search.js'
 
@@ -19,6 +19,18 @@
   const newBlockDelay = 2000
   let restoring = false
   let formattedBlockValue = ''
+
+  let compactView
+  let landscape
+  let tinyView
+  $: {
+    if ($pageWidth && $pageHeight && !$freezeResize) {
+      const aspectRatio = ($pageWidth / $pageHeight)
+      landscape = aspectRatio >= 1
+      compactView = (aspectRatio < 1) && ($pageHeight < 760)
+      tinyView = (aspectRatio < 1) && ($pageHeight <= 400)
+    }
+  }
 
   $: {
     if (block && block.value) {
@@ -188,20 +200,12 @@
       display: none;
     }
 
-    @media (max-aspect-ratio: 1/1) and (max-height: 760px) {
+    &.compact {
       .compact {
         display: block;
       }
       .full-size {
         display: none;
-      }
-    }
-    @media (aspect-ratio: 1/1) and (max-height: 760px) {
-      .compact {
-        display: none;
-      }
-      .full-size {
-        display: block;
       }
     }
 
@@ -278,65 +282,61 @@
     }
   }
 
-  @media (min-aspect-ratio: 1/1) {
-    .block-info {
-      bottom: unset;
-      left: unset;
-      top: 0;
-      right: 100%;
-      padding-right: .5rem;
+  .block-info.landscape {
+    bottom: unset;
+    left: unset;
+    top: 0;
+    right: 100%;
+    padding-right: .5rem;
 
-      min-width: 0;
-      transform: translateX(0);
+    min-width: 0;
+    transform: translateX(0);
 
-      .data-row {
+    .data-row {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: flex-end;
+
+      &.spacer {
         display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: flex-end;
-
-        &.spacer {
-          display: flex;
-        }
-      }
-
-      .data-field {
-        white-space: wrap;
-        margin-left: 0;
-        margin-right: 5px;
-
-        &.title-field {
-          margin-bottom: .5em;
-        }
-
-        &.close-button {
-          display: none;
-        }
       }
     }
 
-    .standalone.close-button {
-      display: block;
-      position: absolute;
-      bottom: 100%;
-      left: 100%;
-      margin: 5px;
+    .data-field {
+      white-space: wrap;
+      margin-left: 0;
+      margin-right: 5px;
+
+      &.title-field {
+        margin-bottom: .5em;
+      }
+
+      &.close-button {
+        display: none;
+      }
     }
   }
 
-  @media (min-aspect-ratio: 1/1) and (max-height: 400px) {
-    .standalone.close-button {
-      top: 0;
-      bottom: unset;
-      margin-top: 0;
-    }
+  .standalone.landscape.close-button {
+    display: block;
+    position: absolute;
+    bottom: 100%;
+    left: 100%;
+    margin: 5px;
+  }
+
+  .standalone.tinyscreen.close-button {
+    top: 0;
+    bottom: unset;
+    margin-top: 0;
   }
 </style>
 
 {#key transitionDirection}
   {#each ((block != null && visible && $blocksEnabled) ? [block] : []) as block (block.id)}
     <div class="block-info-container" out:fly|local={flyOut} in:fly|local={flyIn}>
-      <div class="block-info">
+      <div class="block-info" class:compact={compactView} class:landscape={landscape}>
           <!-- <span class="data-field">Hash: { block.id }</span> -->
           <div class="full-size">
             <div class="data-row">
@@ -363,7 +363,7 @@
           </div>
           <div class="compact">
             <div class="data-row">
-              <span class="data-field title-field" title="{block.miner_sig}"><b>Latest Block: </b>{ numberFormat.format(block.height) }</span>
+              <span class="data-field title-field" title="{block.miner_sig}"><b>{#if block.height == $latestBlockHeight}Latest {/if}Block: </b>{ numberFormat.format(block.height) }</span>
               <button class="data-field close-button" on:click={hideBlock}><Icon icon={closeIcon} color="var(--palette-x)" /></button>
             </div>
             <div class="data-row">
@@ -371,7 +371,7 @@
               <span class="data-field">{ formattedBlockValue }</span>
             </div>
             <div class="data-row">
-              <span class="data-field">{ formatCount(block.txnCount) } transactions</span>
+              <span class="data-field">{ formatCount(block.txnCount) } transaction{block.txnCount == 1 ? '' : 's'}</span>
               {#if block.fees != null}
                 <span class="data-field">{ formatFee(block.avgFeerate) } sats/vb</span>
               {:else}
@@ -395,7 +395,7 @@
           </svg>
         </a>
       {/if}
-      <button class="close-button standalone" on:click={hideBlock}>
+      <button class="close-button standalone" class:landscape={landscape} class:tinyscreen={tinyView} on:click={hideBlock}>
         <Icon icon={closeIcon} color="var(--palette-x)" />
       </button>
     </div>

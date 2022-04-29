@@ -1,8 +1,10 @@
 <script>
+import { tick } from 'svelte'
 import Toggle from './util/Toggle.svelte'
 import Pill from './util/Pill.svelte'
 import Select from 'svelte-select'
 import { createEventDispatcher } from 'svelte'
+import { freezeResize } from '../stores.js'
 const dispatch = createEventDispatcher()
 
 export let value = false
@@ -26,6 +28,18 @@ function filterSelectItems (label, filterText, option) {
 function onSelect (e) {
   selectedOption = e.detail
   dispatch('input', selectedOption.value )
+  if (document.activeElement) document.activeElement.blur()
+}
+
+let freezeTimeout
+function focusIn(e) {
+  if (freezeTimeout) clearTimeout(freezeTimeout)
+  $freezeResize = true
+}
+async function focusOut(e) {
+  freezeTimeout = setTimeout(() => {
+    $freezeResize = false
+  }, 500)
 }
 </script>
 
@@ -73,7 +87,7 @@ function onSelect (e) {
     <span class="label">{ label }</span>
     <Pill active={value} left={falseLabel} right={trueLabel} />
   {:else if type === 'dropdown'}
-    <div class="select">
+    <div class="select" on:focusin={focusIn} on:focusOut={focusOut}>
       <Select items={ options } value={selectedOption} isSearchable={true} isClearable={false} itemFilter={filterSelectItems} placeholder={label} on:select={onSelect} showIndicator={true} />
     </div>
   {:else}

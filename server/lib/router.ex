@@ -34,7 +34,7 @@ defmodule BitcoinStream.Router do
   match "/api/block/:hash" do
     case get_block(hash) do
       {:ok, block, true} ->
-        put_resp_header(conn, "cache-control", "public, max-age=120, immutable")
+        put_resp_header(conn, "cache-control", "public, max-age=1200, immutable")
         |> send_resp(200, block)
 
         {:ok, block, false} ->

@@ -9,7 +9,7 @@ import CrossIcon from '../assets/icon/cil-x.svg'
 import AddressIcon from '../assets/icon/cil-wallet.svg'
 import TxIcon from '../assets/icon/cil-arrow-circle-right.svg'
 import { matchQuery } from '../utils/search.js'
-import { highlight, newHighlightQuery, highlightingFull } from '../stores.js'
+import { highlight, newHighlightQuery, highlightingFull, freezeResize } from '../stores.js'
 import { hlToHex, highlightA, highlightB, highlightC, highlightD, highlightE } from '../utils/color.js'
 
 const highlightColors = [highlightA, highlightB, highlightC, highlightD, highlightE]
@@ -145,8 +145,20 @@ async function remove (index) {
 
 function searchSubmit (e) {
   e.preventDefault()
+  if (document.activeElement) document.activeElement.blur()
   add()
   return false
+}
+
+let freezeTimeout
+function focusIn(e) {
+  if (freezeTimeout) clearTimeout(freezeTimeout)
+  $freezeResize = true
+}
+async function focusOut(e) {
+  freezeTimeout = setTimeout(() => {
+    $freezeResize = false
+  }, 500)
 }
 </script>
 
@@ -244,7 +256,7 @@ function searchSubmit (e) {
   <div class="input-wrapper" class:full={$highlightingFull} style="--input-color: {queryColorHex};">
     {#if !$highlightingFull }
       <form class="search-form" action="" on:submit={searchSubmit}>
-        <input class="search-input" type="text" bind:value={query} placeholder="Enter an address or txid...">
+        <input class="search-input" type="text" bind:value={query} placeholder="Enter an address or txid..." on:focusin={focusIn} on:focusOut={focusOut}>
         <button type="submit" class="search-submit" />
       </form>
     {:else}

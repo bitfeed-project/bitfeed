@@ -20,7 +20,7 @@ import MempoolLegend from '../components/MempoolLegend.svelte'
 import ContactTab from '../components/ContactTab.svelte'
 import SearchTab from '../components/SearchTab.svelte'
 
-import { sidebarToggle, overlay, currentBlock, blockVisible, haveSupporters } from '../stores.js'
+import { sidebarToggle, overlay, currentBlock, blockVisible, haveSupporters, freezeResize } from '../stores.js'
 
 let searchTabComponent
 
@@ -58,12 +58,14 @@ function showBlock () {
     align-items: flex-start;
 
     @media (max-width: 480px) and (max-height: 480px) {
-      display: none;
+      &:not(.frozen) {
+        display: none;
+      }
     }
   }
 </style>
 
-<div class="sidebar">
+<div class="sidebar" class:frozen={$freezeResize}>
   <!-- displayed in reverse order, to preserve proper z-index layering -->
   {#if blockHidden }
     <SidebarTab  on:click={() => showBlock()} tooltip="Show Latest Block">
