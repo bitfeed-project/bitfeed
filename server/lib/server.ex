@@ -13,7 +13,7 @@ defmodule BitcoinStream.Server do
     { rpc_pool_size, "" } = Integer.parse(System.get_env("RPC_POOL_SIZE") || "16");
     log_level = System.get_env("LOG_LEVEL");
     btc_host = System.get_env("BITCOIN_HOST");
-    indexed = System.get_env("INDEXED")
+    indexed = Mix.target == "public";
 
     case log_level do
       "debug" ->

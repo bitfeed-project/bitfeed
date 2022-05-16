@@ -17,7 +17,7 @@ defmodule BitcoinStream.Index.Spend do
   @impl true
   def init([indexed]) do
     :ets.new(:spend_cache, [:set, :public, :named_table]);
-    if (indexed != nil) do
+    if (indexed) do
       {:ok, dbref} = :rocksdb.open(String.to_charlist("data/index/spend"), [create_if_missing: true]);
       Process.send_after(self(), :sync, 2000);
       {:ok, [dbref, indexed, false]}
@@ -28,14 +28,14 @@ defmodule BitcoinStream.Index.Spend do
 
   @impl true
   def terminate(_reason, [dbref, indexed, _done]) do
-    if (indexed != nil) do
+    if (indexed) do
       :rocksdb.close(dbref)
     end
   end
 
   @impl true
   def handle_info(:sync, [dbref, indexed, done]) do
-    if (indexed != nil) do
+    if (indexed) do
       case sync(dbref) do
         true ->
           {:noreply, [dbref, indexed, true]}
@@ -57,7 +57,7 @@ defmodule BitcoinStream.Index.Spend do
 
   @impl true
   def handle_call({:get_tx_spends, txid}, _from, [dbref, indexed, done]) do
-    case get_transaction_spends(dbref, txid, (indexed != nil)) do
+    case get_transaction_spends(dbref, txid, (indexed)) do
       {:ok, spends} ->
         {:reply, {:ok, spends}, [dbref, indexed, done]}
 
@@ -69,7 +69,7 @@ defmodule BitcoinStream.Index.Spend do
 
   @impl true
   def handle_cast(:new_block, [dbref, indexed, done]) do
-    if (indexed != nil and done) do
+    if (indexed and done) do
       case sync(dbref) do
         true ->
           {:noreply, [dbref, indexed, true]}
@@ -86,7 +86,7 @@ defmodule BitcoinStream.Index.Spend do
   @impl true
   def handle_cast({:block_disconnected, hash}, [dbref, indexed, done]) do
     Logger.info("block disconnected: #{hash}");
-    if (indexed != nil and done) do
+    if (indexed and done) do
       block_disconnected(dbref, hash)
     end
     {:noreply, [dbref, indexed, done]}
