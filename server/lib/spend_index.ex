@@ -57,7 +57,7 @@ defmodule BitcoinStream.Index.Spend do
 
   @impl true
   def handle_call({:get_tx_spends, txid}, _from, [dbref, indexed, done]) do
-    case get_transaction_spends(dbref, txid, (indexed)) do
+    case get_transaction_spends(dbref, txid, indexed) do
       {:ok, spends} ->
         {:reply, {:ok, spends}, [dbref, indexed, done]}
 
@@ -297,12 +297,81 @@ defmodule BitcoinStream.Index.Spend do
     end
   end
 
+  defp batch_spend_status(txid, batch) do
+    with  batch_params <- Enum.map(batch, fn index -> [[txid, index, true], index] end),
+          {:ok, 200, txouts} <- RPC.batch_request(:rpc, "gettxout", batch_params, false),
+          utxos <- Enum.map(txouts, fn txout ->
+            case txout do
+              %{"error" => nil, "id" => index, "result" => nil} ->
+                { index, true }
+
+              %{"error" => nil, "id" => index, "result" => result} ->
+                { index, false }
+
+              %{"error" => error, "id" => index } ->
+                { index, false }
+            end
+          end),
+          utxoMap <- Enum.into(Enum.filter(utxos, fn utxo ->
+            case utxo do
+              { _index, false } ->
+                false
+
+              { _index, true } ->
+                true
+
+              _ -> false
+            end
+          end), %{})
+    do
+      {:ok, utxoMap}
+    else
+      _ ->
+        :error
+    end
+  end
+
+  defp get_spend_status(_txid, [], results) do
+    results
+  end
+
+  defp get_spend_status(txid, [next_batch | rest], results) do
+    case batch_spend_status(txid, next_batch) do
+      {:ok, result} ->
+        get_spend_status(txid, rest, Map.merge(results, result))
+
+      _ -> :err
+    end
+  end
+
+  defp get_spend_status(txid, numOutputs) do
+    index_list = Enum.to_list(0..(numOutputs - 1))
+    spend_map = get_spend_status(txid, Enum.chunk_every(index_list, 100), %{});
+    Enum.map(index_list, fn index ->
+      case Map.get(spend_map, index) do
+        true -> true
+
+        _ -> false
+      end
+    end)
+  end
+
+  defp get_spend_status(txid) do
+    with {:ok, 200, hextx} <- RPC.request(:rpc, "getrawtransaction", [txid]),
+         rawtx <- Base.decode16!(hextx, case: :lower),
+         {:ok, tx } <- BitcoinTx.decode(rawtx) do
+      get_spend_status(txid, length(tx.outputs))
+    else
+      _ -> []
+    end
+  end
+
   defp get_chain_spends(dbref, binary_txid, use_index) do
-    case (if use_index do :rocksdb.get(dbref, binary_txid, []) else :not_found end) do
+    case (if use_index do :rocksdb.get(dbref, binary_txid, []) else :unindexed end) do
       {:ok, spends} ->
         spends
 
-      :not_found ->
+      :unindexed ->
         # uninitialized, try to construct on-the-fly from RPC data
         txid = Base.encode16(binary_txid);
         with {:ok, 200, hextx} <- RPC.request(:rpc, "getrawtransaction", [txid]),
@@ -339,23 +408,29 @@ defmodule BitcoinStream.Index.Spend do
   end
 
   defp get_transaction_spends(dbref, txid, use_index) do
-    binary_txid = Base.decode16!(txid, [case: :lower]);
-    chain_spends = get_chain_spends(dbref, binary_txid, use_index);
-    spend_list = unpack_spends(chain_spends);
-    spend_list = add_mempool_spends(txid, spend_list);
-    {:ok, spend_list}
+    if (use_index) do
+      binary_txid = Base.decode16!(txid, [case: :lower]);
+      chain_spends = get_chain_spends(dbref, binary_txid, use_index);
+      spend_list = unpack_spends(chain_spends);
+      spend_list = add_mempool_spends(txid, spend_list);
+      {:ok, spend_list}
+    else
+      spend_list = get_spend_status(txid);
+      spend_list = add_mempool_spends(txid, spend_list);
+      {:ok, spend_list}
+    end
   end
 
   defp add_mempool_spends(_txid, _index, [],  added) do
     Enum.reverse(added)
   end
-  defp add_mempool_spends(txid, index, [false | rest], added) do
+  defp add_mempool_spends(txid, index, [spend | rest], added) when is_boolean(spend) do
     case :ets.lookup(:spend_cache, [txid, index]) do
       [] ->
-        add_mempool_spends(txid, index + 1, rest, [false | added])
-
-      [{[_index, _txid], spend}] ->
         add_mempool_spends(txid, index + 1, rest, [spend | added])
+
+      [{[_index, _txid], mempool_spend}] ->
+        add_mempool_spends(txid, index + 1, rest, [mempool_spend | added])
     end
   end
   defp add_mempool_spends(txid, index, [spend | rest], added) do

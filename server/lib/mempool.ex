@@ -397,7 +397,7 @@ defmodule BitcoinStream.Mempool do
 
 
   defp sync_batch(pid, batch) do
-    with  batch_params <- Enum.map(batch, fn txid -> [txid, txid] end),
+    with  batch_params <- Enum.map(batch, fn txid -> [[txid], txid] end),
           {:ok, 200, txs} <- RPC.batch_request(:rpc, "getrawtransaction", batch_params, true),
           failures <- Enum.filter(txs, fn %{"error" => error} -> error != nil end),
           successes <- Enum.filter(txs, fn %{"error" => error} -> error == nil end) do
@@ -411,7 +411,7 @@ defmodule BitcoinStream.Mempool do
         end);
         case length(failures) do
           count when count > 0 ->
-            IO.puts("failures: #{length(failures)}")
+            Logger.info("Failed to sync #{length(failures)} transactions")
 
           _ -> false
         end
@@ -435,7 +435,7 @@ defmodule BitcoinStream.Mempool do
   defp sync_mempool_txns(pid, [next_chunk | rest], count) do
     case sync_batch(pid, next_chunk) do
       {:ok, batch_count} ->
-        IO.puts("synced #{batch_count + count} mempool transactions");
+        Logger.info("synced #{batch_count + count} mempool transactions");
         sync_mempool_txns(pid, rest, batch_count + count)
 
       _ ->

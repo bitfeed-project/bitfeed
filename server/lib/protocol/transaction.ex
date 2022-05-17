@@ -125,7 +125,7 @@ defmodule BitcoinStream.Protocol.Transaction do
   end
 
   defp inflate_batch(batch, fail_fast) do
-    with  batch_params <- Enum.map(batch, fn input -> [input.prev_txid, input.prev_txid <> "#{input.prev_vout}"] end),
+    with  batch_params <- Enum.map(batch, fn input -> [[input.prev_txid], input.prev_txid <> "#{input.prev_vout}"] end),
           batch_map <- Enum.into(batch, %{}, fn p -> {p.prev_txid <> "#{p.prev_vout}", p} end),
           {:ok, 200, txs} <- RPC.batch_request(:rpc, "getrawtransaction", batch_params, fail_fast),
           successes <- Enum.filter(txs, fn %{"error" => error} -> error == nil end),

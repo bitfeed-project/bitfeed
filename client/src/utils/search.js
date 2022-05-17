@@ -190,9 +190,13 @@ async function fetchSpends (txid) {
     const result = await response.json()
     return result.map(output => {
       if (output) {
-        return {
-          txid: output[0],
-          vin: output[1],
+        if (output === true) {
+          return true
+        } else {
+          return {
+            txid: output[0],
+            vin: output[1],
+          }
         }
       } else {
         return null

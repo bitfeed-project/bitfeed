@@ -175,7 +175,7 @@ defmodule BitcoinStream.RPC do
   end
 
   defp do_batch_request(method, batch_params, host, port, creds) do
-    case Jason.encode(Enum.map(batch_params, fn [params, id] -> %{method: method, params: [params], id: id} end)) do
+    case Jason.encode(Enum.map(batch_params, fn [params, id] -> %{method: method, params: params, id: id} end)) do
       {:ok, body} ->
         async_request(body, host, port, creds)
 
