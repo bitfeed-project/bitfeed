@@ -86,20 +86,14 @@ defmodule BitcoinStream.Router do
   end
 
   defp get_block(hash) do
-    last_id = BlockData.get_block_id(:block_data);
-    if hash == last_id do
-      payload = BlockData.get_json_block(:block_data);
-      {:ok, payload, true}
+    with  {:ok, 200, block} <- RPC.request(:rpc, "getblock", [hash, 2]),
+          {:ok, cleaned} <- BlockData.clean_block(block),
+          {:ok, payload} <- Jason.encode(cleaned) do
+      {:ok, payload, false}
     else
-      with  {:ok, 200, block} <- RPC.request(:rpc, "getblock", [hash, 2]),
-            {:ok, cleaned} <- BlockData.clean_block(block),
-            {:ok, payload} <- Jason.encode(cleaned) do
-        {:ok, payload, false}
-      else
-        err ->
-          IO.inspect(err);
-          :err
-      end
+      err ->
+        IO.inspect(err);
+        :err
     end
   end
 

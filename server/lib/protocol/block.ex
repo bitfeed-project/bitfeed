@@ -11,7 +11,6 @@ defmodule BitcoinStream.Protocol.Block do
 """
 
 alias BitcoinStream.Protocol.Transaction, as: BitcoinTx
-alias BitcoinStream.Mempool, as: Mempool
 
 @derive Jason.Encoder
 defstruct [
@@ -24,7 +23,6 @@ defstruct [
   :nonce,
   :txn_count,
   :txns,
-  :fees,
   :value,
   :id
 ]
@@ -34,7 +32,7 @@ def decode(block_binary) do
         hex <- Base.encode16(block_binary, case: :lower),
         {:ok, raw_block} <- Bitcoinex.Block.decode(hex),
         id <- Bitcoinex.Block.block_id(block_binary),
-        {summarised_txns, total_value, total_fees} <- summarise_txns(raw_block.txns)
+        {summarised_txns, total_value} <- summarise_txns(raw_block.txns)
   do
     {:ok, %__MODULE__{
       version: raw_block.version,
@@ -45,7 +43,6 @@ def decode(block_binary) do
       bytes: bytes,
       txn_count: raw_block.txn_count,
       txns: summarised_txns,
-      fees: total_fees,
       value: total_value,
       id: id
     }}
@@ -64,7 +61,7 @@ def parse(hex) do
         bytes <- byte_size(block_binary),
         {:ok, raw_block} <- Bitcoinex.Block.decode(hex),
         id <- Bitcoinex.Block.block_id(block_binary),
-        {summarised_txns, total_value, total_fees} <- summarise_txns(raw_block.txns)
+        {summarised_txns, total_value} <- summarise_txns(raw_block.txns)
   do
     {:ok, %__MODULE__{
       version: raw_block.version,
@@ -75,7 +72,6 @@ def parse(hex) do
       bytes: bytes,
       txn_count: raw_block.txn_count,
       txns: summarised_txns,
-      fees: total_fees,
       value: total_value,
       id: id
     }}
@@ -92,8 +88,8 @@ end
 defp summarise_txns([coinbase | txns]) do
   # Mempool.is_done returns false while the mempool is still syncing
   with extended_coinbase <- BitcoinTx.extend(coinbase),
-       {summarised, total, fees} <- summarise_txns(txns, [], 0, 0, Mempool.is_done(:mempool)) do
-    {[extended_coinbase | summarised], total + extended_coinbase.value, fees}
+       {summarised, total} <- summarise_txns(txns, [], 0) do
+    {[extended_coinbase | summarised], total + extended_coinbase.value}
   else
     err ->
       Logger.error("Failed to inflate block");
@@ -102,29 +98,13 @@ defp summarise_txns([coinbase | txns]) do
   end
 end
 
-defp summarise_txns([], summarised, total, fees, do_inflate) do
-  if do_inflate do
-    {Enum.reverse(summarised), total, fees}
-  else
-    {Enum.reverse(summarised), total, nil}
-  end
+defp summarise_txns([], summarised, total) do
+  {Enum.reverse(summarised), total}
 end
 
-defp summarise_txns([next | rest], summarised, total, fees, do_inflate) do
-  extended_txn = BitcoinTx.extend(next)
-
-  # if the mempool is still syncing, inflating txs will take too long, so skip it
-  if do_inflate do
-    inflated_txn = BitcoinTx.inflate(extended_txn, false)
-    if (inflated_txn.inflated) do
-      # Logger.debug("Processing block tx #{length(summarised)}/#{length(summarised) + length(rest) + 1} | #{extended_txn.id}");
-      summarise_txns(rest, [inflated_txn | summarised], total + inflated_txn.value, fees + inflated_txn.fee, true)
-    else
-      summarise_txns(rest, [inflated_txn | summarised], total + inflated_txn.value, nil, false)
-    end
-  else
-    summarise_txns(rest, [extended_txn | summarised], total + extended_txn.value, nil, false)
-  end
+defp summarise_txns([next | rest], summarised, total) do
+  extended_txn = BitcoinTx.extend(next);
+  summarise_txns(rest, [extended_txn | summarised], total + extended_txn.value)
 end
 
 end

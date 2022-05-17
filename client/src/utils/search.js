@@ -140,19 +140,31 @@ async function fetchTx (txid) {
 async function fetchBlockByHash (hash) {
   if (!hash || (currentBlockVal && hash === currentBlockVal.id)) return true
   // try to fetch static block
+  console.log('downloading block', hash)
   let response = await fetch(`${api.uri}/api/block/${hash}`, {
     method: 'GET'
   })
-  if (!response) throw new Error('null response')
+  if (!response) {
+    console.log('failed to download block', hash)
+    throw new Error('null response')
+  }
   if (response && response.status == 200) {
     const blockData = await response.json()
+    let block
     if (blockData) {
       if (blockData.id) {
-        return new BitcoinBlock(blockData)
-      } else return BitcoinBlock.decompress(blockData)
+        block = new BitcoinBlock(blockData)
+      } else block = BitcoinBlock.decompress(blockData)
     }
+    if (block && block.id) {
+      console.log('downloaded block', block.id)
+    } else {
+      console.log('failed to download block', block.id)
+    }
+    return block
   }
 }
+export {fetchBlockByHash as fetchBlockByHash}
 
 async function fetchBlockByHeight (height) {
   if (height == null) return
