@@ -4,13 +4,13 @@ defmodule BitcoinStream.Server do
   use Application
 
   def start(_type, _args) do
-    { socket_port, "" } = Integer.parse(System.get_env("PORT"));
-    { zmq_tx_port, "" } = Integer.parse(System.get_env("BITCOIN_ZMQ_RAWTX_PORT"));
-    { zmq_block_port, "" } = Integer.parse(System.get_env("BITCOIN_ZMQ_RAWBLOCK_PORT"));
-    { zmq_sequence_port, "" } = Integer.parse(System.get_env("BITCOIN_ZMQ_SEQUENCE_PORT"));
-    { rpc_port, "" } = Integer.parse(System.get_env("BITCOIN_RPC_PORT"));
-    { rpc_pools, "" } = Integer.parse(System.get_env("RPC_POOLS"));
-    { rpc_pool_size, "" } = Integer.parse(System.get_env("RPC_POOL_SIZE"));
+    { socket_port, "" } = Integer.parse(System.get_env("PORT") || "5001");
+    { zmq_tx_port, "" } = Integer.parse(System.get_env("BITCOIN_ZMQ_RAWTX_PORT") || "28333");
+    { zmq_block_port, "" } = Integer.parse(System.get_env("BITCOIN_ZMQ_RAWBLOCK_PORT") || "28332");
+    { zmq_sequence_port, "" } = Integer.parse(System.get_env("BITCOIN_ZMQ_SEQUENCE_PORT") || "28334");
+    { rpc_port, "" } = Integer.parse(System.get_env("BITCOIN_RPC_PORT") || "8332");
+    { rpc_pools, "" } = Integer.parse(System.get_env("RPC_POOLS") || "1");
+    { rpc_pool_size, "" } = Integer.parse(System.get_env("RPC_POOL_SIZE") || "16");
     log_level = System.get_env("LOG_LEVEL");
     btc_host = System.get_env("BITCOIN_HOST");
     indexed = System.get_env("INDEXED")
