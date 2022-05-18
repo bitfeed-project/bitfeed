@@ -484,7 +484,7 @@ async function goToBlock(e) {
             justify-content: center;
             align-items: center;
 
-            .chevron {
+            .raw-svg {
               .outline {
                 stroke: white;
                 stroke-width: 32;
@@ -501,13 +501,13 @@ async function goToBlock(e) {
             }
 
             &:hover {
-              .chevron .outline {
+              .raw-svg .outline {
                 fill-opacity: 1;
               }
             }
 
             &.loading {
-              .chevron .outline {
+              .raw-svg .outline {
                 stroke-opacity: 0;
                 animation-name: svgpulse;
                 animation-delay: 500ms;
@@ -519,7 +519,7 @@ async function goToBlock(e) {
             &.disabled {
               cursor: normal;
               opacity: 0.5;
-              .chevron .outline {
+              .raw-svg .outline {
                 stroke-opacity: 1;
                 fill-opacity: 1;
               }
@@ -710,7 +710,7 @@ async function goToBlock(e) {
             <div class="entry" class:clickable={input.rest} class:highlight={highlight.in != null && highlight.in === index} on:click={() => clickItem(input)}>
               {#if input.prev_txid }
                 <a href="/tx/{input.prev_txid}:{input.prev_vout}" on:click={(e) => goToInput(e, input)} class="put-link" transition:fade|local={{ duration: 200 }}>
-                  <svg class="chevron left" height="1.2em" width="1.2em" viewBox="0 0 512 512">
+                  <svg class="raw-svg left" height="1.2em" width="1.2em" viewBox="0 0 512 512">
                     <path d="M 107.628,257.54 327.095,38.078 404,114.989 261.506,257.483 404,399.978 327.086,476.89 Z" class="outline" />
                   </svg>
                 </a>
@@ -753,19 +753,25 @@ async function goToBlock(e) {
             <div class="entry" class:clickable={output.rest} class:highlight={highlight.out != null && highlight.out === output.index} on:click={() => clickItem(output)}>
               {#if loadingSpends}
                 <span class="put-link loading" out:fade|local={{ duration: 500 }}>
-                  <svg class="chevron right" height="1.2em" width="1.2em" viewBox="0 0 512 512">
+                  <svg class="raw-svg right" height="1.2em" width="1.2em" viewBox="0 0 512 512">
                     <path d="M 107.628,257.54 327.095,38.078 404,114.989 261.506,257.483 404,399.978 327.086,476.89 Z" class="outline" />
+                  </svg>
+                </span>
+              {:else if output.opreturn }
+                <span class="put-link disabled" in:fade|local={{ duration: 200 }} title="unspendable">
+                  <svg class="raw-svg" height="1.2em" width="1.2em" viewBox="0 0 512 512">
+                    <path d="M 69.323814,148.51977 148.51977,69.323812 256,176.80404 363.48024,69.3238 442.67619,148.51977 335.19596,256 442.6762,363.48023 363.48023,442.67619 256,335.19596 148.51978,442.6762 69.323812,363.48023 176.80404,256 Z" class="outline" />
                   </svg>
                 </span>
               {:else if spends[output.index] == true}
               <span class="put-link disabled" in:fade|local={{ duration: 200 }} title="spent">
-                <svg class="chevron right" height="1.2em" width="1.2em" viewBox="0 0 512 512">
+                <svg class="raw-svg right" height="1.2em" width="1.2em" viewBox="0 0 512 512">
                   <path d="M 107.628,257.54 327.095,38.078 404,114.989 261.506,257.483 404,399.978 327.086,476.89 Z" class="outline" />
                 </svg>
               </span>
               {:else if spends[output.index]}
                 <a href="/tx/{spends[output.index].vin}:{spends[output.index].txid}" on:click={(e) => goToSpend(e, spends[output.index])} title="spent" class="put-link" in:fade|local={{ duration: 200 }}>
-                  <svg class="chevron right" height="1.2em" width="1.2em" viewBox="0 0 512 512">
+                  <svg class="raw-svg right" height="1.2em" width="1.2em" viewBox="0 0 512 512">
                     <path d="M 107.628,257.54 327.095,38.078 404,114.989 261.506,257.483 404,399.978 327.086,476.89 Z" class="outline" />
                   </svg>
                 </a>

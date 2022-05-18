@@ -182,7 +182,7 @@ defmodule BitcoinStream.Protocol.Transaction do
 
   # Retrieves cached inputs if available,
   # otherwise inflates inputs in batches of up to 100
-  def inflate_inputs(txid, inputs, fail_fast) do
+  def inflate_inputs(_txid, inputs, fail_fast) do
     inflate_inputs(Enum.chunk_every(inputs, 100), [], 0, fail_fast)
   end
 

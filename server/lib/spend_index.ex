@@ -305,10 +305,10 @@ defmodule BitcoinStream.Index.Spend do
               %{"error" => nil, "id" => index, "result" => nil} ->
                 { index, true }
 
-              %{"error" => nil, "id" => index, "result" => result} ->
+              %{"error" => nil, "id" => index, "result" => _result} ->
                 { index, false }
 
-              %{"error" => error, "id" => index } ->
+              %{"error" => _error, "id" => index } ->
                 { index, false }
             end
           end),

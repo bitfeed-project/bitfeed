@@ -109,7 +109,7 @@ defmodule BitcoinStream.Bridge.Sequence do
 
         # Transaction removed from mempool for non block inclusion reason
         'R' ->
-          <<seq::little-size(64)>> = rest;
+          <<_seq::little-size(64)>> = rest;
           case Mempool.drop(:mempool, hash) do
             count when is_integer(count) ->
               send_drop_tx(hash, count);
@@ -127,7 +127,7 @@ defmodule BitcoinStream.Bridge.Sequence do
           true
 
         # Don't care about other events
-        other ->
+        _other ->
           true
       end
     else
