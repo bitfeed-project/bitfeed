@@ -78,7 +78,9 @@ defmodule BitcoinStream.Index.Spend do
           {:noreply, [dbref, indexed, false]}
       end
     else
-      Logger.info("Already building spend index");
+      if (indexed) do
+        Logger.info("Already building spend index");
+      end
       {:noreply, [dbref, indexed, false]}
     end
   end

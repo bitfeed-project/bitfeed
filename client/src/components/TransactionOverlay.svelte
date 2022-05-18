@@ -757,19 +757,13 @@ async function goToBlock(e) {
                     <path d="M 107.628,257.54 327.095,38.078 404,114.989 261.506,257.483 404,399.978 327.086,476.89 Z" class="outline" />
                   </svg>
                 </span>
-              {:else if output.opreturn }
-                <span class="put-link disabled" in:fade|local={{ duration: 200 }} title="unspendable">
-                  <svg class="raw-svg" height="1.2em" width="1.2em" viewBox="0 0 512 512">
-                    <path d="M 69.323814,148.51977 148.51977,69.323812 256,176.80404 363.48024,69.3238 442.67619,148.51977 335.19596,256 442.6762,363.48023 363.48023,442.67619 256,335.19596 148.51978,442.6762 69.323812,363.48023 176.80404,256 Z" class="outline" />
-                  </svg>
-                </span>
-              {:else if spends[output.index] == true}
+              {:else if (!output.opreturn && spends[output.index] == true)}
               <span class="put-link disabled" in:fade|local={{ duration: 200 }} title="spent">
                 <svg class="raw-svg right" height="1.2em" width="1.2em" viewBox="0 0 512 512">
                   <path d="M 107.628,257.54 327.095,38.078 404,114.989 261.506,257.483 404,399.978 327.086,476.89 Z" class="outline" />
                 </svg>
               </span>
-              {:else if spends[output.index]}
+              {:else if (!output.opreturn && spends[output.index])}
                 <a href="/tx/{spends[output.index].vin}:{spends[output.index].txid}" on:click={(e) => goToSpend(e, spends[output.index])} title="spent" class="put-link" in:fade|local={{ duration: 200 }}>
                   <svg class="raw-svg right" height="1.2em" width="1.2em" viewBox="0 0 512 512">
                     <path d="M 107.628,257.54 327.095,38.078 404,114.989 261.506,257.483 404,399.978 327.086,476.89 Z" class="outline" />
