@@ -83,9 +83,6 @@ defmodule BitcoinStream.Mempool.Sync do
             Logger.debug("updated to #{newcount}");
           end
 
-          # repair transactions with deflated inputs
-          Mempool.repair(:mempool);
-
           # next check in 1 minute
           Process.send_after(self(), :resync, 60 * 1000)
         else

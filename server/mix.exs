@@ -4,7 +4,7 @@ defmodule BitcoinStream.MixProject do
   def project do
     [
       app: :bitcoin_stream,
-      version: "2.3.0",
+      version: "2.3.1",
       elixir: "~> 1.10",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -42,7 +42,7 @@ defmodule BitcoinStream.MixProject do
       {:corsica, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
       {:jason, "~> 1.1"},
-      {:rocksdb, "~> 1.6"}
+      {:rocksdb, "~> 1.6", targets: :public}
     ]
   end
 end

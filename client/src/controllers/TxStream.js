@@ -1,6 +1,7 @@
 import { serverConnected, serverDelay, lastBlockId } from '../stores.js'
 import config from '../config.js'
 import api from '../utils/api.js'
+import { fetchBlockByHash } from '../utils/search.js'
 
 let mempoolTimer
 let lastBlockSeen
@@ -121,17 +122,8 @@ class TxStream {
   async fetchBlock (id, calledOnLoad) {
     if (!id) return
     if (id !== lastBlockSeen) {
-      try {
-        console.log('downloading block', id)
-        const response = await fetch(`${api.uri}/api/block/${id}`, {
-          method: 'GET'
-        })
-        let blockData = await response.json()
-        console.log('downloaded block', id)
-        window.dispatchEvent(new CustomEvent('bitcoin_block', { detail: { block: blockData, realtime: !calledOnLoad} }))
-      } catch (err) {
-        console.log("failed to download block ", id)
-      }
+      const blockData = await fetchBlockByHash(id)
+      window.dispatchEvent(new CustomEvent('bitcoin_block', { detail: { block: blockData, realtime: !calledOnLoad} }))
     } else {
       console.log('already seen block ', lastBlockSeen)
     }

@@ -120,7 +120,7 @@ $: {
     }
   } else inputs = []
   if ($detailTx && $detailTx.outputs) {
-    if ($detailTx.isCoinbase || !$detailTx.is_inflated || !$detailTx.fee) {
+    if ($detailTx.isCoinbase || $detailTx.fee == null) {
       outputs = expandAddresses($detailTx.outputs, truncate)
     } else {
       outputs = [{address: 'fee', value: $detailTx.fee, fee: true}, ...expandAddresses($detailTx.outputs, truncate)]
@@ -515,6 +515,15 @@ async function goToBlock(e) {
                 animation-iteration-count: infinite;
               }
             }
+
+            &.disabled {
+              cursor: normal;
+              opacity: 0.5;
+              .chevron .outline {
+                stroke-opacity: 1;
+                fill-opacity: 1;
+              }
+            }
           }
         }
 
@@ -660,7 +669,7 @@ async function goToBlock(e) {
           </div>
         </div>
       {:else}
-        {#if $detailTx.is_inflated && $detailTx.fee != null && $detailTx.feerate != null}
+        {#if $detailTx.fee != null && $detailTx.feerate != null}
           <div class="pane fields">
             <div class="field">
               <span class="label">fee</span>
@@ -748,8 +757,14 @@ async function goToBlock(e) {
                     <path d="M 107.628,257.54 327.095,38.078 404,114.989 261.506,257.483 404,399.978 327.086,476.89 Z" class="outline" />
                   </svg>
                 </span>
+              {:else if spends[output.index] == true}
+              <span class="put-link disabled" in:fade|local={{ duration: 200 }} title="spent">
+                <svg class="chevron right" height="1.2em" width="1.2em" viewBox="0 0 512 512">
+                  <path d="M 107.628,257.54 327.095,38.078 404,114.989 261.506,257.483 404,399.978 327.086,476.89 Z" class="outline" />
+                </svg>
+              </span>
               {:else if spends[output.index]}
-                <a href="/tx/{spends[output.index].vin}:{spends[output.index].txid}" on:click={(e) => goToSpend(e, spends[output.index])} class="put-link" in:fade|local={{ duration: 200 }}>
+                <a href="/tx/{spends[output.index].vin}:{spends[output.index].txid}" on:click={(e) => goToSpend(e, spends[output.index])} title="spent" class="put-link" in:fade|local={{ duration: 200 }}>
                   <svg class="chevron right" height="1.2em" width="1.2em" viewBox="0 0 512 512">
                     <path d="M 107.628,257.54 327.095,38.078 404,114.989 261.506,257.483 404,399.978 327.086,476.89 Z" class="outline" />
                   </svg>

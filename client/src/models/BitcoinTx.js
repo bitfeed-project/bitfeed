@@ -49,6 +49,23 @@ export default class BitcoinTx {
     this.view = new TxView(this)
   }
 
+  mergeData ({ version, inflated, preview, id, value, fee, vbytes, numInputs, inputs, outputs, time, block }, isCoinbase=false) {
+    this.setData({
+      version,
+      inflated: this.is_inflated || inflated,
+      preview: this.is_preview && preview,
+      id,
+      value,
+      fee: this.fee || fee,
+      vbytes,
+      numInputs: this.numInputs || numInputs,
+      inputs: this.inputs,
+      outputs: this.outputs,
+      time,
+      block
+    })
+  }
+
   setData ({ version, inflated, preview, id, value, fee, vbytes, numInputs, inputs, outputs, time, block }, isCoinbase=false) {
     this.version = version
     this.is_inflated = !!inflated

@@ -366,96 +366,87 @@ defmodule BitcoinStream.Mempool do
   end
 
   defp sync_mempool(pid, txns) do
-    sync_mempool_txns(pid, txns, 0)
+    sync_mempool_txns(pid, txns)
   end
+  #
+  # defp sync_mempool_txn(pid, txid) do
+  #   case :ets.lookup(:mempool_cache, txid) do
+  #     [] ->
+  #       with  {:ok, 200, hextx} <- RPC.request(:rpc, "getrawtransaction", [txid]),
+  #             rawtx <- Base.decode16!(hextx, case: :lower),
+  #             {:ok, txn } <- BitcoinTx.decode(rawtx) do
+  #         register(pid, txid, nil, false);
+  #         insert(pid, txid, txn)
+  #       else
+  #         _ -> Logger.debug("sync_mempool_txn failed #{txid}")
+  #       end
+  #
+  #     [_] -> true
+  #   end
+  # end
+  #
+  # defp sync_mempool_txns(_, [], count) do
+  #   count
+  # end
+  #
+  # defp sync_mempool_txns(pid, [head | tail], count) do
+  #   Logger.debug("Syncing mempool tx #{count}/#{count + length(tail) + 1} | #{head}");
+  #   sync_mempool_txn(pid, head);
+  #   sync_mempool_txns(pid, tail, count + 1)
+  # end
 
-  defp sync_mempool_txn(pid, txid) do
-    case :ets.lookup(:mempool_cache, txid) do
-      [] ->
-        with  {:ok, 200, hextx} <- RPC.request(:rpc, "getrawtransaction", [txid]),
-              rawtx <- Base.decode16!(hextx, case: :lower),
-              {:ok, txn } <- BitcoinTx.decode(rawtx),
-              inflated_txn <- BitcoinTx.inflate(txn, false) do
-          register(pid, txid, nil, false);
-          insert(pid, txid, inflated_txn)
-        else
-          _ -> Logger.debug("sync_mempool_txn failed #{txid}")
+
+  defp sync_batch(pid, batch) do
+    with  batch_params <- Enum.map(batch, fn txid -> [[txid], txid] end),
+          {:ok, 200, txs} <- RPC.batch_request(:rpc, "getrawtransaction", batch_params, true),
+          failures <- Enum.filter(txs, fn %{"error" => error} -> error != nil end),
+          successes <- Enum.filter(txs, fn %{"error" => error} -> error == nil end) do
+        Enum.each(successes, fn tx ->
+          with  %{"error" => nil, "id" => _txid, "result" => hextx} <- tx,
+                rawtx <- Base.decode16!(hextx, case: :lower),
+                {:ok, txn } <- BitcoinTx.decode(rawtx) do
+            register(pid, txn.id, nil, false);
+            insert(pid, txn.id, txn)
+          end
+        end);
+        case length(failures) do
+          count when count > 0 ->
+            Logger.info("Failed to sync #{length(failures)} transactions")
+
+          _ -> false
         end
-
-      [_] -> true
-    end
-  end
-
-  defp sync_mempool_txns(_, [], count) do
-    count
-  end
-
-  defp sync_mempool_txns(pid, [head | tail], count) do
-    Logger.debug("Syncing mempool tx #{count}/#{count + length(tail) + 1} | #{head}");
-    sync_mempool_txn(pid, head);
-    sync_mempool_txns(pid, tail, count + 1)
-  end
-
-  # when transaction inflation fails, we fall back to storing deflated inputs in the cache
-  # the repair function scans the mempool cache for deflated inputs, and attempts to reinflate
-  def repair(_pid) do
-    Logger.debug("Checking mempool integrity");
-    repaired = :ets.foldl(&(repair_mempool_txn/2), 0, :mempool_cache);
-    if repaired > 0 do
-      Logger.info("MEMPOOL CHECK COMPLETE #{repaired} REPAIRED");
+        {:ok, length(successes)}
     else
-      Logger.debug("MEMPOOL REPAIR NOT REQUIRED");
+      _ ->
+        :error
     end
-    :ok
+
   catch
     err ->
-      Logger.error("Failed to repair mempool: #{inspect(err)}");
+      Logger.error("unexpected error syncing batch");
+      IO.inspect(err);
       :error
   end
 
-  defp repair_mempool_txn(entry, repaired) do
-    case entry do
-      # unprocessed
-      {_, nil, _} ->
-        repaired
-
-      # valid entry, already inflated
-      {_txid, {_inputs, _total, true}, _} ->
-        repaired
-
-      # valid entry, not inflated
-      # repair
-      {txid, {_inputs, _total, false}, status} ->
-        Logger.debug("repairing #{txid}");
-        with  {:ok, 200, hextx} <- RPC.request(:rpc, "getrawtransaction", [txid]),
-              rawtx <- Base.decode16!(hextx, case: :lower),
-              {:ok, txn } <- BitcoinTx.decode(rawtx),
-              inflated_txn <- BitcoinTx.inflate(txn, false) do
-          if inflated_txn.inflated do
-            :ets.insert(:mempool_cache, {txid, { inflated_txn.inputs, inflated_txn.value + inflated_txn.fee, inflated_txn.inflated }, status});
-            cache_spends(txid, inflated_txn.inputs);
-            Logger.debug("repaired #{repaired} mempool txns #{txid}");
-            repaired + 1
-          else
-            Logger.debug("failed to inflate transaction for repair #{txid}");
-            repaired
-          end
-
-        else
-          _ -> Logger.debug("failed to fetch transaction for repair #{txid}");
-          repaired
-        end
-
-      # catch all
-      other ->
-        Logger.error("unexpected cache entry: #{inspect(other)}");
-        repaired
-    end
-  catch
-    err ->
-      Logger.debug("unexpected error repairing transaction: #{inspect(err)}");
-      repaired
+  defp sync_mempool_txns(_pid, [], count) do
+    {:ok, count}
   end
+
+  defp sync_mempool_txns(pid, [next_chunk | rest], count) do
+    case sync_batch(pid, next_chunk) do
+      {:ok, batch_count} ->
+        Logger.info("synced #{batch_count + count} mempool transactions");
+        sync_mempool_txns(pid, rest, batch_count + count)
+
+      _ ->
+        :failed
+    end
+  end
+
+  def sync_mempool_txns(pid, txns) do
+    sync_mempool_txns(pid, Enum.chunk_every(txns, 100), 0)
+  end
+
 
   defp cache_sync_ids(pid, txns) do
     :ets.delete_all_objects(:sync_cache);
