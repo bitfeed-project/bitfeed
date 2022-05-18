@@ -4,7 +4,7 @@ defmodule BitcoinStream.MixProject do
   def project do
     [
       app: :bitcoin_stream,
-      version: "2.3.0",
+      version: "2.3.1",
       elixir: "~> 1.10",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
