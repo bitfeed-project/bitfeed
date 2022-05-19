@@ -91,7 +91,7 @@ function expandAddresses(items, truncate) {
   })
   if (truncate && items.length > 100) {
     const remainingCount = items.length - 100
-    const remainingValue = items.slice(100).reduce((acc, item) => { return acc + item.value }, 0)
+    const remainingValue = items.slice(100).reduce((acc, item) => { return acc + (item.value || 0) }, 0)
     expanded.push({
       address: `+ ${remainingCount} more`,
       value: remainingValue,
@@ -173,36 +173,32 @@ function calcSankeyLines(inputs, outputs, fee, value, totalHeight, svgWidth, flo
   let maxXOffset = 0
 
   const inLines = inputs.map((input, index) => {
-    if (input.value == null) {
-      return { line: [], weight: 0, index, total: inputs.length, in: true }
-    } else {
-      const weight = (input.value / total) * flowWeight
-      const height = ((index + 0.5) * rowHeight)
-      const step = (weight / 2)
-      const line = []
-      const yOffset = 0.5
+    const weight = ((input.value || 0) / total) * flowWeight
+    const height = ((index + 0.5) * rowHeight)
+    const step = (weight / 2)
+    const line = []
+    const yOffset = 0.5
 
-      line.push({ x: triangleWidth, y: height })
-      line.push({ x: triangleWidth + (0.25 * svgWidth), y: height })
-      line.push({ x: 0.425 * svgWidth, y: mergeOffset + cumThick + step + yOffset })
-      line.push({ x: (0.5 * svgWidth) + 1, y: mergeOffset + cumThick + step + yOffset })
+    line.push({ x: triangleWidth, y: height })
+    line.push({ x: triangleWidth + (0.25 * svgWidth), y: height })
+    line.push({ x: 0.425 * svgWidth, y: mergeOffset + cumThick + step + yOffset })
+    line.push({ x: (0.5 * svgWidth) + 1, y: mergeOffset + cumThick + step + yOffset })
 
-      const dy = line[1].y - line[2].y
-      const dx = line[2].x - line[1].x
-      const miterOffset = getMiterOffset(weight, dy, dx)
-      xOffset += miterOffset
-      line[1].x += xOffset
-      line[2].x += xOffset
-      xOffset += miterOffset
-      maxXOffset = Math.max(xOffset, maxXOffset)
+    const dy = line[1].y - line[2].y
+    const dx = line[2].x - line[1].x
+    const miterOffset = getMiterOffset(weight, dy, dx)
+    xOffset += miterOffset
+    line[1].x += xOffset
+    line[2].x += xOffset
+    xOffset += miterOffset
+    maxXOffset = Math.max(xOffset, maxXOffset)
 
-      // inLines.push({ line, weight })
-      // inLines.push({ line: [{x: line[1].x + miterOffset, y: line[1].y - (weight / 2)}, {x: line[2].x + miterOffset, y: line[2].y - (weight / 2)}], weight: 1})
+    // inLines.push({ line, weight })
+    // inLines.push({ line: [{x: line[1].x + miterOffset, y: line[1].y - (weight / 2)}, {x: line[2].x + miterOffset, y: line[2].y - (weight / 2)}], weight: 1})
 
-      cumThick += weight
+    cumThick += weight
 
-      return { line, weight, index, total: inputs.length, in: true }
-    }
+    return { line, weight, index, total: inputs.length, in: true }
   })
   inLines.forEach(line => {
     if (line.line.length) {
