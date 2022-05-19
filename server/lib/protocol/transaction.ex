@@ -21,6 +21,7 @@ defmodule BitcoinStream.Protocol.Transaction do
   defstruct [
     :version,
     :inflated,
+    :partial,
     :vbytes,
     :inputs,
     :outputs,
@@ -99,6 +100,7 @@ defmodule BitcoinStream.Protocol.Transaction do
         %__MODULE__{
           version: txn.version,
           inflated: false,
+          partial: true,
           vbytes: txn.vbytes,
           inputs: inputs,
           outputs: txn.outputs,
@@ -163,27 +165,35 @@ defmodule BitcoinStream.Protocol.Transaction do
       :error
   end
 
-  defp inflate_inputs([], inflated, total, _fail_fast) do
+  defp inflate_inputs([], inflated, total, _fail_fast, false) do
     {:ok, inflated, total}
   end
 
-  defp inflate_inputs([next_chunk | rest], inflated, total, fail_fast) do
-    case inflate_batch(next_chunk, fail_fast) do
-      {:ok, inflated_chunk, chunk_total} ->
-        inflate_inputs(rest, inflated ++ inflated_chunk, total + chunk_total, fail_fast)
-      _ ->
-        {:failed, inflated ++ next_chunk ++ rest, 0}
+  defp inflate_inputs([], inflated, total, _fail_fast, true) do
+    {:failed, inflated, 0}
+  end
+
+  defp inflate_inputs([next_chunk | rest], inflated, total, fail_fast, failed) do
+    if (failed) do
+      inflate_inputs(rest, inflated ++ next_chunk, total, fail_fast, true)
+    else
+      case inflate_batch(next_chunk, fail_fast) do
+        {:ok, inflated_chunk, chunk_total} ->
+          inflate_inputs(rest, inflated ++ inflated_chunk, total + chunk_total, fail_fast, false)
+        _ ->
+          inflate_inputs(rest, inflated ++ next_chunk, total, fail_fast, true)
+      end
     end
   end
 
-  def inflate_inputs([], nil, _fail_fast) do
+  def inflate_inputs([], nil, _fail_fast, _failed) do
     { :failed, nil, 0 }
   end
 
   # Retrieves cached inputs if available,
   # otherwise inflates inputs in batches of up to 100
   def inflate_inputs(_txid, inputs, fail_fast) do
-    inflate_inputs(Enum.chunk_every(inputs, 100), [], 0, fail_fast)
+    inflate_inputs(Enum.chunk_every(inputs, 50), [], 0, fail_fast, false)
   end
 
 end

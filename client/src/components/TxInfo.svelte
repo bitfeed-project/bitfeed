@@ -166,6 +166,9 @@ function highlight () {
   {#if !tx.coinbase && tx.fee != null }
     <p class="field feerate">Fee rate: { numberFormat.format(tx.feerate.toFixed(2)) } sats/vbyte</p>
     <p class="field fee">Fee: { numberFormat.format(tx.fee) } sats</p>
+  {:else if !tx.coinbase && tx.fee == null}
+    <p class="field feerate">Fee rate: unavailable</p>
+    <p class="field fee">Fee: unavailable</p>
   {/if}
   <p class="field value">
     Total value: { formatBTC(tx.value) }

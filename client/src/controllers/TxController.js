@@ -417,7 +417,7 @@ export default class TxController {
       this.selectedTx = selected
       selectedTx.set(selected)
       if (sameTx && selected) {
-        if (!selected.is_inflated) {
+        if (!selected.is_inflated || selected.is_partial) {
           loading.increment()
           await searchTx(selected.id)
           loading.decrement()

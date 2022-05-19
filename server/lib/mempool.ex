@@ -433,18 +433,20 @@ defmodule BitcoinStream.Mempool do
   end
 
   defp sync_mempool_txns(pid, [next_chunk | rest], count) do
+    :timer.sleep(250);
     case sync_batch(pid, next_chunk) do
       {:ok, batch_count} ->
         Logger.info("synced #{batch_count + count} mempool transactions");
         sync_mempool_txns(pid, rest, batch_count + count)
 
       _ ->
-        :failed
+        Logger.info("Failed to sync #{length(next_chunk)} mempool transactions");
+        sync_mempool_txns(pid, rest, count)
     end
   end
 
   def sync_mempool_txns(pid, txns) do
-    sync_mempool_txns(pid, Enum.chunk_every(txns, 100), 0)
+    sync_mempool_txns(pid, Enum.chunk_every(txns, 50), 0)
   end
 
 

@@ -359,7 +359,7 @@
             </div>
             <div class="data-row spacer">&nbsp;</div>
             <div class="data-row">
-              <span class="data-field">Avg fee rate</span>
+              <span class="data-field">avg fee rate</span>
               {#if block.fees != null}
                 <span class="data-field">{ formatFee(block.avgFeerate) } sats/vbyte</span>
               {:else}

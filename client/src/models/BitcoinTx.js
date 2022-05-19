@@ -49,10 +49,11 @@ export default class BitcoinTx {
     this.view = new TxView(this)
   }
 
-  mergeData ({ version, inflated, preview, id, value, fee, vbytes, numInputs, inputs, outputs, time, block }, isCoinbase=false) {
+  mergeData ({ version, inflated, partial, preview, id, value, fee, vbytes, numInputs, inputs, outputs, time, block }, isCoinbase=false) {
     this.setData({
       version,
       inflated: this.is_inflated || inflated,
+      partial: this.is_partial && partial,
       preview: this.is_preview && preview,
       id,
       value,
@@ -66,9 +67,10 @@ export default class BitcoinTx {
     })
   }
 
-  setData ({ version, inflated, preview, id, value, fee, vbytes, numInputs, inputs, outputs, time, block }, isCoinbase=false) {
+  setData ({ version, inflated, partial, preview, id, value, fee, vbytes, numInputs, inputs, outputs, time, block }, isCoinbase=false) {
     this.version = version
     this.is_inflated = !!inflated
+    this.is_partial = !!partial
     this.is_preview = !!preview
     this.id = id
     this.pixelPosition = { x: 0, y: 0, r: 0}
@@ -92,7 +94,7 @@ export default class BitcoinTx {
 
     // is a coinbase transaction?
     this.isCoinbase = isCoinbase
-    if (this.isCoinbase || this.fee == null || this.fee < 0) {
+    if (this.isCoinbase || this.fee == null || this.fee < 0 || this.is_partial) {
       this.fee = null
       this.feerate = null
     }
