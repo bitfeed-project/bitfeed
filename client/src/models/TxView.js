@@ -4,13 +4,17 @@ const highlightTransitionTime = 300
 
 // converts from this class's update format to TxSprite's update format
 // now, id, value, position, size, color, alpha, duration, adjust
-function toSpriteUpdate(display, duration, delay, start, adjust) {
+function toSpriteUpdate(display, duration, minDuration, delay, start, adjust, smooth, boomerang) {
   return {
-    now: (start || performance.now()) + (delay || 0),
+    now: (start || performance.now()),
+    delay: delay,
     duration: duration,
+    minDuration: minDuration,
     ...(display.position ? display.position: {}),
     ...(display.color ? display.color: {}),
-    adjust
+    adjust,
+    smooth,
+    boomerang
   }
 }
 
@@ -46,14 +50,14 @@ export default class TxView {
     delay: for queued transitions, how long to wait after current transition
            completes to start.
   */
-  update ({ display, duration, delay, jitter, state, start, adjust }) {
+  update ({ display, duration, minDuration, delay = 0, jitter, state, start, adjust, smooth, boomerang }) {
     this.state = state
     if (jitter) delay += (Math.random() * jitter)
 
     if (!this.initialised || !this.sprite) {
       this.initialised = true
       this.sprite = new TxSprite(
-        toSpriteUpdate(display, duration, delay, start),
+        toSpriteUpdate(display, duration, minDuration, delay, start, adjust, smooth, boomerang),
         this.vertexArray
       )
       // apply any pending modifications
@@ -74,7 +78,7 @@ export default class TxView {
       }
     } else {
       this.sprite.update(
-        toSpriteUpdate(display, duration, delay, start, adjust)
+        toSpriteUpdate(display, duration, minDuration, delay, start, adjust, smooth, boomerang)
       )
     }
   }
@@ -87,7 +91,7 @@ export default class TxView {
         ...this.hoverColor,
         duration: highlightTransitionTime,
         adjust: false,
-        modify: true
+        modify: true,
       })
     } else {
       this.hover = false

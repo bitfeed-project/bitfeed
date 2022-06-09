@@ -30,8 +30,8 @@ export default class TxMondrianPoolScene extends TxPoolScene {
     else return logTxSize(tx.value, this.blockWidth)
   }
 
-  place (tx, index, size) {
-    // console.log(`placing tx at ${index} (size ${size})`)
+  place (tx) {
+    const size = this.txSize(tx)
     const position = this.layout.place(tx, size)
     tx.gridPosition.x = position.x
     tx.gridPosition.y = position.y

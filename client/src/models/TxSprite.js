@@ -1,30 +1,42 @@
+import { smootherstep } from '../utils/easing.js'
+
 function interpolateAttributeStart(attribute, now, modular) {
   if (attribute.v == 0 || (attribute.t + attribute.d) <= now) {
     // transition finished, next transition starts from current end state
     // (clamp to 1)
-    attribute.a = attribute.b
-    attribute.v = 0
-    attribute.d = 0
+    if (attribute.boom) {
+      attribute.a = attribute.a
+      attribute.v = 0
+      attribute.d = 0
+    } else {
+      attribute.a = attribute.b
+      attribute.v = 0
+      attribute.d = 0
+    }
+    return false
   } else if (attribute.t > now) {
     // transition not started
     // (clamp to 0)
+    return true
   } else {
     // transition in progress
     // (interpolate)
-    let progress = (now - attribute.t)
+    const progress = (now - attribute.t)
+    const delta = attribute.e ? smootherstep(progress / attribute.d) : (progress / attribute.d)
     if (modular && Math.abs(attribute.a - attribute.b) > 0.5) {
       if (attribute.a > 0.5) {
         attribute.a -= 1
-        attribute.a = attribute.a + ((progress / attribute.d) * (attribute.b - attribute.a))
+        attribute.a = attribute.a + (delta * (attribute.b - attribute.a))
       } else {
-        attribute.a = attribute.a + ((progress / attribute.d) * (attribute.b - 1 - attribute.a))
+        attribute.a = attribute.a + (delta * (attribute.b - 1 - attribute.a))
       }
       if (attribute.a < 0) attribute.a += 1
     } else {
-      attribute.a = attribute.a + ((progress / attribute.d) * (attribute.b - attribute.a))
+      attribute.a = attribute.a + (delta * (attribute.b - attribute.a))
     }
     attribute.d = attribute.d - progress
     attribute.v = 1 / attribute.d
+    return true
   }
 }
 
@@ -39,12 +51,12 @@ export default class TxSprite {
     }
 
     this.attributes = {
-      x: { a: x, b: x, t: offsetTime, v: 0, d: 0 },
-      y: { a: y, b: y, t: offsetTime, v: 0, d: 0 },
-      r: { a: r, b: r, t: offsetTime, v: 0, d: 0 },
-      h: { a: h, b: h, t: offsetTime, v: 0, d: 0 },
-      l: { a: l, b: l, t: offsetTime, v: 0, d: 0 },
-      a: { a: alpha, b: alpha, t: offsetTime, v: 0, d: 0 },
+      x: { a: x, b: x, t: 0, v: 0, d: 0 },
+      y: { a: y, b: y, t: 0, v: 0, d: 0 },
+      r: { a: r, b: r, t: 0, v: 0, d: 0 },
+      h: { a: h, b: h, t: 0, v: 0, d: 0 },
+      l: { a: l, b: l, t: 0, v: 0, d: 0 },
+      a: { a: alpha, b: alpha, t: 0, v: 0, d: 0 },
     }
 
     // Used to temporarily modify the sprite, so that the base view can be resumed later
@@ -55,15 +67,16 @@ export default class TxSprite {
     this.compile()
   }
 
-  interpolateAttributes (updateMap, attributes, offsetTime, v, duration, minDuration, adjust) {
+  interpolateAttributes (updateMap, attributes, offsetTime, delay, v, smooth, boomerang, duration, minDuration, adjust) {
     for (const key of Object.keys(updateMap)) {
       // for each non-null attribute:
       if (updateMap[key] != null) {
         // calculate current interpolated value, and set as 'from'
-        interpolateAttributeStart(attributes[key], offsetTime, key === 'h')
+        const inProgress = interpolateAttributeStart(attributes[key], offsetTime, key === 'h')
         // interpolateAttributeStart(attributes[key], offsetTime, key)
         // set 'start' to now
         attributes[key].t = offsetTime
+        if (!adjust || !inProgress) attributes[key].t += (delay || 0)
         // if 'adjust' flag set
         // set 'duration' to Max(remaining time, 'duration')
         if (!adjust || (duration && attributes[key].d == 0)) {
@@ -75,11 +88,18 @@ export default class TxSprite {
         }
         // set 'to' to target value
         attributes[key].b = updateMap[key]
+
+        if (!adjust || !inProgress) {
+          if (smooth) attributes[key].e = true
+          else if (!smooth && attributes[key].e) delete attributes[key].e
+          if (boomerang) attributes[key].boom = true
+          else if (!boomerang && attributes[key].boom) delete attributes[key].boom
+        }
       }
     }
   }
 
-  update ({ now = performance.now(), x, y, r, h, l, alpha, duration, minDuration, adjust, modify }) {
+  update ({ now = performance.now(), delay, x, y, r, h, l, alpha, smooth, boomerang, duration, minDuration, adjust, modify }) {
     const offsetTime = now
     const v = duration > 0 ? (1 / duration) : 0
 
@@ -92,7 +112,7 @@ export default class TxSprite {
 
     const isModified = !!this.modAttributes
     if (!modify) {
-      this.interpolateAttributes(this.updateMap, this.attributes, offsetTime, v, duration, minDuration, adjust)
+      this.interpolateAttributes(this.updateMap, this.attributes, offsetTime, delay, v, smooth, boomerang, duration, minDuration, adjust)
     } else {
       if (!isModified) { // set up the modAttributes
         this.modAttributes = {}
@@ -102,7 +122,7 @@ export default class TxSprite {
           }
         }
       }
-      this.interpolateAttributes(this.updateMap, this.modAttributes, offsetTime, v, duration, minDuration, adjust)
+      this.interpolateAttributes(this.updateMap, this.modAttributes, offsetTime, delay, v, smooth, boomerang, duration, minDuration, adjust)
     }
 
     this.compile()
@@ -152,7 +172,18 @@ export default class TxSprite {
       for (let step = 0; step < VI.length; step++) {
         // components of each field in the vertex array are defined by an entry in VI:
         // VI[i].a is the attribute, VI[i].f is the inner field, VI[i].offA and VI[i].offB are offset factors
-        this.vertexData[(vertex * vertexStride) + step + 2] = attributes[VI[step].a][VI[step].f]
+        if (VI[step].f === 'v' && attributes[VI[step].a].e) {
+          if (VI[step].f === 'v' && attributes[VI[step].a].boom) {
+            this.vertexData[(vertex * vertexStride) + step + 2] = -20 - attributes[VI[step].a][VI[step].f]
+          }
+          else {
+            this.vertexData[(vertex * vertexStride) + step + 2] = -attributes[VI[step].a][VI[step].f]
+          }
+        } else if (VI[step].f === 'v' && attributes[VI[step].a].boom) {
+          this.vertexData[(vertex * vertexStride) + step + 2] = -10 - attributes[VI[step].a][VI[step].f]
+        } else {
+          this.vertexData[(vertex * vertexStride) + step + 2] = attributes[VI[step].a][VI[step].f]
+        }
       }
     }
 

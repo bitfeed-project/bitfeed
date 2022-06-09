@@ -1,6 +1,7 @@
 import TxMondrianPoolScene from './TxMondrianPoolScene.js'
 import { settings } from '../stores.js'
 import { logTxSize, byteTxSize } from '../utils/misc.js'
+import { orange } from '../utils/color.js'
 import config from '../config.js'
 
 let settingsValue
@@ -62,6 +63,7 @@ export default class TxBlockScene extends TxMondrianPoolScene {
   }
 
   setTxOnScreen (tx, pixelPosition) {
+    this.saveGridToPixelPosition(tx)
     if (!tx.view.initialised) {
       tx.view.update({
         display: {
@@ -95,14 +97,17 @@ export default class TxBlockScene extends TxMondrianPoolScene {
           color: tx.getColor('block', this.colorMode).color
         },
         duration: this.laidOut ? 1000 : 2000,
-        delay: 0,
-        jitter: this.laidOut ? 0 : 1500,
+        delay: 50,
+        jitter: this.laidOut ? 500 : 1500,
+        smooth: true,
         state: 'block'
       })
     }
   }
 
-  prepareTxOnScreen (tx) {
+  prepareTxOnScreen (tx, now) {
+    const oldRadius = tx.pixelPosition.r
+    this.saveGridToPixelPosition(tx)
     if (!tx.view.initialised) {
       tx.view.update({
         display: {
@@ -119,21 +124,40 @@ export default class TxBlockScene extends TxMondrianPoolScene {
         delay: 0,
         state: 'ready'
       })
+    } else {
+      const jitter = (Math.random() * 1700)
+      tx.view.update({
+        display: {
+          position: {
+            r: oldRadius + Math.max(2, oldRadius * 0.2)
+          },
+        },
+        delay: 50 + jitter,
+        start: now,
+        duration: 750,
+        smooth: true,
+        boomerang: true
+      })
+      tx.view.update({
+        display: {
+          color: settingsValue.darkMode && false ? {
+            h: 0.8,
+            l: 1.0
+          } : orange,
+        },
+        start: now,
+        delay: 50 + jitter,
+        duration: 500,
+      })
     }
-    tx.view.update({
-      display: {
-      color: tx.getColor('block', this.colorMode).color
-      },
-      duration: 2000,
-      delay: 0
-    })
   }
 
   prepareTx (tx, sequence) {
-    this.prepareTxOnScreen(tx, this.layoutTx(tx, sequence, 0, false))
+    this.place(tx)
+    this.prepareTxOnScreen(tx)
   }
 
-  enterTx (tx, right) {
+  enterTx (tx, start, right) {
     tx.view.update({
       display: {
         position: {
@@ -157,8 +181,11 @@ export default class TxBlockScene extends TxMondrianPoolScene {
           alpha: 1
         }
       },
+      start,
       duration: 2000,
-      delay: 0
+      delay: 100,
+      jitter: 500,
+      smooth: true,
     })
   }
 
@@ -166,8 +193,9 @@ export default class TxBlockScene extends TxMondrianPoolScene {
     this.hidden = false
     this.exited = false
     const ids = this.getActiveTxList()
+    const start = performance.now()
     for (let i = 0; i < ids.length; i++) {
-      this.enterTx(this.txs[ids[i]], right)
+      this.enterTx(this.txs[ids[i]], start, right)
     }
   }
 
@@ -179,7 +207,7 @@ export default class TxBlockScene extends TxMondrianPoolScene {
     this.enter(false)
   }
 
-  exitTx (tx, right) {
+  exitTx (tx, start, right) {
     tx.view.update({
       display: {
         position: {
@@ -192,8 +220,11 @@ export default class TxBlockScene extends TxMondrianPoolScene {
           alpha: 0
         }
       },
-      delay: 0,
-      duration: 2000
+      delay: 100,
+      start,
+      jitter: 500,
+      duration: 2000,
+      smooth: true,
     })
   }
 
@@ -201,8 +232,9 @@ export default class TxBlockScene extends TxMondrianPoolScene {
     this.hidden = true
     this.exited = true
     const ids = this.getActiveTxList()
+    const start = performance.now()
     for (let i = 0; i < ids.length; i++) {
-      this.exitTx(this.txs[ids[i]], right)
+      this.exitTx(this.txs[ids[i]], start, right)
     }
   }
 
@@ -214,7 +246,7 @@ export default class TxBlockScene extends TxMondrianPoolScene {
     this.exit(false)
   }
 
-  hideTx (tx) {
+  hideTx (tx, now) {
     this.savePixelsToScreenPosition(tx)
     tx.view.update({
       display: {
@@ -225,13 +257,15 @@ export default class TxBlockScene extends TxMondrianPoolScene {
           alpha: 0
         }
       },
-      duration: 2000,
-      delay: 0,
-      state: 'fadeout'
+      start: now,
+      duration: 1500,
+      delay: 50,
+      state: 'fadeout',
+      smooth: true,
     })
   }
 
-  showTx (tx) {
+  showTx (tx, now) {
     this.savePixelsToScreenPosition(tx)
     tx.view.update({
       display: {
@@ -242,13 +276,16 @@ export default class TxBlockScene extends TxMondrianPoolScene {
           alpha: 1
         }
       },
-      duration: 500,
-      delay: 0,
-      state: 'fadeout'
+      start: now,
+      duration: 1500,
+      delay: 50,
+      state: 'fadeout',
+      smooth: true,
     })
   }
 
   prepareAll () {
+    const now = performance.now()
     this.resize({})
     this.scene.count = 0
     let ids = this.getHiddenTxList()
@@ -258,7 +295,7 @@ export default class TxBlockScene extends TxMondrianPoolScene {
     }
     ids = this.getActiveTxList()
     for (let i = 0; i < ids.length; i++) {
-      this.prepareTx(this.txs[ids[i]], this.scene.count++)
+      this.prepareTx(this.txs[ids[i]], now)
     }
   }
 
@@ -277,30 +314,43 @@ export default class TxBlockScene extends TxMondrianPoolScene {
     }, 3000)
   }
 
+  resetScroll () {
+    return
+  }
+
   hide () {
     this.hidden = true
+    const now = performance.now()
     const ids = this.getActiveTxList()
     for (let i = 0; i < ids.length; i++) {
-      this.hideTx(this.txs[ids[i]])
+      this.hideTx(this.txs[ids[i]], now)
     }
   }
 
   show () {
     if (this.hidden) {
       this.hidden = false
+      const now = performance.now()
       const ids = this.getActiveTxList()
       for (let i = 0; i < ids.length; i++) {
-        this.showTx(this.txs[ids[i]])
+        this.showTx(this.txs[ids[i]], now)
       }
     }
   }
 
   expire (delay=3000) {
     this.expired = true
+    const txIds = this.getTxList()
+    for (let i = 0; i < txIds.length; i++) {
+      if (this.txs[txIds[i]]) {
+        this.controller.deleteTx(txIds[i])
+      }
+    }
     setTimeout(() => {
-      const txIds = this.getTxList()
       for (let i = 0; i < txIds.length; i++) {
-        if (this.txs[txIds[i]]) this.controller.destroyTx(txIds[i])
+        if (this.txs[txIds[i]]) {
+          this.txs[txIds[i]].destroy()
+        }
       }
       this.layout.destroy()
     }, delay)

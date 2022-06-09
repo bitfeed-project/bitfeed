@@ -73,7 +73,7 @@ export default class BitcoinTx {
     this.is_partial = !!partial
     this.is_preview = !!preview
     this.id = id
-    this.pixelPosition = { x: 0, y: 0, r: 0}
+    if (!this.pixelPosition) this.pixelPosition = { x: 0, y: 0, r: 0}
     this.screenPosition = { x: 0, y: 0, r: 0}
     this.gridPosition = { x: 0, y: 0, r: 0}
     this.inputs = inputs
