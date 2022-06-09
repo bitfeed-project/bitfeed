@@ -1,4 +1,4 @@
-import { serverConnected, serverDelay, lastBlockId } from '../stores.js'
+import { serverConnected, serverDelay, lastBlockId, latestBlockHeight } from '../stores.js'
 import config from '../config.js'
 import api from '../utils/api.js'
 import { fetchBlockByHash } from '../utils/search.js'
@@ -6,7 +6,8 @@ import { fetchBlockByHash } from '../utils/search.js'
 let mempoolTimer
 let lastBlockSeen
 lastBlockId.subscribe(val => { lastBlockSeen = val })
-
+let latestBlockHeightVal
+latestBlockHeight.subscribe(val => { latestBlockHeightVal = val })
 
 class TxStream {
   constructor () {
@@ -122,8 +123,11 @@ class TxStream {
   async fetchBlock (id, calledOnLoad) {
     if (!id) return
     if (id !== lastBlockSeen) {
-      const blockData = await fetchBlockByHash(id)
-      window.dispatchEvent(new CustomEvent('bitcoin_block', { detail: { block: blockData, realtime: !calledOnLoad} }))
+      const block = await fetchBlockByHash(id)
+      // ignore this block if we've downloaded a newer one while we were waiting
+      if (block.height >= latestBlockHeightVal) {
+        window.dispatchEvent(new CustomEvent('bitcoin_block', { detail: { block, realtime: !calledOnLoad} }))
+      }
     } else {
       console.log('already seen block ', lastBlockSeen)
     }

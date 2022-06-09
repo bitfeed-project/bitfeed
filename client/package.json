@@ -1,6 +1,6 @@
 {
   "name": "bitfeed-client",
-  "version": "2.3.2",
+  "version": "2.3.3",
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",
