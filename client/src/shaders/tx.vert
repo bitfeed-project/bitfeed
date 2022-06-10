@@ -15,9 +15,40 @@ uniform vec2 screenSize;
 uniform float now;
 uniform sampler2D colorTexture;
 
+float interpolate(float x, bool useSmooth, bool boomerang) {
+  x = clamp(x, 0.0, 1.0);
+  if (boomerang) {
+    x = 2.0 * x;
+    if (x > 1.0) {
+      x = 2.0 - x;
+    }
+  }
+  if (useSmooth) {
+    float ix = 1.0 - x;
+    x = x * x;
+    return x / (x + ix * ix);
+  } else {
+    return x;
+  }
+}
+
 // hue is modular, so interpolation should take the shortest path, wrapping around if necessary
 float interpolateHue(vec4 hue) {
-  float delta = clamp((now - hue.z) * hue.w, 0.0, 1.0);
+  bool useSmooth = false;
+  bool boomerang = false;
+  if (hue.w <= -20.0) {
+    boomerang = true;
+    useSmooth = true;
+    hue.w = (0.0 - hue.w) - 20.0;
+  } else if (hue.w <= -10.0) {
+    boomerang = true;
+    hue.w = (0.0 - hue.w) - 10.0;
+  } else if (hue.w < 0.0) {
+    useSmooth = true;
+    hue.w = -hue.w;
+  }
+  float d = clamp((now - hue.z) * hue.w, 0.0, 1.0);
+  float delta = interpolate(d, useSmooth, boomerang);
   if (abs(hue.x - hue.y) > 0.5) {
     if (hue.x > 0.5) {
       return mod(mix(hue.x - 1.0, hue.y, delta), 1.0);
@@ -30,7 +61,21 @@ float interpolateHue(vec4 hue) {
 }
 
 float interpolateAttribute(vec4 attr) {
-  float delta = clamp((now - attr.z) * attr.w, 0.0, 1.0);
+  bool useSmooth = false;
+  bool boomerang = false;
+  if (attr.w <= -20.0) {
+    boomerang = true;
+    useSmooth = true;
+    attr.w = (0.0 - attr.w) - 20.0;
+  } else if (attr.w <= -10.0) {
+    boomerang = true;
+    attr.w = (0.0 - attr.w) - 10.0;
+  } else if (attr.w < 0.0) {
+    useSmooth = true;
+    attr.w = -attr.w;
+  }
+  float d = clamp((now - attr.z) * attr.w, 0.0, 1.0);
+  float delta = interpolate(d, useSmooth, boomerang);
   return mix(attr.x, attr.y, delta);
 }
 

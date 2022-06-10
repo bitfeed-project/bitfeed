@@ -207,6 +207,7 @@ export default class TxController {
 
     if (!this.explorerBlockScene) this.clearBlock()
 
+    this.poolScene.scrollLock = true
     if (this.blocksEnabled) {
       this.blockScene = new TxBlockScene({ width: this.blockAreaSize, height: this.blockAreaSize, blockId: block.id, controller: this, colorMode: this.colorMode })
       let knownCount = 0
@@ -239,7 +240,6 @@ export default class TxController {
         currentBlock.set(block)
       }
     } else {
-      this.poolScene.scrollLock = true
       for (let i = 0; i < block.txns.length; i++) {
         if (this.txs[block.txns[i].id] && this.txs[block.txns[i].id].view) {
           this.txs[block.txns[i].id].view.update({
@@ -304,7 +304,7 @@ export default class TxController {
         enterFromRight = true
       }
       else prevBlockScene.exitRight()
-      prevBlockScene.expire(2000)
+      prevBlockScene.expire(3000)
     } else if (this.blockScene) {
       this.blockScene.exitRight()
     }
@@ -343,7 +343,7 @@ export default class TxController {
       const prevBlock = this.explorerBlock
       const prevBlockScene = this.explorerBlockScene
       prevBlockScene.exitLeft()
-      prevBlockScene.expire(2000)
+      prevBlockScene.expire(3000)
       this.explorerBlockScene = null
       this.explorerBlock = null
       urlPath.set("/")
@@ -384,6 +384,10 @@ export default class TxController {
       scene.remove(id)
     })
     if (this.txs[id]) this.txs[id].destroy()
+    this.deleteTx(id)
+  }
+
+  deleteTx (id) {
     delete this.txs[id]
   }
 

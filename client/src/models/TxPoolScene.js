@@ -22,6 +22,7 @@ export default class TxPoolScene {
         y: 0
       }
     }
+    this.lastScroll = performance.now()
 
     this.resize({ width, height })
     this.txs = {}
@@ -79,15 +80,19 @@ export default class TxPoolScene {
 
   insert (tx, insertDelay, autoLayout=true) {
     if (autoLayout) {
-      this.layoutTx(tx, this.scene.count++, insertDelay)
       this.txs[tx.id] = tx
+      this.place(tx)
+      if (this.checkTxScroll(tx)) {
+        this.applyTxScroll(tx)
+      }
+      this.setTxOnScreen(tx, insertDelay)
     } else {
       this.hiddenTxs[tx.id] = tx
     }
   }
 
   clearOffscreenTx (tx) {
-    if (tx.pixelPosition && (tx.pixelPosition.y + tx.pixelPosition.r) < -(this.scene.offset.y + 20)) {
+    if (tx.pixelPosition && (tx.pixelPosition.y + tx.pixelPosition.r) < -(this.scene.offset.y + 100)) {
       this.controller.destroyTx(tx.id)
     }
   }
@@ -97,6 +102,7 @@ export default class TxPoolScene {
     for (let i = 0; i < ids.length; i++) {
       this.clearOffscreenTx(this.txs[ids[i]])
     }
+    this.clearTimer = null
   }
 
   redrawTx (tx, now) {
@@ -108,37 +114,40 @@ export default class TxPoolScene {
           position: tx.screenPosition
         },
         duration: 1000,
+        minDuration: 500,
         start: now,
-        minDuration: 250,
+        delay: 50,
+        smooth: true,
         adjust: true
       })
     }
   }
 
-  updateChunk (ids) {
-    const now = performance.now()
-    for (let i = 0; i < ids.length; i++) {
-      this.redrawTx(this.txs[ids[i]], now)
-    }
-  }
+  // updateChunk (ids, now = performance.now()) {
+  //   for (let i = 0; i < ids.length; i++) {
+  //     this.redrawTx(this.txs[ids[i]], now)
+  //   }
+  // }
 
   async doScroll (offset) {
-    const ids = this.getTxList()
-    this.scene.scroll += offset
-    const processingChunks = []
-    // Scrolling operation is potentially very costly, as we're calculating and updating positions of every active tx in the pool
-    // So attempt to spread the cost over several frames, by separately processing chunks of 100 txs each
-    // Schedule ~1 chunk per frame at the targeted framerate (60 fps, frame every 16.7ms)
-    for (let i = 0; i < ids.length; i+=100) {
-      processingChunks.push(new Promise((resolve, reject) => {
-        setTimeout(() => {
-          this.updateChunk(ids.slice(i, i+100))
-          resolve()
-        }, (i / 100) * 20)
-      }))
+    const now = performance.now()
+    if (now - this.lastScroll > 1000) {
+      this.lastScroll = now
+      const ids = this.getTxList()
+      this.scene.scroll += offset
+      this.maxHeight += offset
+      if (this.heightStore) this.heightStore.set(this.maxHeight)
+
+      for (let i = 0; i < ids.length; i++) {
+        this.redrawTx(this.txs[ids[i]], now)
+      }
+
+      if (!this.clearTimer) {
+        this.clearTimer = setTimeout(() => {
+          this.clearOffscreenTxs()
+        }, 1500)
+      }
     }
-    await Promise.all(processingChunks)
-    this.clearOffscreenTxs()
   }
 
   scroll (offset, force) {
@@ -159,9 +168,7 @@ export default class TxPoolScene {
     return 1
   }
 
-  layoutTx (tx, sequence, insertDelay, setOnScreen = true) {
-    const units = this.txSize(tx)
-    this.place(tx, sequence, units)
+  checkTxScroll (tx, insertDelay, setOnScreen = true) {
     this.saveGridToPixelPosition(tx)
     const top = tx.pixelPosition.y + tx.pixelPosition.r
     const bottom = tx.pixelPosition.y - tx.pixelPosition.r
@@ -169,16 +176,17 @@ export default class TxPoolScene {
       this.maxHeight = top
       if (this.heightStore) this.heightStore.set(this.maxHeight)
     }
-    if (this.heightLimit && bottom > this.heightLimit) {
-      this.scroll(this.heightLimit - bottom)
-      this.maxHeight += (this.heightLimit - bottom)
-      if (this.heightStore) this.heightStore.set(this.maxHeight)
-      this.saveGridToPixelPosition(tx)
-    }
-    if (setOnScreen) this.setTxOnScreen(tx, insertDelay)
+    return (this.heightLimit && bottom > this.heightLimit)
+  }
+
+  applyTxScroll (tx) {
+    const bottom = tx.pixelPosition.y - tx.pixelPosition.r
+    this.scroll(this.heightLimit - bottom)
   }
 
   setTxOnScreen (tx, insertDelay=0) {
+    this.saveGridToPixelPosition(tx)
+    this.savePixelsToScreenPosition(tx)
     if (!tx.view.initialised) {
       const txColor = tx.getColor(this.sceneType, this.colorMode)
       tx.view.update({
@@ -198,7 +206,7 @@ export default class TxPoolScene {
       })
       tx.view.update({
         display: {
-          position: this.pixelsToScreen(tx.pixelPosition),
+          position: tx.screenPosition,
           color: txColor.color
         },
         duration: 2500,
@@ -218,11 +226,13 @@ export default class TxPoolScene {
     } else {
       tx.view.update({
         display: {
-          position: this.pixelsToScreen(tx.pixelPosition)
+          position: tx.screenPosition
         },
-        duration: 1500,
-        minDuration: 1000,
-        delay: 0,
+        duration: 1000,
+        minDuration: 500,
+        delay: 50,
+        jitter: 500,
+        smooth: true,
         adjust: true
       })
     }
@@ -239,33 +249,37 @@ export default class TxPoolScene {
     }
     ids = this.getActiveTxList()
     for (let i = 0; i < ids.length; i++) {
-      this.layoutTx(this.txs[ids[i]], this.scene.count++)
+      this.place(this.txs[ids[i]])
+      this.saveGridToPixelPosition(this.txs[ids[i]])
     }
 
+    this.resetScroll()
+
+    for (let i = 0; i < ids.length; i++) {
+      this.setTxOnScreen(this.txs[ids[i]])
+    }
+  }
+
+  resetScroll () {
+    const ids = this.getActiveTxList()
     let poolTop = -Infinity
     let poolBottom = Infinity
     let poolScreenTop = -Infinity
-    ids = this.getActiveTxList()
     let tx
     for (let i = 0; i < ids.length; i++) {
       tx = this.txs[ids[i]]
-      this.saveGridToPixelPosition(tx)
+      // this.saveGridToPixelPosition(tx)
       poolTop = Math.max(poolTop, tx.pixelPosition.y - tx.pixelPosition.r)
       poolScreenTop = Math.max(poolScreenTop, tx.pixelPosition.y + tx.pixelPosition.r)
       poolBottom = Math.min(poolBottom, tx.pixelPosition.y - tx.pixelPosition.r)
     }
 
     this.maxHeight = poolScreenTop
+    let scrollAmount = Math.min(-this.scene.scroll, this.heightLimit - poolTop)
 
-    if (this.heightLimit && poolTop > this.heightLimit) {
-      let scrollAmount = this.heightLimit - poolTop
-      this.scroll(scrollAmount, true)
-      this.maxHeight += scrollAmount
-    } else if (this.heightLimit && poolTop < this.heightLimit) {
-      let scrollAmount = Math.min(-this.scene.scroll, this.heightLimit - poolTop)
-      this.scroll(scrollAmount, true)
-      this.maxHeight += scrollAmount
-    }
+    this.scene.scroll += scrollAmount
+    this.maxHeight += scrollAmount
+
     if (this.heightStore) this.heightStore.set(this.maxHeight)
   }
 
@@ -343,7 +357,8 @@ export default class TxPoolScene {
     return grid
   }
 
-  place (tx, position, size) {
+  place (tx) {
+    const size = this.txSize(tx)
     tx.gridPosition.x = 1 + Math.floor(position % this.blockWidth)
     tx.gridPosition.y = 1 + (Math.floor(position / this.blockWidth))
     tx.gridPosition.r = size

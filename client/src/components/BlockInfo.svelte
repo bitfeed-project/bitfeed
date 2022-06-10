@@ -1,7 +1,7 @@
 <script>
   import analytics from '../utils/analytics.js'
   import { fly } from 'svelte/transition'
-  import { linear } from 'svelte/easing'
+  import { smootherstep } from '../utils/easing.js'
   import { createEventDispatcher } from 'svelte'
   import Icon from '../components/Icon.svelte'
   import closeIcon from '../assets/icon/cil-x-circle.svg'
@@ -80,16 +80,16 @@
   $: {
     if (!$blockTransitionDirection || !visible || !block || !$blocksEnabled) {
       transitionDirection = 'up'
-      flyIn = { y: (restoring ? -50 : 50), duration: (restoring ? 500 : 1000), easing: linear, delay: (restoring ? 0 : newBlockDelay) }
-      flyOut = { y: -50, duration: 2000, easing: linear }
+      flyIn = { y: (restoring ? -50 : 50), duration: (restoring ? 1500 : 1000), easing: smootherstep, delay: (restoring ? 0 : newBlockDelay) }
+      flyOut = { y: -50, duration: 1500, easing: smootherstep, delay: 0 }
     } else if ($blockTransitionDirection && $blockTransitionDirection === 'right') {
       transitionDirection = 'right'
-      flyIn = { x: 100, easing: linear, delay: 1000, duration: 1000 }
-      flyOut = { x: -100, easing: linear, delay: 0, duration: 1000  }
+      flyIn = { x: 100, easing: smootherstep, delay: 1000, duration: 1000 }
+      flyOut = { x: -100, easing: smootherstep, delay: 0, duration: 1000  }
     } else if ($blockTransitionDirection && $blockTransitionDirection === 'left') {
       transitionDirection = 'left'
-      flyIn = { x: -100, easing: linear, delay: 1000, duration: 1000  }
-      flyOut = { x: 100, easing: linear, delay: 0, duration: 1000  }
+      flyIn = { x: -100, easing: smootherstep, delay: 1000, duration: 1000  }
+      flyOut = { x: 100, easing: smootherstep, delay: 0, duration: 1000  }
     } else {
       transitionDirection = 'down'
     }
