@@ -125,7 +125,7 @@ export default class TxBlockScene extends TxMondrianPoolScene {
         state: 'ready'
       })
     } else {
-      const jitter = (Math.random() * 1700)
+      const jitter = (Math.random() * 1200)
       tx.view.update({
         display: {
           position: {
@@ -140,10 +140,7 @@ export default class TxBlockScene extends TxMondrianPoolScene {
       })
       tx.view.update({
         display: {
-          color: settingsValue.darkMode && false ? {
-            h: 0.8,
-            l: 1.0
-          } : orange,
+          color: ice(tx.colors[this.colorMode].block.color),
         },
         start: now,
         delay: 50 + jitter,
@@ -361,5 +358,12 @@ export default class TxBlockScene extends TxMondrianPoolScene {
       const gridPosition = this.screenToGrid({ x: position.x + (this.gridSize/4), y: position.y - (this.gridSize/2) })
       return this.layout.getTxInGridCell(gridPosition)
     } else return null
+  }
+}
+
+function ice (color) {
+  return {
+    h: Math.abs(color.h - 0.58) < 0.1 ? (color.h < 0.58 ? 0.48 : 0.68) : color.h,
+    l: color.h < 0.76 ? 1 : 0.7
   }
 }

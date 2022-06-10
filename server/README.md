@@ -51,6 +51,7 @@ The API server expects the following environment variables to be set:
 | LOG_LEVEL | Tailor logging verbosity. either "error", "info" (default) or "debug" |
 | RPC_POOLS | Number of connection pools for RPC requests to Bitcoin Core |
 | RPC_POOL_SIZE | Number of connections maintained per pool (RPC_POOLS x RPC_POOL_SIZE should be substantially lower than `rpcworkqueue` in bitcoin.conf) |
+| TARGET | build target "public" or "personal" |
 | BITCOIN_HOST | Bitcoin node host address |
 | BITCOIN_ZMQ_RAWBLOCK_PORT | Bitcoin node ZMQ port for block events (to match `zmqpubrawblock` in bitcoin.conf) |
 | BITCOIN_ZMQ_RAWTX_PORT | Bitcoin node ZMQ port for transaction events (to match `zmqpubrawtx` in bitcoin.conf) |
