@@ -1,7 +1,7 @@
 import api from './api.js'
 import BitcoinTx from '../models/BitcoinTx.js'
 import BitcoinBlock from '../models/BitcoinBlock.js'
-import { detailTx, selectedTx, currentBlock, explorerBlockData, overlay, highlightInOut, urlPath } from '../stores.js'
+import { detailTx, selectedTx, currentBlock, explorerBlock, overlay, highlightInOut, urlPath } from '../stores.js'
 import { addressToSPK } from './encodings.js'
 
 // Quick heuristic matching to guess what kind of search a query is for
@@ -154,7 +154,7 @@ async function fetchBlockByHash (hash) {
     if (blockData) {
       if (blockData.id) {
         block = new BitcoinBlock(blockData)
-      } else block = BitcoinBlock.decompress(blockData)
+      } else block = new BitcoinBlock(BitcoinBlock.decompress(blockData))
     }
     if (block && block.id) {
       console.log('downloaded block', block.id)
@@ -255,7 +255,7 @@ export async function searchBlockHash (hash) {
     const searchResult = await fetchBlockByHash(hash)
     if (searchResult) {
       if (searchResult.id) {
-        explorerBlockData.set(searchResult)
+        explorerBlock.set(searchResult)
       }
       return null
     } else {
@@ -274,7 +274,7 @@ export async function searchBlockHeight (height) {
     const searchResult = await fetchBlockByHeight(height)
     if (searchResult) {
       if (searchResult.id) {
-        explorerBlockData.set(searchResult)
+        explorerBlock.set(searchResult)
       }
       return null
     } else {

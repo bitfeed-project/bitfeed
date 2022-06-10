@@ -6,7 +6,7 @@ import BitcoinBlock from '../models/BitcoinBlock.js'
 import TxSprite from '../models/TxSprite.js'
 import { FastVertexArray } from '../utils/memory.js'
 import { searchTx, fetchSpends, addSpends } from '../utils/search.js'
-import { overlay, txCount, mempoolCount, mempoolScreenHeight, blockVisible, currentBlock, selectedTx, detailTx, blockAreaSize, highlight, colorMode, blocksEnabled, latestBlockHeight, explorerBlockData, blockTransitionDirection, loading, urlPath } from '../stores.js'
+import { overlay, txCount, mempoolCount, mempoolScreenHeight, blockVisible, currentBlock, selectedTx, detailTx, blockAreaSize, highlight, colorMode, blocksEnabled, latestBlockHeight, explorerBlock, blockTransitionDirection, loading, urlPath } from '../stores.js'
 import config from "../config.js"
 import { tick } from 'svelte';
 
@@ -48,9 +48,9 @@ export default class TxController {
     colorMode.subscribe(mode => {
       this.setColorMode(mode)
     })
-    explorerBlockData.subscribe(blockData => {
-      if (blockData) {
-        this.exploreBlock(blockData)
+    explorerBlock.subscribe(block => {
+      if (block) {
+        this.exploreBlock(block)
       } else {
         this.resumeLatest()
       }
@@ -168,20 +168,17 @@ export default class TxController {
       }).map(key => {
         return {
           ...this.txs[key],
-          inputs: this.txs[key].inputs.map(input => { return {...input, script_pub_key: null, value: null }}),
+          inputs: this.txs[key].inputs ? this.txs[key].inputs.map(input => { return {...input, script_pub_key: null, value: null }}) : [],
         }
       })]
     })
   }
 
-  addBlock (blockData, realtime=true) {
+  addBlock (block, realtime=true) {
     // discard duplicate blocks
-    if (!blockData || !blockData.id || this.knownBlocks[blockData.id]) {
+    if (!block || !block.id || this.knownBlocks[block.id]) {
       return
     }
-
-    let block
-    block = new BitcoinBlock(blockData)
 
     latestBlockHeight.set(block.height)
     // this.knownBlocks[block.id] = true
@@ -285,9 +282,7 @@ export default class TxController {
     return block
   }
 
-  async exploreBlock (blockData) {
-    const block = blockData.isBlock ? blockData : new BitcoinBlock(blockData)
-
+  async exploreBlock (block) {
     if (this.block && this.block.id === block.id) {
       this.showBlock()
       return

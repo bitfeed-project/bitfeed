@@ -1,4 +1,4 @@
-import { urlPath, settings, loading, detailTx, highlightInOut, explorerBlockData, overlay } from '../stores.js'
+import { urlPath, settings, loading, detailTx, highlightInOut, explorerBlock, overlay } from '../stores.js'
 import { searchTx, searchBlockHash, searchBlockHeight } from '../utils/search.js'
 
 export default class Router {
@@ -37,7 +37,7 @@ export default class Router {
       detailTx.set(null)
       highlightInOut.set(null)
       urlPath.set("/")
-      explorerBlockData.set(null)
+      explorerBlock.set(null)
       overlay.set(null)
     } else {
       switch (parts[1]) {

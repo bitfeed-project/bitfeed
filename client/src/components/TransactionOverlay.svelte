@@ -3,7 +3,7 @@ import Overlay from '../components/Overlay.svelte'
 import Icon from './Icon.svelte'
 import BookmarkIcon from '../assets/icon/cil-bookmark.svg'
 import { longBtcFormat, numberFormat, feeRateFormat, dateFormat } from '../utils/format.js'
-import { exchangeRates, settings, sidebarToggle, newHighlightQuery, highlightingFull, detailTx, pageWidth, latestBlockHeight, highlightInOut, loading, urlPath, currentBlock, overlay, explorerBlockData } from '../stores.js'
+import { exchangeRates, settings, sidebarToggle, newHighlightQuery, highlightingFull, detailTx, pageWidth, latestBlockHeight, highlightInOut, loading, urlPath, currentBlock, overlay, explorerBlock } from '../stores.js'
 import { formatCurrency } from '../utils/fx.js'
 import { hlToHex, mixColor, teal, purple } from '../utils/color.js'
 import { SPKToAddress } from '../utils/encodings.js'
@@ -298,9 +298,11 @@ async function goToBlock(e) {
   let hash = $detailTx.block.hash || $detailTx.block.id
   let height = $detailTx.block.height
   if (hash === $currentBlock.id) {
+    onClose()
     $overlay = null
   } else if (height == $latestBlockHeight) {
-    $explorerBlockData = null
+    onClose()
+    $explorerBlock = null
     $overlay = null
   } else if (hash) {
     loading.increment()
