@@ -97,7 +97,7 @@ export default class TxBlockScene extends TxMondrianPoolScene {
           color: tx.getColor('block', this.colorMode).color
         },
         duration: this.laidOut ? 1000 : 2000,
-        delay: 50,
+        delay: 200,
         jitter: this.laidOut ? 500 : 1500,
         smooth: true,
         state: 'block'
@@ -125,14 +125,14 @@ export default class TxBlockScene extends TxMondrianPoolScene {
         state: 'ready'
       })
     } else {
-      const jitter = (Math.random() * 1200)
+      const jitter = (Math.random() * 1500)
       tx.view.update({
         display: {
           position: {
             r: oldRadius + Math.max(2, oldRadius * 0.2)
           },
         },
-        delay: 50 + jitter,
+        delay: 200 + jitter,
         start: now,
         duration: 750,
         smooth: true,
@@ -143,7 +143,7 @@ export default class TxBlockScene extends TxMondrianPoolScene {
           color: ice(tx.colors[this.colorMode].block.color),
         },
         start: now,
-        delay: 50 + jitter,
+        delay: 200 + jitter,
         duration: 500,
       })
     }
@@ -180,7 +180,7 @@ export default class TxBlockScene extends TxMondrianPoolScene {
       },
       start,
       duration: 2000,
-      delay: 100,
+      delay: 200,
       jitter: 500,
       smooth: true,
     })
@@ -217,7 +217,7 @@ export default class TxBlockScene extends TxMondrianPoolScene {
           alpha: 0
         }
       },
-      delay: 100,
+      delay: 200,
       start,
       jitter: 500,
       duration: 2000,

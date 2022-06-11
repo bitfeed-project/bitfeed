@@ -22,7 +22,16 @@ function interpolateAttributeStart(attribute, now, modular) {
     // transition in progress
     // (interpolate)
     const progress = (now - attribute.t)
-    const delta = attribute.e ? smootherstep(progress / attribute.d) : (progress / attribute.d)
+    let delta = progress / attribute.d
+    if (attribute.boom) {
+      delta *= 2
+      if (delta > 1) {
+        delta = 2 - delta
+      }
+    }
+    if (attribute.e) {
+      delta = smootherstep(delta)
+    }
     if (modular && Math.abs(attribute.a - attribute.b) > 0.5) {
       if (attribute.a > 0.5) {
         attribute.a -= 1

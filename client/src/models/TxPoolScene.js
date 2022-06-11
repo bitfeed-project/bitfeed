@@ -92,7 +92,7 @@ export default class TxPoolScene {
   }
 
   clearOffscreenTx (tx) {
-    if (tx.pixelPosition && (tx.pixelPosition.y + tx.pixelPosition.r) < -(this.scene.offset.y + 100)) {
+    if (tx.pixelPosition && (tx.pixelPosition.y + tx.pixelPosition.r) < -(this.scene.offset.y + 50)) {
       this.controller.destroyTx(tx.id)
     }
   }
@@ -114,9 +114,9 @@ export default class TxPoolScene {
           position: tx.screenPosition
         },
         duration: 1000,
-        minDuration: 500,
+        minDuration: 200,
         start: now,
-        delay: 50,
+        delay: 0,
         smooth: true,
         adjust: true
       })
