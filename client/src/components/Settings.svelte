@@ -2,7 +2,7 @@
 import config from '../config.js'
 import analytics from '../utils/analytics.js'
 import SidebarMenuItem from '../components/SidebarMenuItem.svelte'
-import { settings, nativeAntialias, exchangeRates, haveMessages } from '../stores.js'
+import { settings, exchangeRates, haveMessages } from '../stores.js'
 import { currencies } from '../utils/fx.js'
 
 function toggle(setting) {
@@ -59,14 +59,6 @@ let settingConfig = {
   }
 }
 $: {
-  if ($nativeAntialias) {
-    settingConfig.fancyGraphics = false
-  } else {
-    settingConfig.fancyGraphics = {
-      label: 'Fancy Graphics',
-      valueType: 'bool'
-    }
-  }
   if (config.messagesEnabled && $haveMessages) {
     settingConfig.showMessages = {
       label: 'Message Bar',

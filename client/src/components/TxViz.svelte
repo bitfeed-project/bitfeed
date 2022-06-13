@@ -4,7 +4,7 @@
   import TxRender from './TxRender.svelte'
   import getTxStream from '../controllers/TxStream.js'
   import { settings, overlay, serverConnected, serverDelay, txCount, mempoolCount,
-           mempoolScreenHeight, frameRate, avgFrameRate, blockVisible, tinyScreen,
+           mempoolScreenHeight, blockVisible, tinyScreen,
            compactScreen, currentBlock, latestBlockHeight, selectedTx, blockAreaSize,
            devEvents, devSettings, pageWidth, pageHeight, loading, freezeResize } from '../stores.js'
   import BlockInfo from '../components/BlockInfo.svelte'
@@ -30,7 +30,6 @@
   let running = false
 
   let lastFrameUpdate = 0
-  let frameRateLabel = ''
 
   let txStream
   if (!config.noTxFeed || !config.noBlockFeed) txStream = getTxStream()

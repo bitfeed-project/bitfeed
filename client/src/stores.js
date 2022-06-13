@@ -87,8 +87,6 @@ export const txCount = createCounter()
 export const lastBlockId = writable(null)
 export const mempoolCount = tweened(0)
 export const mempoolScreenHeight = writable(0)
-export const frameRate = writable(null)
-export const avgFrameRate = writable(null)
 export const blockVisible = writable(false)
 export const currentBlock = writable(null)
 export const selectedTx = writable(null)
@@ -107,7 +105,6 @@ const defaultSettings = {
 	showFX: true,
 	vbytes: false,
 	colorByFee: false,
-	fancyGraphics: true,
 	showMessages: true,
 	showSearch: true,
 	noTrack: false,
@@ -139,8 +136,6 @@ export const devSettings = (config.dev && config.debug) ? createCachedDict('dev-
 }) : writable({})
 
 export const sidebarToggle = writable(null)
-
-export const nativeAntialias = writable(false)
 
 const newVisitor = !localStorage.getItem('seen-welcome-msg')
 // export const overlay = writable(newVisitor ? 'about' : null)
