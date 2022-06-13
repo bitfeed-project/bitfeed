@@ -4,16 +4,16 @@
   import fragShaderSrc from '../shaders/tx.frag'
   import TxSprite from '../models/TxSprite.js'
   import { color, hcl } from 'd3-color'
-  import { darkMode, frameRate, avgFrameRate, nativeAntialias, settings, devSettings, freezeResize } from '../stores.js'
+  import { darkMode, settings, devSettings, freezeResize } from '../stores.js'
   import config from '../config.js'
 
   let canvas
   let gl
   let animationFrameRequest
-  let simulateAntialiasing = false
-  let autoSetGraphicsMode = false
   let displayWidth
   let displayHeight
+  let cssWidth
+  let cssHeight
   let shaderProgram
   let aspectRatio
   let sceneScale = [1.0, 1.0]
@@ -21,10 +21,6 @@
   let debugPointArray
 
   let lastTime = performance.now()
-  let rawFrameRate = 0
-  const frameRateSamples = Array(60).fill(60)
-  const frameRateReducer = (acc, rate) => { return acc + rate }
-  let frameRateSampleIndex = 0
 
   const nullPointArray = new Float32Array()
 
@@ -68,11 +64,6 @@
     if (running) run()
   }
 
-  $: {
-    simulateAntialiasing = !$nativeAntialias && $settings.fancyGraphics
-    resizeCanvas()
-  }
-
   function windowReady () {
     resizeCanvas()
   }
@@ -83,16 +74,13 @@
     resizeTimer = null
     // var rect = canvas.parentNode.getBoundingClientRect()
     if (canvas && !sizeFrozen) {
-      displayWidth = window.innerWidth
-      displayHeight = window.innerHeight
-      if (simulateAntialiasing) {
-        canvas.width = displayWidth * 2
-        canvas.height = displayHeight * 2
-      } else {
-        canvas.width = displayWidth
-        canvas.height = displayHeight
-      }
-      if (gl) gl.viewport(0, 0, canvas.width, canvas.height)
+      cssWidth = window.innerWidth
+      cssHeight = window.innerHeight
+      displayWidth = cssWidth * window.devicePixelRatio
+      displayHeight = cssHeight * window.devicePixelRatio
+      canvas.width = displayWidth
+      canvas.height = displayHeight
+      if (gl) gl.viewport(0, 0, displayWidth, displayHeight)
     } else {
       resizeTimer = setTimeout(resizeCanvas, 500)
     }
@@ -167,7 +155,7 @@
 
     /* SET UP SHADER UNIFORMS */
     // screen dimensions
-    gl.uniform2f(gl.getUniformLocation(shaderProgram, 'screenSize'), displayWidth, displayHeight)
+    gl.uniform2f(gl.getUniformLocation(shaderProgram, 'screenSize'), cssWidth, cssHeight)
     // frame timestamp
     gl.uniform1f(gl.getUniformLocation(shaderProgram, 'now'), now)
     gl.uniform1i(gl.getUniformLocation(shaderProgram, 'colorTexture'), 0);
@@ -187,25 +175,8 @@
       gl.drawArrays(gl.TRIANGLES, 0, pointArray.length / TxSprite.vertexSize)
     }
 
-    const rawFrameRate = (1000 / (now - lastTime)) + 0.075
-    frameRateSamples[frameRateSampleIndex++] = rawFrameRate
-    if (frameRateSampleIndex >= frameRateSamples.length) frameRateSampleIndex = 0
-    const rawAvgFrameRate = frameRateSamples.reduce(frameRateReducer, 0) / frameRateSamples.length
-    // rawFrameRate = Math.max(1, (rawFrameRate * 0.8) + (0.2 * (1 / (frameTime / 1000))))
-    if (rawAvgFrameRate < 45 && !autoSetGraphicsMode) {
-      autoSetGraphicsMode = true
-      $settings.fancyGraphics = false
-    }
-    frameRate.set(rawFrameRate)
-    avgFrameRate.set(rawAvgFrameRate)
-    lastTime = now
-
     /* LOOP */
     if (running) {
-      // if (animationFrameRequest) {
-      //   cancelAnimationFrame(animationFrameRequest)
-      //   animationFrameRequest = null
-      // }
       animationFrameRequest = requestAnimationFrame(run)
     }
   }
@@ -253,8 +224,6 @@
   }
 
   function initCanvas () {
-    $nativeAntialias = gl.getContextAttributes().antialias
-
     gl.clearColor(0.0, 0.0, 0.0, 0.0)
     gl.clear(gl.COLOR_BUFFER_BIT)
 
@@ -327,11 +296,6 @@
   bottom: 0;
   /* pointer-events: none; */
   overflow: hidden;
-
-  &.sim-antialias {
-    transform: scale(0.5);
-    transform-origin: top left;
-  }
 }
 </style>
 
@@ -339,6 +303,8 @@
 
 <canvas
   class="tx-scene"
-  class:sim-antialias={simulateAntialiasing}
+  width={displayWidth}
+  height={displayHeight}
+  style="width: {cssWidth}px; height: {cssHeight}px;"
   bind:this={canvas}
 ></canvas>
