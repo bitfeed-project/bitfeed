@@ -6,8 +6,9 @@ import BitcoinBlock from '../models/BitcoinBlock.js'
 import TxSprite from '../models/TxSprite.js'
 import { FastVertexArray } from '../utils/memory.js'
 import { searchTx, fetchSpends, addSpends } from '../utils/search.js'
-import { overlay, txCount, mempoolCount, mempoolScreenHeight, blockVisible, currentBlock, selectedTx, detailTx, blockAreaSize, highlight, colorMode, blocksEnabled, latestBlockHeight, explorerBlock, blockTransitionDirection, loading, urlPath } from '../stores.js'
+import { overlay, txCount, mempoolCount, mempoolScreenHeight, blockVisible, currentBlock, selectedTx, detailTx, blockAreaSize, highlight, colorMode, blocksEnabled, latestBlockHeight, explorerBlock, blockTransitionDirection, loading, urlPath, displayModeEnabled } from '../stores.js'
 import config from "../config.js"
+import { get } from 'svelte/store'
 import { tick } from 'svelte';
 
 export default class TxController {
@@ -16,8 +17,9 @@ export default class TxController {
     this.debugVertexArray = new FastVertexArray(1024, TxSprite.dataSize)
     this.txs = {}
     this.expiredTxs = {}
-    this.poolScene = new TxMondrianPoolScene({ width, height, controller: this, heightStore: mempoolScreenHeight })
-    this.blockAreaSize = (width <= 620) ? Math.min(window.innerWidth * 0.7, window.innerHeight / 2.75) : Math.min(window.innerWidth * 0.75, window.innerHeight / 2.5)
+    this.displayMode = get(displayModeEnabled)
+    this.poolScene = new TxMondrianPoolScene({ width, height, displayMode: this.displayMode, controller: this, heightStore: mempoolScreenHeight })
+    this.blockAreaSize = this.displayMode ? Math.min(window.innerWidth * 0.8, window.innerHeight / 2.5) : (width <= 620) ? Math.min(window.innerWidth * 0.7, window.innerHeight / 2.75) : Math.min(window.innerWidth * 0.75, window.innerHeight / 2.5)
     blockAreaSize.set(this.blockAreaSize)
     this.blockScene = null
     this.block = null
@@ -55,6 +57,9 @@ export default class TxController {
         this.resumeLatest()
       }
     })
+    displayModeEnabled.subscribe(mode => {
+      this.displayMode = mode
+    })
   }
 
   getVertexData () {
@@ -72,19 +77,23 @@ export default class TxController {
   }
 
   redoLayout ({ width, height }) {
-    this.poolScene.layoutAll({ width, height })
+    this.poolScene.layoutAll({ width, height, displayMode })
     if (this.blockScene) {
-      this.blockScene.layoutAll({ width: this.blockAreaSize, height: this.blockAreaSize })
+      this.blockScene.layoutAll({ width: this.blockAreaSize, height: this.blockAreaSize, displayMode })
     }
     if (this.explorerBlockScene) {
-      this.explorerBlockScene.layoutAll({ width: this.blockAreaSize, height: this.blockAreaSize })
+      this.explorerBlockScene.layoutAll({ width: this.blockAreaSize, height: this.blockAreaSize, displayMode })
     }
   }
 
   resize ({ width, height }) {
-    this.blockAreaSize = (width <= 620) ? Math.min(window.innerWidth * 0.7, window.innerHeight / 2.75) : Math.min(window.innerWidth * 0.75, window.innerHeight / 2.5)
+    if (this.displayMode) {
+      this.blockAreaSize = Math.min(window.innerWidth * 0.8, window.innerHeight / 2.5)
+    } else {
+      this.blockAreaSize = (width <= 620) ? Math.min(window.innerWidth * 0.7, window.innerHeight / 2.75) : Math.min(window.innerWidth * 0.75, window.innerHeight / 2.5)
+    }
     blockAreaSize.set(this.blockAreaSize)
-    this.redoLayout({ width, height })
+    this.redoLayout({ width, height, displayMode: this.displayMode })
   }
 
   setColorMode (mode) {
@@ -206,7 +215,7 @@ export default class TxController {
 
     this.poolScene.scrollLock = true
     if (this.blocksEnabled) {
-      this.blockScene = new TxBlockScene({ width: this.blockAreaSize, height: this.blockAreaSize, blockId: block.id, controller: this, colorMode: this.colorMode })
+      this.blockScene = new TxBlockScene({ width: this.blockAreaSize, height: this.blockAreaSize, displayMode: this.displayMode, blockId: block.id, controller: this, colorMode: this.colorMode })
       let knownCount = 0
       let unknownCount = 0
       for (let i = 0; i < block.txns.length; i++) {
@@ -307,7 +316,7 @@ export default class TxController {
     this.explorerBlock = block
 
     if (this.blocksEnabled) {
-      this.explorerBlockScene = new TxBlockScene({ width: this.blockAreaSize, height: this.blockAreaSize, blockId: block.id, controller: this, colorMode: this.colorMode })
+      this.explorerBlockScene = new TxBlockScene({ width: this.blockAreaSize, height: this.blockAreaSize, displayMode: this.displayMode, blockId: block.id, controller: this, colorMode: this.colorMode })
       for (let i = 0; i < block.txns.length; i++) {
         const tx = new BitcoinTx({
           ...block.txns[i],

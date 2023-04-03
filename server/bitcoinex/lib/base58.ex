@@ -69,7 +69,7 @@ defmodule Bitcoinex.Base58 do
       |> Tuple.to_list()
       |> Enum.map(&:binary.list_to_bin(&1))
 
-    case checksum == binary_slice(Utils.double_sha256(decoded_body), 0..3) do
+    case checksum == my_binary_slice(Utils.double_sha256(decoded_body), 0..3) do
       false -> {:error, :invalid_checksum}
       true -> {:ok, decoded_body}
     end
@@ -119,11 +119,11 @@ defmodule Bitcoinex.Base58 do
   defp checksum(body) do
     body
     |> Utils.double_sha256()
-    |> binary_slice(0..3)
+    |> my_binary_slice(0..3)
   end
 
-  @spec binary_slice(binary, Range.t()) :: binary
-  defp binary_slice(data, range) do
+  @spec my_binary_slice(binary, Range.t()) :: binary
+  defp my_binary_slice(data, range) do
     data
     |> :binary.bin_to_list()
     |> Enum.slice(range)

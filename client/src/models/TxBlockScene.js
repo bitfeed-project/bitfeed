@@ -10,8 +10,8 @@ settings.subscribe(v => {
 })
 
 export default class TxBlockScene extends TxMondrianPoolScene {
-  constructor ({ width, height, unit = 4, padding = 1, blockId, controller, heightStore, colorMode }) {
-    super({ width, height, unit, padding, controller, heightStore, colorMode })
+  constructor ({ width, height, displayMode = false, unit = 4, padding = 1, blockId, controller, heightStore, colorMode }) {
+    super({ width, height, displayMode, unit, padding, controller, heightStore, colorMode })
     this.heightLimit = null
     this.expired = false
     this.laidOut = false
@@ -22,7 +22,7 @@ export default class TxBlockScene extends TxMondrianPoolScene {
     this.sceneType = 'block'
   }
 
-  resize ({ width = this.width, height = this.height }) {
+  resize ({ width = this.width, height = this.height, displayMode = this.displayMode }) {
     if (this.initialised) {
       let blockWeight = 0
       const ids = this.getTxList()
@@ -43,9 +43,16 @@ export default class TxBlockScene extends TxMondrianPoolScene {
       this.unitPadding = this.gridSize / 4
       this.unitWidth = this.gridSize - (this.unitPadding * 2)
 
+      let top
+      if (displayMode) {
+        top = 5 * (window.innerHeight - this.height) / 5.85
+      } else {
+        top = 2 * (window.innerHeight - this.height) / ((window.innerWidth <= 640) ? 3.5 : 3)
+      }
+
       this.scene.offset = {
         x: (window.innerWidth - this.width) / 2,
-        y: 2 * (window.innerHeight - this.height) / ((window.innerWidth <= 640) ? 3.5 : 3)
+        y: top
       }
       this.scene.scroll = 0
     } else {

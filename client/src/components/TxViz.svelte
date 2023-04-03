@@ -6,7 +6,7 @@
   import { settings, overlay, serverConnected, serverDelay, txCount, mempoolCount,
            mempoolScreenHeight, blockVisible, tinyScreen,
            compactScreen, currentBlock, latestBlockHeight, selectedTx, blockAreaSize,
-           devEvents, devSettings, pageWidth, pageHeight, loading, freezeResize } from '../stores.js'
+           devEvents, devSettings, pageWidth, pageHeight, loading, freezeResize, displayModeEnabled } from '../stores.js'
   import BlockInfo from '../components/BlockInfo.svelte'
   import SearchBar from '../components/SearchBar.svelte'
   import TxInfo from '../components/TxInfo.svelte'
@@ -17,6 +17,7 @@
   import SupportersOverlay from '../components/SupportersOverlay.svelte'
   import LoadingAnimation from '../components/util/LoadingAnimation.svelte'
   import Alerts from '../components/alert/Alerts.svelte'
+  import Mononaut from '../components/Mononaut.svelte'
   import { numberFormat } from '../utils/format.js'
   import { exchangeRates, lastBlockId, haveSupporters, sidebarToggle } from '../stores.js'
   import { formatCurrency } from '../utils/fx.js'
@@ -54,7 +55,7 @@
 
   let canvasWidth = '100%'
   let canvasHeight = '100%'
-  $: {
+  $: $displayModeEnabled, (() => {
     if ($freezeResize) {
       canvasWidth = `${window.innerWidth}px`
       canvasHeight = `${window.innerHeight}px`
@@ -63,7 +64,7 @@
       canvasHeight = '100%'
       resize()
     }
-  }
+  })();
 
   onMount(() => {
     txController = new TxController({ width, height })
@@ -262,6 +263,7 @@
       flex-direction: row;
       justify-content: space-between;
       align-items: baseline;
+      font-variant: small-caps;
     }
 
     .height-bar {
@@ -475,6 +477,25 @@
     }
   }
 
+  .display-branding {
+    position: absolute;
+    top: .5em;
+    left: 1rem;
+    right: 1em;
+    font-size: 0.9rem;
+    color: var(--palette-x);
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    font-variant: small-caps;
+
+    .monkey-avatar {
+      display: inline-block;
+      width: 1.6em;
+    }
+  }
+
   @media screen and (max-width: 640px) {
     .search-bar-wrapper {
       position: fixed;
@@ -512,10 +533,12 @@
     </div>
 
     <div class="block-area-wrapper">
-      <div class="spacer" style="flex: {$pageWidth <= 640 ? '1.5' : '1'}"></div>
+      <div class="spacer" style="flex: {$displayModeEnabled ? 0.33 : $pageWidth <= 640 ? '1.5' : '1'}"></div>
       <div class="block-area-outer" style="width: {$blockAreaSize}px; height: {$blockAreaSize}px">
         <div class="block-area">
-          <BlockInfo block={$currentBlock} visible={$blockVisible && !$tinyScreen} on:hideBlock={hideBlock} on:quitExploring={quitExploring} />
+          {#if !displayModeEnabled}
+            <BlockInfo block={$currentBlock} visible={$blockVisible && !$tinyScreen} on:hideBlock={hideBlock} on:quitExploring={quitExploring} />
+          {/if}
         </div>
         {#if config.dev && config.debug && $devSettings.guides }
           <div class="guide-area" />
@@ -530,47 +553,54 @@
     <TxInfo tx={$selectedTx} position={mousePosition} />
   {/if}
 
-  <div class="top-bar">
-    <div class="status" class:tiny={$tinyScreen}>
-      <div class="row">
-        {#if $settings.showFX && fxLabel }
-          <span class="fx-ticker {fxColor}" on:click={() => { $sidebarToggle = 'settings'}}>{ fxLabel }</span>
-        {/if}
-        {#if $tinyScreen && $currentBlock }
-          <span class="block-height"><b>Block: </b>{ numberFormat.format($currentBlock.height) }</span>
-        {/if}
+  {#if !$displayModeEnabled}
+    <div class="top-bar">
+      <div class="status" class:tiny={$tinyScreen}>
+        <div class="row">
+          {#if $settings.showFX && fxLabel }
+            <span class="fx-ticker {fxColor}" on:click={() => { $sidebarToggle = 'settings'}}>{ fxLabel }</span>
+          {/if}
+          {#if $tinyScreen && $currentBlock }
+            <span class="block-height"><b>Block: </b>{ numberFormat.format($currentBlock.height) }</span>
+          {/if}
+        </div>
+        <div class="row">
+          {#if $settings.showNetworkStatus }
+            <div class="status-light {connectionColor}" title={connectionTitle}></div>
+          {/if}
+        </div>
       </div>
-      <div class="row">
-        {#if $settings.showNetworkStatus }
-          <div class="status-light {connectionColor}" title={connectionTitle}></div>
-        {/if}
-      </div>
+      {#if $settings.showSearch && !$tinyScreen && !$compactScreen }
+        <div class="search-bar-wrapper">
+          <SearchBar />
+        </div>
+      {/if}
+      {#if !$tinyScreen}
+        <div class="alert-bar-wrapper">
+          {#if config.messagesEnabled && $settings.showMessages}
+            <Alerts />
+          {:else}
+            <div class="spacer"></div>
+          {/if}
+        </div>
+      {/if}
     </div>
-    {#if $settings.showSearch && !$tinyScreen && !$compactScreen }
-      <div class="search-bar-wrapper">
-        <SearchBar />
-      </div>
-    {/if}
-    {#if !$tinyScreen}
-      <div class="alert-bar-wrapper">
-        {#if config.messagesEnabled && $settings.showMessages}
-          <Alerts />
-        {:else}
-          <div class="spacer"></div>
-        {/if}
-      </div>
-    {/if}
-  </div>
 
-  <Sidebar />
+    <Sidebar />
 
-  <TransactionOverlay />
-  <AboutOverlay />
-  {#if config.donationsEnabled }
-    <DonationOverlay />
-    {#if $haveSupporters}
-      <SupportersOverlay />
+    <TransactionOverlay />
+    <AboutOverlay />
+    {#if config.donationsEnabled }
+      <DonationOverlay />
+      {#if $haveSupporters}
+        <SupportersOverlay />
+      {/if}
     {/if}
+  {:else}
+    <div class="display-branding">
+      <span class="left"></span>
+      <span class="right">bitfeed.live</span>
+    </div>
   {/if}
 
   {#if $loading}

@@ -108,7 +108,8 @@ const defaultSettings = {
 	showMessages: true,
 	showSearch: true,
 	noTrack: false,
-	blocksEnabled: true
+	blocksEnabled: true,
+	displayMode: true,
 }
 
 const searchParams = URL ? (new URL(document.location)).searchParams : {}
@@ -149,12 +150,16 @@ export const pageWidth = writable(window.innerWidth)
 export const pageHeight = writable(window.innerHeight)
 export const freezeResize = writable(false)
 
+export const displayModeEnabled = derived([settings], ([$settings]) => {
+	return !!$settings.displayMode
+})
+
 let lastTinyScreen
-export const tinyScreen = derived([pageWidth, pageHeight, freezeResize], ([$pageWidth, $pageHeight, $freezeResize]) => {
+export const tinyScreen = derived([pageWidth, pageHeight, freezeResize, displayModeEnabled], ([$pageWidth, $pageHeight, $freezeResize, $displayModeEnabled]) => {
 	if ($freezeResize) return lastTinyScreen
 	else {
 		const aspectRatio = $pageWidth / $pageHeight
-		lastTinyScreen = (aspectRatio >= 1 && $pageWidth < 480) || (aspectRatio <= 1 && $pageHeight < 480)
+		lastTinyScreen = $displayModeEnabled || ((aspectRatio >= 1 && $pageWidth < 480) || (aspectRatio <= 1 && $pageHeight < 480))
 		return lastTinyScreen
 	}
 })

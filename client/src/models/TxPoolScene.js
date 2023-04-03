@@ -1,7 +1,8 @@
 import config from '../config.js'
 
 export default class TxPoolScene {
-  constructor ({ width, height, unit, padding, controller, heightStore, colorMode }) {
+  constructor ({ width, height, displayMode, unit, padding, controller, heightStore, colorMode }) {
+    this.displayMode = displayMode
     this.colorMode = colorMode || "age"
     this.maxHeight = 0
     this.heightStore = heightStore
@@ -32,10 +33,14 @@ export default class TxPoolScene {
     this.initialised = true
   }
 
-  resize ({ width = this.width, height = this.height }) {
+  resize ({ width = this.width, height = this.height, displayMode = this.displayMode }) {
     this.width = width
     this.height = height
-    this.heightLimit =  (width <= 620) ? (height / 4.5) : (height / 4)
+    if (displayMode) {
+      this.heightLimit =  height / 3.5
+    } else {
+      this.heightLimit =  (width <= 620) ? (height / 4.5) : (height / 4)
+    }
     this.unitWidth = Math.floor(Math.max(4, width / 250))
     this.unitPadding =  Math.floor(Math.max(1, width / 1000))
     this.gridSize = this.unitWidth + (this.unitPadding * 2)
